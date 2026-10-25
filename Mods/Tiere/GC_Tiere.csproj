@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Tiere (Gorduan): Tiere: Leinen, Pfeifen, Tierpflege. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Tiere</AssemblyName>
+    <RootNamespace>GC.Server.ModTiere</RootNamespace>
+    <Product>GC_Tiere</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>tiere</GcId>
+    <GcStufe>5</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd>randyknapp.mods.epicloot</GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>5</GcAusgleich>
+    <GcTitel>Tiere: Leinen, Pfeifen, Tierpflege</GcTitel>
+    <GcBeschreibung>Tierleinen wie in Minecraft, vier Tierpfeifen, der Skill Tierpflege, Tier-Erfahrung und Zucht-Stufen. Mit EpicLoot verzauberbare Leinen, Pfeifen und Sättel.</GcBeschreibung>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\*.gcm" />
+  </ItemGroup>
+</Project>

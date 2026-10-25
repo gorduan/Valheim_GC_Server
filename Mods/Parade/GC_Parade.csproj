@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Parade (Gorduan): Parade. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Parade</AssemblyName>
+    <RootNamespace>GC.Server.ModParade</RootNamespace>
+    <Product>GC_Parade</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>parade</GcId>
+    <GcStufe>4</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>2</GcAusgleich>
+    <GcTitel>Parade</GcTitel>
+    <GcBeschreibung>Eine Parade wirft Pfeile und Geschosse zurück.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

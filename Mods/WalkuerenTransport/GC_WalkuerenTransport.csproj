@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_WalkuerenTransport (Gorduan): Walküren-Transport. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_WalkuerenTransport</AssemblyName>
+    <RootNamespace>GC.Server.ModWalkuerenTransport</RootNamespace>
+    <Product>GC_WalkuerenTransport</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>walkuerentransport</GcId>
+    <GcStufe>5</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht>tiere</GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Walküren-Transport</GcTitel>
+    <GcBeschreibung>Die Walkürenpfeife ruft eine Walküre, die deinen Karren mit 20 Loxfleisch abholt und später zu dir bringt. Danach ein Raid, dazu ein Easteregg. Braucht GC_Tiere.</GcBeschreibung>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- freie Geräusche und Musik (Quellen und Lizenzen: Assets\Sounds\QUELLEN.md) -->
+    <EmbeddedResource Include="Assets\Sounds\*.ogg" />
+    <ProjectReference Include="..\Tiere\GC_Tiere.csproj" Private="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Partikel (Feuer), Laden der OGG-Dateien, nachladbare Walküre aus dem Intro -->
+    <Reference Include="UnityEngine.ParticleSystemModule" HintPath="$(Managed)\UnityEngine.ParticleSystemModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UnityWebRequestModule" HintPath="$(Managed)\UnityEngine.UnityWebRequestModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule" HintPath="$(Managed)\UnityEngine.UnityWebRequestAudioModule.dll" Private="false" />
+    <Reference Include="SoftReferenceableAssets" HintPath="$(Managed)\SoftReferenceableAssets.dll" Private="false" />
+  </ItemGroup>
+</Project>

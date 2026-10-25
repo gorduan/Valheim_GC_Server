@@ -1,0 +1,39 @@
+<Solution>
+  <Folder Name="/Kern/">
+    <Project Path="Kern/GC_Kern.csproj" />
+  </Folder>
+  <Folder Name="/Patcher/">
+    <Project Path="Patcher/Server/GC_ModSchalter_Server.csproj" />
+  </Folder>
+  <Folder Name="/Mods/" />
+  <Folder Name="/Mods/Felder/">
+    <Project Path="Mods/Felder/GC_Felder.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Futterfolge/">
+    <Project Path="Mods/Futterfolge/GC_Futterfolge.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Leiter/">
+    <Project Path="Mods/Leiter/GC_Leiter.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Parade/">
+    <Project Path="Mods/Parade/GC_Parade.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Portalnamen/">
+    <Project Path="Mods/Portalnamen/GC_Portalnamen.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Spitzhacke/">
+    <Project Path="Mods/Spitzhacke/GC_Spitzhacke.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Tierarten/">
+    <Project Path="Mods/Tierarten/GC_Tierarten.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Tiere/">
+    <Project Path="Mods/Tiere/GC_Tiere.csproj" />
+  </Folder>
+  <Folder Name="/Mods/WalkuerenTransport/">
+    <Project Path="Mods/WalkuerenTransport/GC_WalkuerenTransport.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Zuchtgrenze/">
+    <Project Path="Mods/Zuchtgrenze/GC_Zuchtgrenze.csproj" />
+  </Folder>
+</Solution>

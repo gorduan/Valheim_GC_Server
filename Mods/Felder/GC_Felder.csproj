@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Felder (Gorduan): Felder für den Kultivator. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Felder</AssemblyName>
+    <RootNamespace>GC.Mods.Felder</RootNamespace>
+    <Product>GC_Felder</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>felder</GcId>
+    <GcStufe>3</GcStufe>
+    <GcSeite>ServerOptional</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_client.cfg;gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Felder für den Kultivator</GcTitel>
+    <GcBeschreibung>Felder mit dem Kultivator zeichnen und automatisch bepflanzen. Der Server speichert die Felder und gibt die Regeln vor.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Spitzhacke (Gorduan): Spitzhacke als Waffe. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Spitzhacke</AssemblyName>
+    <RootNamespace>GC.Server.ModSpitzhacke</RootNamespace>
+    <Product>GC_Spitzhacke</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>spitzhacke</GcId>
+    <GcStufe>4</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>1</GcAusgleich>
+    <GcTitel>Spitzhacke als Waffe</GcTitel>
+    <GcBeschreibung>Spitzhacken schlagen wie ein Streitkolben und taugen als Waffe.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

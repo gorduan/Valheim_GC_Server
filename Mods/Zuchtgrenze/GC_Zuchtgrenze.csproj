@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Zuchtgrenze (Gorduan): Zuchtgrenze. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Zuchtgrenze</AssemblyName>
+    <RootNamespace>GC.Server.ModZuchtgrenze</RootNamespace>
+    <Product>GC_Zuchtgrenze</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>zuchtgrenze</GcId>
+    <GcStufe>4</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner>tiere</GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>1</GcAusgleich>
+    <GcTitel>Zuchtgrenze</GcTitel>
+    <GcBeschreibung>Mehr Tiere je Umkreis, bevor die Zucht stoppt. Mit GC_Tiere zählen angeleinte Tiere nur halb.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

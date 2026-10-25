@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Portalnamen (Gorduan): Portalnamen. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Portalnamen</AssemblyName>
+    <RootNamespace>GC.Mods.Portalnamen</RootNamespace>
+    <Product>GC_Portalnamen</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>portalnamen</GcId>
+    <GcStufe>1</GcStufe>
+    <GcSeite>ServerOptional</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner>portalschutz</GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_client.cfg;gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Portalnamen</GcTitel>
+    <GcBeschreibung>Liste der Portalnamen beim Umbenennen: deine eigene und, wenn der Server die Mod hat, die Server-Liste.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

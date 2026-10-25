@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Tierarten (Gorduan): Tierarten und Sättel. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Tierarten</AssemblyName>
+    <RootNamespace>GC.Server.ModTierarten</RootNamespace>
+    <Product>GC_Tierarten</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>tierarten</GcId>
+    <GcStufe>5</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht>tiere</GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>5</GcAusgleich>
+    <GcTitel>Tierarten und Sättel</GcTitel>
+    <GcBeschreibung>Höchststufen je Tierart (Lox 300, Wolf und Bär 200), Sterne bei der Geburt, mehr Beute, weitere zähmbare Tiere, Bärenjunge, Unbjørn, Bären- und Unbjørn-Sattel. Braucht GC_Tiere.</GcBeschreibung>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\*.gcm" />
+    <ProjectReference Include="..\Tiere\GC_Tiere.csproj" Private="false" />
+  </ItemGroup>
+</Project>

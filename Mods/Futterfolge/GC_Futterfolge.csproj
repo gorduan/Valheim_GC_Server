@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Futterfolge (Gorduan): Futter-Reihenfolge. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Futterfolge</AssemblyName>
+    <RootNamespace>GC.Mods.Futterfolge</RootNamespace>
+    <Product>GC_Futterfolge</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>futterfolge</GcId>
+    <GcStufe>4</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner>tiere</GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig></GcAlteConfig>
+    <GcAusgleich>1</GcAusgleich>
+    <GcTitel>Futter-Reihenfolge</GcTitel>
+    <GcBeschreibung>Zahme Tiere sehen Futter doppelt so weit, wenn ein Weg hinführt. Das Tier mit der höchsten Stufe frisst zuerst. Mit GC_Tiere zählt bei der Zucht der beste satte Partner.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

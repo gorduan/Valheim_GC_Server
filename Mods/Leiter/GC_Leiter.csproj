@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Leiter (Gorduan): Leiter. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Leiter</AssemblyName>
+    <RootNamespace>GC.Server.ModLeiter</RootNamespace>
+    <Product>GC_Leiter</Product>
+    <Version>1.8.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>leiter</GcId>
+    <GcStufe>4</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Leiter</GcTitel>
+    <GcBeschreibung>Baubare Leiter, 1 und 2 m hoch, mit festem Vorne.</GcBeschreibung>
+  </PropertyGroup>
+</Project>
