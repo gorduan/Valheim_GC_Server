@@ -4,7 +4,7 @@
     <AssemblyName>GC_Zuchtgrenze</AssemblyName>
     <RootNamespace>GC.Server.ModZuchtgrenze</RootNamespace>
     <Product>GC_Zuchtgrenze</Product>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>zuchtgrenze</GcId>
     <GcStufe>4</GcStufe>

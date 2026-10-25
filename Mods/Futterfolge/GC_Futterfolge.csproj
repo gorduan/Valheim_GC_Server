@@ -4,7 +4,7 @@
     <AssemblyName>GC_Futterfolge</AssemblyName>
     <RootNamespace>GC.Mods.Futterfolge</RootNamespace>
     <Product>GC_Futterfolge</Product>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>futterfolge</GcId>
     <GcStufe>4</GcStufe>

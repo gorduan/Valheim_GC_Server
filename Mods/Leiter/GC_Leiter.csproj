@@ -4,7 +4,7 @@
     <AssemblyName>GC_Leiter</AssemblyName>
     <RootNamespace>GC.Server.ModLeiter</RootNamespace>
     <Product>GC_Leiter</Product>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>leiter</GcId>
     <GcStufe>4</GcStufe>

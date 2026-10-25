@@ -4,7 +4,7 @@
     <AssemblyName>GC_Felder</AssemblyName>
     <RootNamespace>GC.Mods.Felder</RootNamespace>
     <Product>GC_Felder</Product>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>felder</GcId>
     <GcStufe>3</GcStufe>

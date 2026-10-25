@@ -4,7 +4,7 @@
     <AssemblyName>GC_Spitzhacke</AssemblyName>
     <RootNamespace>GC.Server.ModSpitzhacke</RootNamespace>
     <Product>GC_Spitzhacke</Product>
-    <Version>1.8.0</Version>
+    <Version>1.8.1</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>spitzhacke</GcId>
     <GcStufe>4</GcStufe>

@@ -2,7 +2,7 @@
 
 Gameplay for server and players, one DLL per feature: animal leashes, whistles and an Animal Care skill, more tameable animals with saddles, Valkyrie cart transport, cultivator fields, ladders, portal name lists.
 
-Version 1.8.0 · Author: Gorduan · License: MIT
+Version 1.8.1 · Author: Gorduan · License: MIT
 
 ## Included mods
 
