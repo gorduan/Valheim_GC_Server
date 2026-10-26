@@ -23,7 +23,7 @@ public partial class Plugin : BaseUnityPlugin
 		GC.Client.PortalNames.Plugin.Init(Config, harmony);
 		GC.Server.PortalNames.Plugin.Init(Config, harmony);
 		Module.TakeOverOldSettings();
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gccm_" + key))
 			.Main("portalnames", GC.Client.PortalNames.Plugin.Enabled)
 			.Sub("portalnames_click", GC.Client.PortalNames.Plugin.ClickRenames);

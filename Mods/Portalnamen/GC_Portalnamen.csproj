@@ -4,7 +4,7 @@
     <AssemblyName>GC_Portalnamen</AssemblyName>
     <RootNamespace>GC.Mods.Portalnamen</RootNamespace>
     <Product>GC_Portalnamen</Product>
-    <Version>1.8.1</Version>
+    <Version>1.9.0</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>portalnamen</GcId>
     <GcStufe>1</GcStufe>

@@ -26,7 +26,7 @@ public partial class Plugin : BaseUnityPlugin
 		Leash.Plugin.Init(Config, harmony);
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => Leash.Plugin.On || Leash.Care.Enabled.Value; // Boss-Fortschritt: Tiere 5 %
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("leash", Leash.Plugin.Enabled)
 			.Sub("leash_slip", Leash.Plugin.SlipDistance, 1, " m")

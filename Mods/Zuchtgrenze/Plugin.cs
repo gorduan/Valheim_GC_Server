@@ -21,7 +21,7 @@ public partial class Plugin : BaseUnityPlugin
 		Leash.BreedLimit.Init(Config);
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => Leash.BreedLimit.Enabled.Value; // Boss-Fortschritt: nur, wenn eingeschaltet
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("breed", Leash.BreedLimit.Enabled)
 			.Sub("breed_factor", Leash.BreedLimit.LimitFactor, 0.1, " ×")

@@ -20,7 +20,7 @@ public partial class Plugin : BaseUnityPlugin
 		Harmony harmony = new(GcMod.Guid);
 		Ladder.Plugin.Init(Config, harmony);
 		Module.TakeOverOldSettings();
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("ladder", Ladder.Plugin.Enabled, () => Ladder.Plugin.Blocked, "GC_Ladder")
 			.Sub("ladder_cost", Ladder.Plugin.WoodCost, 1)

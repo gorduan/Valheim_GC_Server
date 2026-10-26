@@ -39,7 +39,7 @@ public partial class Plugin : BaseUnityPlugin
 			}
 			return kind.Optional ? GcTaming.SimpleAI : GcTaming.Normal;
 		};
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 
 		GcMenuGroup species = Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("species_cap", Leash.Species.EffectCap, step: 10)

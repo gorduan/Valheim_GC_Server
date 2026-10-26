@@ -4,7 +4,7 @@
     <AssemblyName>GC_WalkuerenTransport</AssemblyName>
     <RootNamespace>GC.Server.ModWalkuerenTransport</RootNamespace>
     <Product>GC_WalkuerenTransport</Product>
-    <Version>1.8.1</Version>
+    <Version>1.9.0</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>walkuerentransport</GcId>
     <GcStufe>5</GcStufe>

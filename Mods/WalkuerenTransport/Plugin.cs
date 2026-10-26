@@ -26,7 +26,7 @@ public partial class Plugin : BaseUnityPlugin
 		GcHooks.CourierOn = () => Courier.Transport.On;
 		GcHooks.CourierWhistle = Courier.Transport.OnWhistle;
 		GcHooks.CourierTooltip = Courier.Transport.TooltipStatus;
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("courier", Courier.Transport.Enabled)

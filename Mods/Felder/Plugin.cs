@@ -23,7 +23,7 @@ public partial class Plugin : BaseUnityPlugin
 		GC.Client.Fields.Plugin.Init(Config, harmony);
 		GC.Server.Fields.Plugin.Init(Config);
 		Module.TakeOverOldSettings();
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("fields", GC.Server.Fields.Plugin.Enabled)
 			.Sub("fields_remove", GC.Server.Fields.Plugin.RemoveBy)

@@ -1,31 +1,31 @@
 # GC Server (Valheim mod)
 
-Gameplay for server and players, one DLL per feature: animal leashes, whistles and an Animal Care skill, more tameable animals with saddles, Valkyrie cart transport, cultivator fields, ladders, portal name lists.
+Gameplay: animal leashes, whistles, Animal Care skill, tameable animals with saddles, Valkyrie cart transport, cultivator fields, ladders, portal name lists. Part of the GC Discord server's mods. Free for anyone to use, modify and re-upload (MIT).
 
-Version 1.8.1 · Author: Gorduan · License: MIT
+Version 1.9.0 · Author: Gorduan · License: MIT
 
 ## Included mods
 
-Each mod is a separate DLL in the package folder. Server owners keep only the ones they want.
+All mods of this package are in GC_Server.dll, next to GC_Kern.dll (the shared core). Each mod can be switched off on its own: GC Option menu, tab Mods (main menu), or its GUID in BepInEx/config/GC_Kern/aus.txt.
 
-| File | Level | Runs on | Feature |
+| Mod | Level | Runs on | Feature |
 |---|---|---|---|
-| GC_Kern.dll | 0 Core | always, on server and clients | GC core |
-| GC_Portalnamen.dll | 1 Very vanilla | client, optional server part | Portal names |
-| GC_Felder.dll | 3 Vanilla+ | client, optional server part | Fields for the cultivator |
-| GC_Futterfolge.dll | 4 GC light | server and all clients | Feeding order |
-| GC_Leiter.dll | 4 GC light | server and all clients | Ladder |
-| GC_Parade.dll | 4 GC light | server and all clients | Parry |
-| GC_Spitzhacke.dll | 4 GC light | server and all clients | Pickaxe as weapon |
-| GC_Zuchtgrenze.dll | 4 GC light | server and all clients | Breeding limit |
-| GC_Tierarten.dll | 5 GC | server and all clients | Animal species and saddles (requires GC_Tiere) |
-| GC_Tiere.dll | 5 GC | server and all clients | Animals: leashes, whistles, animal care |
-| GC_WalkuerenTransport.dll | 5 GC | server and all clients | Valkyrie transport (requires GC_Tiere) |
+| GC_Kern | 0 Core | always, on server and clients | GC core |
+| GC_Portalnamen | 1 Very vanilla | client, optional server part | Portal names |
+| GC_Felder | 3 Vanilla+ | client, optional server part | Fields for the cultivator |
+| GC_Futterfolge | 4 GC light | server and all clients | Feeding order |
+| GC_Leiter | 4 GC light | server and all clients | Ladder |
+| GC_Parade | 4 GC light | server and all clients | Parry |
+| GC_Spitzhacke | 4 GC light | server and all clients | Pickaxe as weapon |
+| GC_Zuchtgrenze | 4 GC light | server and all clients | Breeding limit |
+| GC_Tierarten | 5 GC | server and all clients | Animal species and saddles (requires GC_Tiere) |
+| GC_Tiere | 5 GC | server and all clients | Animals: leashes, whistles, animal care |
+| GC_WalkuerenTransport | 5 GC | server and all clients | Valkyrie transport (requires GC_Tiere) |
 
 ## Rules
 
-- **GC_Kern.dll** must always stay. It ships in every GC package; BepInEx loads it once and reports the other copies as "duplicate". That is intended.
-- **Removing DLLs:** mods that run on "server and all clients" must be the same on the server and on every client, otherwise the server refuses the connection. If you remove DLLs, your players must remove the same ones.
+- **GC_Kern.dll** must always stay. It ships in every GC package so that each package works on its own; BepInEx loads it once and reports the other copies as "duplicate". That is intended.
+- **Switching mods off:** mods that run on "server and all clients" must be the same on the server and on every client, otherwise the server refuses the connection. If you switch such a mod off on the server, your players must switch it off too.
 - **Dependencies:** GC_Tierarten requires GC_Tiere; GC_WalkuerenTransport requires GC_Tiere.
 - **Settings:** GC Option menu (button in the pause and main menu) or `BepInEx/config/gorduan.gc.<id>.cfg`. On first start every mod takes over the values from the old cfg files.
 
@@ -53,7 +53,7 @@ The sound files in `Mods/WalkuerenTransport/Assets/Sounds` are not covered by th
 2. Copy `GamePaths.user.props.example` to `GamePaths.user.props` and set `GamePath` (your Valheim folder with BepInEx) and `JotunnDll`.
 3. Run `powershell -ExecutionPolicy Bypass -File build.ps1`. The package folder and a zip for r2modman ("Import local mod") end up in `build-output/`.
 
-`Kern/` is the GC core shared by all GC packages (the GC Option menu, settings, texts, permissions). `Patcher/` holds the preloader that lets GC Option switch mods off, `Mods/` one folder per mod. Code comments and `SDK.md` are in German.
+`Kern/` is the GC core shared by all GC packages (the GC Option menu, settings, texts, permissions). `Patcher/` holds the preloader that lets GC Option switch mods off, `Mods/` one folder per mod, `Pakete/` the project that merges the mods into one DLL (ILRepack). Code comments and `SDK.md` are in German.
 
 ## GC packages
 

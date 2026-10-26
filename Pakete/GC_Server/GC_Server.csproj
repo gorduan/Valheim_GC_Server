@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Paket GC_Server (Gorduan, 26.10.2026: eine Mod-DLL je Paket, wegen Thunderstore): hat keine eigenen Quellen, sondern führt die
+    DLLs seiner Mods zu GC_Server.dll zusammen (..\ILRepack.targets). GC_Kern und der Vorlader bleiben eigene DLLs im Paket.
+    Die Mitglieder sind die Mods mit GcPaket = GC_Server; build.ps1 prüft, dass beide Listen übereinstimmen.
+  -->
+  <PropertyGroup>
+    <AssemblyName>GC_Server</AssemblyName>
+    <RootNamespace>GC.Pakete</RootNamespace>
+    <Version>1.9.0</Version>
+    <GcPaketZiel>GC_Server</GcPaketZiel>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ILRepackTargetsFile>$(MSBuildThisFileDirectory)..\ILRepack.targets</ILRepackTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.44.1" PrivateAssets="all" />
+    <ProjectReference Include="..\..\Mods\Felder\GC_Felder.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Futterfolge\GC_Futterfolge.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Leiter\GC_Leiter.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Parade\GC_Parade.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Portalnamen\GC_Portalnamen.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Spitzhacke\GC_Spitzhacke.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Tierarten\GC_Tierarten.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Tiere\GC_Tiere.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\WalkuerenTransport\GC_WalkuerenTransport.csproj" Private="false" />
+    <ProjectReference Include="..\..\Mods\Zuchtgrenze\GC_Zuchtgrenze.csproj" Private="false" />
+  </ItemGroup>
+</Project>

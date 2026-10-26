@@ -21,7 +21,7 @@ public partial class Plugin : BaseUnityPlugin
 		Deflect.Plugin.Init(Config, harmony);
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => Deflect.Plugin.On; // Boss-Fortschritt: nur, wenn eingeschaltet
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("deflect", Deflect.Plugin.Enabled, () => Deflect.Plugin.Blocked, "GC_Deflect")
 			.Sub("deflect_arrows", Deflect.Plugin.DeflectArrows)

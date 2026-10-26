@@ -19,7 +19,7 @@ public partial class Plugin : BaseUnityPlugin
 		FeedOrder.Init(Config, Logger);
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => FeedOrder.Enabled.Value; // Boss-Fortschritt: nur, wenn eingeschaltet
-		new Harmony(GcMod.Guid).PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(new Harmony(GcMod.Guid)); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		GcHooks.MateLevel = FeedOrder.MateLevelForBirth;
 		Module.MenuGroup(key => GcLoc.Get("gcff_" + key))
 			.Main("enabled", FeedOrder.Enabled)

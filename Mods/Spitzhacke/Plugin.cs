@@ -21,7 +21,7 @@ public partial class Plugin : BaseUnityPlugin
 		Pickaxe.Plugin.Init(Config, harmony);
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => Pickaxe.Plugin.On; // Boss-Fortschritt: nur, wenn eingeschaltet
-		harmony.PatchAll(typeof(Plugin).Assembly);
+		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("pickaxe", Pickaxe.Plugin.Enabled, () => Pickaxe.Plugin.Blocked, "GC_Pickaxe")
 			.Sub("pickaxe_enemy", Pickaxe.Plugin.EnemyPercent, 5, " %")
