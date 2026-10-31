@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Blitzspule (Gorduan): Blitzspulen am Vernichter. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Blitzspule</AssemblyName>
+    <RootNamespace>GC.Mods.Blitzspule</RootNamespace>
+    <Product>GC_Blitzspule</Product>
+    <Version>1.9.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>blitzspule</GcId>
+    <GcStufe>4</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd>randyknapp.mods.epicloot</GcFremd>
+    <GcAlteConfig></GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Blitzspulen</GcTitel>
+    <GcBeschreibung>Drei Blitzspulen (Berge, Nebellande, Tiefer Norden) am Vernichter leiten seinen Blitz ab: je Spule ein Drittel weniger Blitzschaden, Vernichtetes gibt 25, 55 oder 85 % der Baumaterialien zurück, EpicLoot-Items dazu 50 bis 80 % ihrer Opfer-Produkte.</GcBeschreibung>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\*.gcm" />
+    <EmbeddedResource Include="Assets\*.png" />
+    <Reference Include="UnityEngine.ImageConversionModule" HintPath="$(Managed)\UnityEngine.ImageConversionModule.dll" Private="false" />
+  </ItemGroup>
+</Project>

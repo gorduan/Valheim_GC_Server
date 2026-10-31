@@ -170,9 +170,9 @@ internal static class ModifyDamagePatch
 		else if (Plugin.IsOre(target))
 		{
 			float factor = Plugin.OrePercent.Value / 100f;
-			if (__instance.m_attackChainLevels > 1 && __instance.m_currentAttackCainLevel == __instance.m_attackChainLevels - 1)
+			if (__instance.m_attackChainLevels > 1 && __instance.m_currentAttackCainLevel == __instance.m_attackChainLevels - 1 && __instance.m_lastChainDamageMultiplier > 1f)
 			{
-				factor *= 0.5f; // Vanilla verdoppelt danach den letzten Schlag der Kette; gegen Erz soll jeder Schlag gleich zählen
+				factor /= __instance.m_lastChainDamageMultiplier; // Vanilla vervielfacht danach den letzten Schlag der Kette (Attack.cs: m_lastChainDamageMultiplier); gegen Erz soll jeder Schlag gleich zählen
 			}
 			hitData.m_damage.Modify(factor);
 		}

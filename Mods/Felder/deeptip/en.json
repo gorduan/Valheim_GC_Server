@@ -1,0 +1,16 @@
+{
+  "$locale": "en",
+  "gc.felder": {
+    "title": "Fields for the cultivator",
+    "short": "Stake out a field with the cultivator: inside it the preview jumps to the next free spot, and holding E plants row by row.",
+    "body": "Choose “Mark field” in the cultivator's build menu: left click sets corner points, a click on the start point closes the field, right click takes the last point back, and Esc discards the drawing. When you then pick a seed, the preview inside the field jumps to the next free spot where the plant can grow, in rows parallel to the first edge and as dense as Valheim allows. Holding E plants one spot after another, even while walking, with Valheim's own click: costs, [[valheim.stat.stamina|stamina]] and [[valheim.skill.farming|Farming]] count as usual.\n\nEveryone holding a cultivator sees the fields; with “Mark field” selected, a right click on a field removes it after a confirmation, and the plants stay. The mod is part of GC Server ([[gc.kern.stufe|level]] 3 “Vanilla+”) and only works if the server has it too; with PlantEasily it does not plant automatically.",
+    "aliases": ["Mark field"],
+    "see": ["gc.felder.fields"]
+  },
+  "gc.felder.fields": {
+    "title": "Switching fields on and off",
+    "short": "Two switches: the server rule allows fields on the server, and your own switch shows and uses them for you.",
+    "body": "“Fields for the cultivator” is the [[gc.serverrules|server rule]]: when it is off, “Mark field” disappears for everyone, and fields are neither shown nor planted. “Show and plant fields” under “Fields: display” applies only to you, and so do colour and opacity of the area ({gc_felder_fields_fill}) and of the edge ({gc_felder_fields_line}); at night the colour is dimmed.\n\nThe server sets the other rules:\n- Who may remove fields: everyone, creator and admins, creator with their guild leaders and admins, or admins only; without a guilds mod guild leaders don't count\n- at most {gc_felder_fields_points} corner points per field and edges up to {gc_felder_fields_edge} (0 = unlimited)\n- planting reaches {gc_felder_fields_reach} around you, every {gc_felder_fields_interval} while you hold E\n- spacing for plants without their own growth rule: bushes {gc_felder_fields_bush}, mushrooms {gc_felder_fields_mushroom}, other {gc_felder_fields_other}\n- always: edges may not cross, fields may not overlap, and no corner lies more than 100 m from the middle",
+    "see": ["gc.felder"]
+  }
+}

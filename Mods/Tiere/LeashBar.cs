@@ -17,10 +17,14 @@ namespace GC.Server.Leash;
 ///    zwischen 90 und 100“). Ist Tierpflege aus, sind alle fünf offen.
 ///  * Echte Plätze: Die Leine liegt in der Leiste, nicht im Inventar (eigenes Inventar 5×1, gespeichert mit dem Charakter in
 ///    Player.m_customData). Hineinziehen und Herausnehmen im Inventar-Bildschirm, rechts neben der Schnellleiste.
+///  * Leinen und Pfeifen (Gorduan, 30.10.2026): Beide passen in jeden Platz, auch in gesperrte. Dort wirken sie nicht: Eine
+///    Leine hält kein Tier, Alt+Zahl nimmt nichts in die Hand. Eine Leine mit Tier lässt sich nicht in einen gesperrten
+///    Platz legen (das Tier wäre sonst los). Leinen vom Pfosten kommen nur in offene Plätze.
 ///  * Sinkt Tierpflege unter eine Stufe, bleibt die Leine im gesperrten Platz, hält dort aber kein Tier (Gorduan).
 ///  * In der Schnellleiste hält nur eine Leine ein Tier (die linke, wenn es doch zwei sind); eine zweite nimmt keines an, und
 ///    eine Leine mit Tier lässt sich nicht dazulegen.
-///  * Beim Tod kommen die Leinen der Leiste mit ins Grab (Gorduan). Pfeifen gehören weiter in die Schnellleiste.
+///  * Beim Tod kommt die Leiste mit ins Grab (Gorduan). Beim Einsammeln kehrt jedes Stück in seinen alten Platz zurück; was dort
+///    inzwischen liegt, kommt ins Inventar (Gorduan, 30.10.2026: „so das alle wieder vor dem tod ist“).
 /// Ausrüsten aus der Leiste: Valheims EquipItem verlangt das Item im Spieler-Inventar; ein Transpiler lässt dort auch die
 /// Leiste des eigenen Spielers zu.
 /// </summary>
@@ -110,6 +114,9 @@ internal static class LeashBar
 	}
 
 	internal static bool Contains(Player player, ItemDrop.ItemData item) => Of(player) is Inventory inventory && inventory.ContainsItem(item);
+
+	/// <summary>Was in die Leiste passt: Leinen und Pfeifen (Gorduan, 30.10.2026).</summary>
+	internal static bool Fits(ItemDrop.ItemData? item) => item != null && (Plugin.IsLeash(item, out _) || Whistles.IsWhistle(item, out _));
 
 	/// <summary>Die Leine liegt in einem offenen Platz der Leiste: dort hält sie ihr Tier.</summary>
 	internal static bool Active(Player player, ItemDrop.ItemData item) => Contains(player, item) && item.m_gridPos.x < Unlocked(player);
@@ -248,8 +255,9 @@ internal static class LeashBar
 	}
 
 	/// <summary>
-	/// Ablegen im Inventar-Bildschirm prüfen (null = erlaubt): in die Leiste nur Leinen und nur in offene Plätze, kein Tausch,
-	/// der etwas anderes hineinbrächte, und keine zweite Leine mit Tier in die Schnellleiste.
+	/// Ablegen im Inventar-Bildschirm prüfen (null = erlaubt): in die Leiste nur Leinen und Pfeifen, auch in gesperrte Plätze,
+	/// dort aber keine Leine mit Tier; kein Tausch, der etwas anderes hineinbrächte, und keine zweite Leine mit Tier in die
+	/// Schnellleiste.
 	/// </summary>
 	internal static string? DropRefusal(Inventory target, Inventory from, ItemDrop.ItemData item, Vector2i pos)
 	{
@@ -265,23 +273,23 @@ internal static class LeashBar
 		}
 		if (target == bar)
 		{
-			if (!Plugin.IsLeash(item, out _))
+			if (!Fits(item))
 			{
 				return GcLoc.Get("gclb_only_leash");
 			}
-			if (pos.x >= Unlocked(player))
+			if (pos.x >= Unlocked(player) && Links.ForItem(item) != null)
 			{
-				return GcLoc.Get("gclb_locked", pos.x + 1, Levels[Mathf.Clamp(pos.x, 0, Slots - 1)]);
+				return GcLoc.Get("gclb_locked_animal", pos.x + 1, Levels[Mathf.Clamp(pos.x, 0, Slots - 1)]);
 			}
 		}
-		if (from == bar && target != bar && swapped != null && !Plugin.IsLeash(swapped, out _))
+		if (from == bar && target != bar && swapped != null && !Fits(swapped))
 		{
 			return GcLoc.Get("gclb_only_leash"); // der Tausch legte etwas anderes in die Leiste
 		}
-		if (from == bar && swapped != null && item.m_gridPos.x >= Unlocked(player))
+		if (from == bar && swapped != null && item.m_gridPos.x >= Unlocked(player) && Links.ForItem(swapped) != null)
 		{
-			// der Tausch legte die verdrängte Leine in einen gesperrten Platz (Prüfung 24.10.2026)
-			return GcLoc.Get("gclb_locked", item.m_gridPos.x + 1, Levels[Mathf.Clamp(item.m_gridPos.x, 0, Slots - 1)]);
+			// der Tausch legte die verdrängte Leine mit Tier in einen gesperrten Platz
+			return GcLoc.Get("gclb_locked_animal", item.m_gridPos.x + 1, Levels[Mathf.Clamp(item.m_gridPos.x, 0, Slots - 1)]);
 		}
 		Inventory main = player.GetInventory();
 		// eine Leine mit Tier in die Schnellleiste, in der schon eine Leine ein Tier hält
@@ -382,12 +390,27 @@ internal static class LeashBar
 
 	private static Player? pendingGrave;
 
-	/// <summary>Ins Grab: was noch in der Leiste liegt (nicht in der Hand), notfalls bekommt das Grab eine Reihe mehr.</summary>
+	/// <summary>Platz in der Leiste vor dem Tod, am Item im Grab (Item-Daten, wandern beim Einsammeln mit).</summary>
+	private const string GraveSlotKey = "gc_lb_slot";
+
+	/// <summary>
+	/// Ins Grab: was noch in der Leiste liegt (nicht in der Hand), notfalls bekommt das Grab eine Reihe mehr. Jedes Stück
+	/// merkt sich seinen Platz. Items aus dem Inventar verlieren eine alte Markierung (aus einem früheren Grab, nie eingesammelt
+	/// über diesen Weg), sonst sprängen sie beim Einsammeln in die Leiste.
+	/// </summary>
 	internal static void IntoGrave(Inventory grave, Inventory original)
 	{
 		Player? player = pendingGrave;
 		pendingGrave = null;
-		if (player == null || original != player.GetInventory() || Of(player) is not Inventory inventory)
+		if (player == null || original != player.GetInventory())
+		{
+			return;
+		}
+		foreach (ItemDrop.ItemData item in grave.GetAllItems())
+		{
+			item.m_customData?.Remove(GraveSlotKey);
+		}
+		if (Of(player) is not Inventory inventory)
 		{
 			return;
 		}
@@ -401,10 +424,77 @@ internal static class LeashBar
 			{
 				grave.m_height++;
 			}
+			item.m_customData ??= new Dictionary<string, string>();
+			item.m_customData[GraveSlotKey] = item.m_gridPos.x.ToString(System.Globalization.CultureInfo.InvariantCulture);
 			if (grave.AddItem(item))
 			{
 				inventory.RemoveItem(item); // erst im Grab, dann aus der Leiste: verloren geht nichts
 			}
+			else
+			{
+				item.m_customData.Remove(GraveSlotKey);
+			}
+		}
+	}
+
+	internal static void ForgetSlot(ItemDrop.ItemData? item) => item?.m_customData?.Remove(GraveSlotKey);
+
+	/// <summary>Inventare der Gräber (Container am TombStone), um Einsammeln von anderem Umräumen zu unterscheiden.</summary>
+	private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Inventory, TombStone> Graves = new();
+
+	internal static void RememberGrave(TombStone tomb)
+	{
+		if (tomb.m_container != null && tomb.m_container.GetInventory() is Inventory inventory)
+		{
+			Graves.Remove(inventory);
+			Graves.Add(inventory, tomb);
+		}
+	}
+
+	/// <summary>
+	/// Nach jedem Umräumen in das Inventar oder die Leiste des eigenen Spielers (Alles nehmen, Ziehen, Umschalt-Klick): Stücke
+	/// aus dem eigenen Grab kehren in ihren alten Platz der Leiste zurück. Was dort inzwischen liegt, kommt an die Stelle im
+	/// Inventar, die das zurückgekehrte Stück frei macht; so passt es immer. Aus einem fremden Grab, in die Leiste gezogen oder
+	/// woanders hin: nur die Markierung weg.
+	/// </summary>
+	internal static void AfterMove(Inventory target, Inventory from)
+	{
+		Player? player = Player.m_localPlayer;
+		if (player == null || !Graves.TryGetValue(from, out TombStone tomb) || tomb == null || Of(player) is not Inventory inventory)
+		{
+			return;
+		}
+		Inventory main = player.GetInventory();
+		if (target != main && target != inventory)
+		{
+			return;
+		}
+		bool mine = tomb.IsOwner();
+		foreach (ItemDrop.ItemData item in new List<ItemDrop.ItemData>(target.GetAllItems()))
+		{
+			if (item.m_customData == null || !item.m_customData.TryGetValue(GraveSlotKey, out string value))
+			{
+				continue;
+			}
+			item.m_customData.Remove(GraveSlotKey);
+			if (!mine || target != main || !int.TryParse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int x) || x < 0 || x >= Slots)
+			{
+				continue;
+			}
+			Vector2i pos = item.m_gridPos;
+			ItemDrop.ItemData? occupant = inventory.GetItemAt(x, 0);
+			if (occupant != null && !inventory.RemoveItem(occupant))
+			{
+				continue;
+			}
+			main.RemoveItem(item);
+			if (occupant != null && !main.AddItem(occupant, pos))
+			{
+				inventory.AddItem(occupant, new Vector2i(x, 0)); // kann nicht passieren (pos ist eben frei geworden), aber nichts verlieren
+				main.AddItem(item, pos);
+				continue;
+			}
+			inventory.AddItem(item, new Vector2i(x, 0));
 		}
 	}
 
@@ -419,10 +509,19 @@ internal static class LeashBar
 		public GameObject Equiped = null!;
 		public GameObject Queued = null!;
 		public Image? Back;
+		// Text unter dem Platz (Tiername, „ab Stufe …“): nur bei Änderung neu (Review 27.10.2026: vorher jedes Bild neue Texte)
+		public ItemDrop.ItemData? TextItem;
+		public Tameable? TextTame;
+		public bool TextLocked;
+		public string? Text;
+		public ItemDrop.ItemData? BackgroundItem; // EpicLoot-Hintergrund zuletzt für dieses Item gesetzt
 	}
 
 	private static RectTransform? hud;
 	private static readonly List<HudSlot> HudSlots = new();
+
+	/// <summary>Spätestens dann die Texte der Plätze neu bilden (Umbenennen, Aufstieg „Lvl X“): 4× je Sekunde.</summary>
+	private static float nextHudText;
 
 	/// <summary>Jedes Bild (Plugin.Update): Anzeige neben der Schnellleiste, im Inventar-Bildschirm das Raster.</summary>
 	internal static void Tick()
@@ -524,6 +623,11 @@ internal static class LeashBar
 		}
 		hud.anchoredPosition = Position(hotkeys); // falls eine andere Mod die Schnellleiste verschiebt
 		int open = Unlocked(player);
+		bool refreshText = Time.time >= nextHudText;
+		if (refreshText)
+		{
+			nextHudText = Time.time + 0.25f;
+		}
 		for (int x = 0; x < HudSlots.Count; x++)
 		{
 			HudSlot slot = HudSlots[x];
@@ -534,10 +638,15 @@ internal static class LeashBar
 				slot.Back.color = locked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
 			}
 			slot.Icon.gameObject.SetActive(item != null);
+			if (refreshText || slot.BackgroundItem != item)
+			{
+				slot.BackgroundItem = item;
+				EpicBackground.Apply(slot.Go, slot.Equiped, item); // Seltenheitsfarbe wie in Valheims Schnellleiste
+			}
 			slot.Durability.gameObject.SetActive(false);
 			slot.Equiped.SetActive(item != null && item.m_equipped);
 			slot.Queued.SetActive(item != null && player.IsEquipActionQueued(item));
-			string text = "";
+			Tameable? tame = null;
 			if (item != null)
 			{
 				slot.Icon.sprite = item.GetIcon();
@@ -558,17 +667,23 @@ internal static class LeashBar
 					}
 				}
 				Link? link = Links.ForItem(item);
-				if (link != null && link.Tame != null)
-				{
-					text = Short(link.Tame.GetHoverName()); // das Tier an dieser Leine
-				}
+				tame = link != null && link.Tame != null ? link.Tame : null;
 			}
-			if (locked)
+			if (!refreshText && slot.Text != null && slot.TextItem == item && slot.TextTame == tame && slot.TextLocked == locked)
 			{
-				text = GcLoc.Get("gclb_from", Levels[x]); // gesperrt: ab welcher Tierpflege
+				continue;
 			}
-			slot.Amount.gameObject.SetActive(text.Length > 0);
-			slot.Amount.text = text;
+			slot.TextItem = item;
+			slot.TextTame = tame;
+			slot.TextLocked = locked;
+			// gesperrt: ab welcher Tierpflege; sonst das Tier an dieser Leine
+			string text = locked ? GcLoc.Get("gclb_from", Levels[x]) : tame != null ? Short(tame.GetHoverName()) : "";
+			if (text != slot.Text)
+			{
+				slot.Text = text;
+				slot.Amount.gameObject.SetActive(text.Length > 0);
+				slot.Amount.text = text;
+			}
 		}
 	}
 
@@ -795,6 +910,46 @@ internal static class LeashBarGraveFillPatch
 	private static void Postfix(Inventory __instance, Inventory original) => LeashBar.IntoGrave(__instance, original);
 }
 
+/// <summary>Gräber merken (Start: dann hat der Container sein Inventar sicher).</summary>
+[HarmonyPatch(typeof(TombStone), nameof(TombStone.Start))]
+internal static class LeashBarGraveKnownPatch
+{
+	private static void Postfix(TombStone __instance) => LeashBar.RememberGrave(__instance);
+}
+
+/// <summary>Einsammeln aus dem Grab: „Alles nehmen“ und Valheims Einsammeln beim Benutzen (Container.TakeAll).</summary>
+[HarmonyPatch(typeof(Inventory), nameof(Inventory.MoveAll))]
+internal static class LeashBarGraveTakeAllPatch
+{
+	private static void Postfix(Inventory __instance, Inventory fromInventory) => LeashBar.AfterMove(__instance, fromInventory);
+}
+
+/// <summary>Einsammeln aus dem Grab: Ziehen und Umschalt-Klick (beide Fassungen von MoveItemToThis).</summary>
+[HarmonyPatch(typeof(Inventory), nameof(Inventory.MoveItemToThis), new[] { typeof(Inventory), typeof(ItemDrop.ItemData) })]
+internal static class LeashBarGraveMovePatch
+{
+	private static void Postfix(Inventory __instance, Inventory fromInventory) => LeashBar.AfterMove(__instance, fromInventory);
+}
+
+[HarmonyPatch(typeof(Inventory), nameof(Inventory.MoveItemToThis), new[] { typeof(Inventory), typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int) })]
+internal static class LeashBarGraveDragPatch
+{
+	private static void Postfix(Inventory __instance, Inventory fromInventory) => LeashBar.AfterMove(__instance, fromInventory);
+}
+
+/// <summary>Aus dem Grab auf den Boden geworfen und wieder aufgehoben: Die Markierung des Platzes gilt nicht mehr.</summary>
+[HarmonyPatch(typeof(Humanoid), nameof(Humanoid.Pickup))]
+internal static class LeashBarGravePickupPatch
+{
+	private static void Prefix(GameObject go)
+	{
+		if (go != null && go.TryGetComponent(out ItemDrop drop))
+		{
+			LeashBar.ForgetSlot(drop.m_itemData);
+		}
+	}
+}
+
 /// <summary>
 /// Inventar-Bildschirm, vor Valheim: Ablegen nach den Regeln der Leiste prüfen, bevor Valheim beide Items ab- und hinterher
 /// wieder ausrüstet (eine Ablehnung erst in DropItem verschöbe sonst die Ausrüstung). Umschalt-Klick in der Leiste über
@@ -918,4 +1073,38 @@ internal static class LeashBarGridPatch
 	}
 
 	private static bool reported;
+}
+
+/// <summary>
+/// EpicLoot 0.15.2 (Gorduan, 27.10.2026: „alle aktuellen Tools für das aktuelle EpicLoot umsetzen“): Verzauberte Leinen zeigen in
+/// der Leinenleiste den Hintergrund in ihrer Seltenheitsfarbe wie in Valheims Schnellleiste (API.ApplyMagicItemBackground).
+/// Das Raster im Inventar ist ein echtes InventoryGrid, dort färbt EpicLoot selbst. Ohne EpicLoot oder älter: nichts.
+/// </summary>
+internal static class EpicBackground
+{
+	private static MethodInfo? apply;
+	private static bool resolved;
+
+	internal static void Apply(GameObject slotRoot, GameObject overlay, ItemDrop.ItemData? item)
+	{
+		if (!resolved)
+		{
+			resolved = true;
+			Type? api = AccessTools.TypeByName("EpicLoot.API");
+			apply = api != null ? AccessTools.Method(api, "ApplyMagicItemBackground", new[] { typeof(GameObject), typeof(GameObject), typeof(ItemDrop.ItemData), typeof(bool) }) : null;
+		}
+		if (apply == null || slotRoot == null || overlay == null)
+		{
+			return;
+		}
+		try
+		{
+			apply.Invoke(null, new object?[] { slotRoot, overlay, item, false });
+		}
+		catch (Exception e)
+		{
+			apply = null; // einmal melden, dann ohne Farbe weiter
+			Plugin.Log.LogWarning($"Leinenleiste: EpicLoot-Hintergrund nicht gesetzt: {e.Message}");
+		}
+	}
 }

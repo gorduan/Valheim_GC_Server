@@ -14,7 +14,7 @@ namespace GC.Server.Leash;
 /// Leinen (Knoten) halten ihr Tier, verstärken aber nichts; nur „Unzerstörbar" und „Haltbarkeit" bleiben Eigenschaften
 /// der Leine selbst.
 /// </summary>
-internal sealed class BondStats
+internal sealed partial class BondStats
 {
 	// ---- die Leine selbst
 	public float Range;          // Leinenreichweite +m (Höchstlänge und Abrutschen; die Mindestlänge bleibt)
@@ -81,16 +81,16 @@ internal sealed class BondStats
 	private BondStats? copy;
 
 	public bool Any => Range > 0f || Durability > 0f || Unbreakable || LoadReduction > 0 || Gentle > 0f || Pull > 0f || Tamer > 0f
-		|| AnimalAny || HolderAny;
+		|| AnimalAny || HolderAny || UniqueMountAny;
 
 	public bool AnimalAny => Obedience > 0f || Damage > 0f || AttackSpeed > 0f || Health > 0f || Speed > 0f || Regen > 0f || Resist > 0f
 		|| NormalAfter != 0f || Thorns > 0f || Feed > 0f || Frost > 0f || Lightning > 0f || Fire > 0f || Spirit > 0f || Poison > 0f || LifeSteal > 0f
 		|| Deter > 0f || StaggerPower > 0f || Berserk > 0f || Light > 0f
 		|| Revive > 0f || PoisonImmune || Steadfast || Fearless || Evade > 0f || Swim > 0f || Youth > 0f || Illusions > 0
-		|| Fireproof || Blaze > 0f || Hall > 0f || Rally > 0f;
+		|| Fireproof || Blaze > 0f || Hall > 0f || Rally > 0f || UniqueAnimalAny;
 
 	public bool HolderAny => HolderCarry > 0f || HolderSpeed > 0f || HolderRegen > 0f || HolderReveal > 0f || HolderHunt > 0f
-		|| HolderWatch > 0f || HolderStealth > 0f || Swim > 0f;
+		|| HolderWatch > 0f || HolderStealth > 0f || Swim > 0f || UniqueHolderAny;
 
 	/// <summary>Für Lokis Trugbilder: die Tier-Werte der Leine ohne Wiederkehr, Licht, Hunger und weitere Trugbilder.</summary>
 	public BondStats ForCopy()
@@ -261,7 +261,7 @@ internal static class Bonds
 			{
 				Animals[link.Animal] = bond;
 			}
-			Holder.HolderCarry += bond.HolderCarry;
+			Holder.HolderCarry += bond.HolderCarry + LeashUniqueEffects.Carry(link.Animal, bond); // Auðhumla: ein Lox trägt mit (Gorduan, 27.10.2026)
 			Holder.HolderSpeed += bond.HolderSpeed;
 			Holder.HolderRegen += bond.HolderRegen;
 			Holder.HolderHunt += bond.HolderHunt;
@@ -710,6 +710,51 @@ internal static class Bonds
 		}
 	}
 
+	/// <summary>
+	/// Nornen (LeashUniqueEffects, Gorduan 27.10.2026): Das Tier fällt x Sekunden in Ohnmacht wie bei der Wiederkehr, auch ohne eigene
+	/// Wiederkehr-Verzauberung; danach wacht es mit vollem Leben auf (HoldFainted), die Leine ist frei. Nur außerhalb von Valheims
+	/// Effekt-Schleife aufrufen (SetHealth, ApplyDamage), dort keine Leinen lösen.
+	/// </summary>
+	internal static bool FaintFor(Character? animal, float seconds)
+	{
+		ZNetView? view = animal != null ? animal.m_nview : null;
+		if (animal == null || view == null || !view.IsValid() || ZNet.instance == null || animal.IsDead() || IsFainted(animal))
+		{
+			return false;
+		}
+		if (!view.IsOwner())
+		{
+			view.ClaimOwnership(); // das Tier an der eigenen Leine besitzt der Halter ohnehin (TickLink)
+		}
+		view.GetZDO().Set(FaintHash, ZNet.instance.GetTime().AddSeconds(seconds).Ticks);
+		EnterFaint(animal);
+		Link? link = Links.ForAnimal(animal);
+		if (link != null)
+		{
+			Links.Detach(link, null); // die Meldung schreibt der Aufrufer
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// Hermóðrs Weckruf (Pfeifen, 27.10.2026): Ein ohnmächtiges Tier wacht beim nächsten Durchlauf auf, beim Besitzer mit vollem
+	/// Leben (HoldFainted). Der Pfeifende übernimmt dafür den Besitz, ein ohnmächtiges Tier hängt an keiner Leine mehr.
+	/// </summary>
+	internal static bool Wake(Character? animal)
+	{
+		ZNetView? view = animal != null ? animal.m_nview : null;
+		if (animal == null || view == null || !view.IsValid() || !IsFainted(animal))
+		{
+			return false;
+		}
+		if (!view.IsOwner())
+		{
+			view.ClaimOwnership();
+		}
+		view.GetZDO().Set(FaintHash, 1L); // längst vorbei: HoldFainted weckt es
+		return true;
+	}
+
 	/// <summary>Alle 0,25 s für alle geladenen Tiere: Licht und Ohnmacht anzeigen (nicht jedes Bild, das kostet bei vielen Tieren).</summary>
 	private static void UpdateScan()
 	{
@@ -1070,7 +1115,7 @@ internal static class BondAttackPatch
 	internal static void Apply(Character character, BondStats bond, ref HitData hitData)
 	{
 		float total = hitData.GetTotalDamage();
-		float factor = 1f + bond.Damage / 100f;
+		float factor = 1f + (bond.Damage + LeashUniqueEffects.Kin(bond, character)) / 100f; // Arten-Leine: nur bei ihrer Art (Gorduan, 27.10.2026)
 		if (bond.Berserk > 0f && character.GetHealthPercentage() < 0.3f)
 		{
 			factor *= 1f + bond.Berserk / 100f;
@@ -1141,6 +1186,7 @@ internal static class BondAttackSpeedPatch
 /// <summary>
 /// Treffer am Tier (beim Besitzer): Ohnmacht (kein Treffer), Trugschleier (Treffer geht vorbei), Leben (weniger Schaden,
 /// auch der allgemeine Schaden, den ApplyModifier auslässt), Elementarschutz, Giftfest, Feuerfest (Surts Lohe), Standfest, Dornen.
+/// Einzigartige Leinen (27.10.2026): Feuerschreiter (Asksvin: keine Lava, kein Feuer) und Arten-Bonus aufs Leben (LeashUniqueEffects).
 /// </summary>
 [HarmonyPatch(typeof(Character), nameof(Character.RPC_Damage))]
 internal static class BondDamagedPatch
@@ -1159,6 +1205,11 @@ internal static class BondDamagedPatch
 		{
 			return true;
 		}
+		bool fireWalker = LeashUniqueEffects.FireWalker(bond, __instance);
+		if (fireWalker && (hit.m_hitType == HitData.HitType.AshlandsLava || hit.m_hitType == HitData.HitType.AshlandsOcean))
+		{
+			return false; // Feuerschreiter (Níðhögg, Gorduan 27.10.2026): Lava und heißes Meer schaden dem Asksvin nicht
+		}
 		if (bond.Evade > 0f && UnityEngine.Random.value * 100f < Mathf.Min(bond.Evade, 75f))
 		{
 			if (DamageText.instance != null)
@@ -1168,9 +1219,10 @@ internal static class BondDamagedPatch
 			return false; // Trugschleier: der Treffer geht ins Leere
 		}
 		float before = hit.GetTotalDamage();
-		if (bond.Health > 0f)
+		float health = bond.Health + LeashUniqueEffects.Kin(bond, __instance); // Arten-Leine: mehr Leben nur bei ihrer Art (Gorduan, 27.10.2026)
+		if (health > 0f)
 		{
-			float keep = 1f / (1f + bond.Health / 100f);
+			float keep = 1f / (1f + health / 100f);
 			hit.ApplyModifier(keep);
 			hit.m_damage.m_damage *= keep;
 		}
@@ -1191,9 +1243,9 @@ internal static class BondDamagedPatch
 				hit.m_statusEffectHash = 0;
 			}
 		}
-		if (bond.Fireproof)
+		if (bond.Fireproof || fireWalker)
 		{
-			hit.m_damage.m_fire = 0f; // Surts Lohe: ohne Feuerschaden auch kein Brennen
+			hit.m_damage.m_fire = 0f; // Surts Lohe, Feuerschreiter: ohne Feuerschaden auch kein Brennen
 			if (hit.m_statusEffectHash == SEMan.s_statusEffectBurning)
 			{
 				hit.m_statusEffectHash = 0;
@@ -1269,7 +1321,8 @@ internal static class BondFireproofPatch
 {
 	private static void Prefix(Character __instance, HitData hit)
 	{
-		if (hit != null && hit.m_damage.m_fire > 0f && __instance.IsTamed() && Bonds.TryGet(__instance, out BondStats bond) && bond.Fireproof)
+		if (hit != null && hit.m_damage.m_fire > 0f && __instance.IsTamed() && Bonds.TryGet(__instance, out BondStats bond)
+			&& (bond.Fireproof || LeashUniqueEffects.FireWalker(bond, __instance))) // auch Feuerschreiter (Asksvin, Gorduan 27.10.2026)
 		{
 			hit.m_damage.m_fire = 0f;
 		}

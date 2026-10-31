@@ -14,6 +14,12 @@ internal enum CargoState
 	Carried = 2,
 	/// <summary>In der Luft, aber der Raid nach dem Abholen läuft noch: erst danach lässt sich der Karren rufen (Gorduan, 19.10.2026).</summary>
 	Locked = 3,
+	/// <summary>
+	/// Abgeliefert (Review 27.10.2026, statt den Datensatz zu löschen): Der Spieler hat das Abwerfen gemeldet. Der Datensatz
+	/// bleibt mit der Fracht 7 Tage in der Welt, damit ein Admin sie wiederherstellen kann, falls die Gegenstände nie beim
+	/// Server ankamen. Geliefert wird er nie wieder, und er zählt für keinen Spieler mehr (Store.MarkDelivered).
+	/// </summary>
+	Delivered = 4,
 }
 
 /// <summary>
@@ -36,6 +42,12 @@ internal static class Store
 	private static readonly int StateHash = "gc_courier_state".GetStableHashCode();
 	private static readonly int OriginHash = "gc_courier_origin".GetStableHashCode();
 	private static readonly int TimeHash = "gc_courier_time".GetStableHashCode();
+	/// <summary>Abgeliefert: wem die Fracht gehörte (der Spieler-Schlüssel steht dann auf 0) und wann (UTC-Ticks).</summary>
+	private static readonly int DeliveredPlayerHash = "gc_courier_delivered_player".GetStableHashCode();
+	private static readonly int DeliveredTimeHash = "gc_courier_delivered_time".GetStableHashCode();
+
+	/// <summary>So lange bleibt abgelieferte Fracht für den Admin in der Welt (Review 27.10.2026).</summary>
+	internal static readonly TimeSpan KeepDelivered = TimeSpan.FromDays(7);
 
 	/// <summary>
 	/// Hinter dem Weltrand (Spieler werden ab 10 500 m zurückgeschoben), aber noch in Valheims Sektor-Raster (±16 384 m): kein
@@ -74,13 +86,18 @@ internal static class Store
 		scanned = false;
 	}
 
-	/// <summary>Alle Fracht-ZDOs der Welt, einmal je Sitzung gesucht. Was beim Neustart noch auf die Walküre wartete, ist jetzt in der Luft.</summary>
+	/// <summary>
+	/// Alle Fracht-ZDOs der Welt, einmal je Sitzung gesucht. Was beim Neustart noch auf die Walküre wartete, ist jetzt in der
+	/// Luft. Abgelieferte bleiben abgeliefert (nur Wartend und Gesperrt werden rufbar; Speicherstände von vor dem 27.10.2026
+	/// kennen den Zustand nicht und laden unverändert), nach 7 Tagen verschwinden sie.
+	/// </summary>
 	private static List<ZDO> Records()
 	{
 		if (!scanned && ZDOMan.instance != null)
 		{
 			scanned = true;
 			All.Clear();
+			int delivered = 0;
 			foreach (ZDO zdo in ZDOMan.instance.m_objectsByID.Values)
 			{
 				if (zdo != null && zdo.GetPrefab() == PrefabHash)
@@ -92,12 +109,17 @@ internal static class Store
 						// Abholung, Wächter-Kampf oder Raid gingen beim Neustart verloren, die Fracht nicht: sie ist jetzt rufbar
 						zdo.Set(StateHash, (int)CargoState.Carried);
 					}
+					else if (state == (int)CargoState.Delivered)
+					{
+						delivered++;
+					}
 				}
 			}
 			if (All.Count > 0)
 			{
-				ServerPlugin.Log.LogInfo($"Walküren-Transport: {All.Count} Fracht(en) in der Luft gefunden.");
+				ServerPlugin.Log.LogInfo($"Walküren-Transport: {All.Count - delivered} Fracht(en) in der Luft gefunden, {delivered} abgelieferte aufbewahrt.");
 			}
+			PurgeDelivered();
 		}
 		All.RemoveAll(z => z == null || !z.IsValid());
 		return All;
@@ -122,7 +144,10 @@ internal static class Store
 		return zdo;
 	}
 
-	/// <summary>Stand eines Spielers: in der Luft, sobald eine Fracht abgeholt ist, sonst wartend, sonst keine.</summary>
+	/// <summary>
+	/// Stand eines Spielers: in der Luft, sobald eine Fracht abgeholt ist, sonst gesperrt, sonst wartend, sonst keine.
+	/// Abgelieferte Fracht zählt nicht (Review 27.10.2026: sonst stünde der Spieler danach für immer auf „wartend“).
+	/// </summary>
 	internal static CargoState StateOf(long playerId)
 	{
 		CargoState state = CargoState.None;
@@ -137,9 +162,13 @@ internal static class Store
 			{
 				return CargoState.Carried;
 			}
-			if (s == CargoState.Locked || state == CargoState.None)
+			if (s == CargoState.Locked)
 			{
-				state = s == CargoState.Locked ? CargoState.Locked : CargoState.Waiting;
+				state = CargoState.Locked;
+			}
+			else if (s == CargoState.Waiting && state == CargoState.None)
+			{
+				state = CargoState.Waiting;
 			}
 		}
 		return state;
@@ -193,7 +222,56 @@ internal static class Store
 		return pkg;
 	}
 
-	/// <summary>Fracht abgeliefert: das ZDO verschwindet (dafür muss der Server sein Besitzer sein).</summary>
+	/// <summary>
+	/// Fracht abgeliefert (Review 27.10.2026, statt sie zu löschen): Zustand „abgeliefert“ mit Zeitpunkt, die Fracht bleibt im
+	/// Datensatz. Der Spieler wandert unter einen eigenen Schlüssel: So wird sie nie wieder geliefert, auch nicht von einer
+	/// älteren Fassung der Mod nach einem Zurückspielen (die kennt den Zustand nicht und hielte den Spieler sonst für immer
+	/// auf „wartend“).
+	/// </summary>
+	internal static void MarkDelivered(ZDO zdo)
+	{
+		zdo.Set(DeliveredPlayerHash, zdo.GetLong(PlayerHash));
+		zdo.Set(DeliveredTimeHash, DateTime.UtcNow.Ticks);
+		zdo.Set(StateHash, (int)CargoState.Delivered);
+		zdo.Set(PlayerHash, 0L);
+	}
+
+	/// <summary>Wem eine abgelieferte Fracht gehörte (0 bei allen anderen).</summary>
+	internal static long DeliveredTo(ZDO zdo) => zdo.GetLong(DeliveredPlayerHash);
+
+	/// <summary>
+	/// Abgelieferte Fracht nach 7 Tagen endgültig aus der Welt (beim ersten Durchsuchen der Welt und danach regelmäßig vom
+	/// Server). Vor dem ersten Durchsuchen nichts: es soll nicht früher stattfinden als bisher.
+	/// </summary>
+	internal static void PurgeDelivered()
+	{
+		if (!scanned)
+		{
+			return;
+		}
+		long now = DateTime.UtcNow.Ticks;
+		foreach (ZDO zdo in All.ToArray())
+		{
+			if (zdo == null || !zdo.IsValid() || zdo.GetInt(StateHash) != (int)CargoState.Delivered)
+			{
+				continue;
+			}
+			long at = zdo.GetLong(DeliveredTimeHash);
+			if (at <= 0L)
+			{
+				zdo.Set(DeliveredTimeHash, now); // ohne Zeitpunkt: die 7 Tage beginnen jetzt, nicht gleich löschen
+				continue;
+			}
+			if (now - at < KeepDelivered.Ticks)
+			{
+				continue;
+			}
+			ServerPlugin.Log.LogInfo($"Walküren-Transport: abgelieferte Fracht von {Describe(zdo)} nach 7 Tagen gelöscht.");
+			Remove(zdo);
+		}
+	}
+
+	/// <summary>Datensatz endgültig löschen: das ZDO verschwindet (dafür muss der Server sein Besitzer sein).</summary>
 	internal static void Remove(ZDO zdo)
 	{
 		Records().Remove(zdo);
@@ -222,6 +300,7 @@ internal static class Store
 		{
 			// nur für das Log
 		}
-		return $"{NameOf(zdo)} ({PlayerOf(zdo)}), {count} Stapel";
+		long player = StateOfRecord(zdo) == CargoState.Delivered ? DeliveredTo(zdo) : PlayerOf(zdo);
+		return $"{NameOf(zdo)} ({player}), {count} Stapel";
 	}
 }

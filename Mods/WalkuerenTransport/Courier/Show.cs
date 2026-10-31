@@ -98,6 +98,7 @@ internal static class Show
 		raidEvent = null;
 		envsReady = false;
 		runner = null;
+		valkyrieLoaded = false; // Review 27.10.2026: ein gescheiterter Ladeversuch gilt nur für eine Sitzung (das geladene Prefab bleibt)
 		if (!Gc.IsHeadless)
 		{
 			Sounds.Load();
@@ -901,6 +902,12 @@ internal static class Show
 		Vector3 target = pkg.ReadVector3();
 		float fill = pkg.ReadSingle();
 		bool mine = Mine(whistler);
+		if (mine)
+		{
+			// Review 27.10.2026: nur die Fracht dieser Lieferung abwerfen. Der Server schickt sie gleich nach dieser Nachricht
+			// (RpcCargo); eine ältere, die zu spät für ein gescheitertes Abwerfen kam, darf hier nicht mehr fallen.
+			Cargo.Remove(playerId);
+		}
 		if (!mine && !Near(target))
 		{
 			return;
@@ -968,22 +975,25 @@ internal static class Show
 				yield break;
 			}
 			Cargo.Remove(playerId);
+			// Review 27.10.2026 (Verdopplung): Gegenstände erzeugen und im selben Bild melden, vor allem anderen. Vorher kam die
+			// Meldung 1,5 s später: Wer dazwischen auslog, schickte die Gegenstände trotzdem (Valheim sendet beim Ausloggen alle
+			// eigenen ZDOs, ZDOMan.FlushClientObjects), die Meldung nie, und nach dem nächsten Login fiel dieselbe Fracht noch
+			// einmal. Starb man am Aufprall, lehnte der Server die späte Meldung ab (Spieler-ZDO fehlt), mit derselben Folge.
+			// Jetzt geht die Meldung vor den neuen ZDOs in die Leitung (Transport.RPC_Delivered).
+			if (!Unload(delivery.cargo, impact))
+			{
+				Transport.DeliveryFailed(playerId); // nichts abgeworfen: die Fracht bleibt in der Luft
+				yield break;
+			}
+			Transport.ConfirmDelivered(playerId, delivery.record);
 			try
 			{
-				Impact(impact, CartWeight(delivery.cargo)); // erst der Aufprall, dann liegt die Fracht dort
+				Impact(impact, CartWeight(delivery.cargo)); // trifft nur Figuren, nicht die Gegenstände am Boden
 			}
 			catch (Exception e)
 			{
 				ServerPlugin.Log.LogWarning($"Walküren-Transport: Aufprall-Schaden nicht verteilt: {e.Message}");
 			}
-			if (!Unload(delivery.cargo, impact))
-			{
-				Transport.DeliveryFailed(playerId);
-				yield break;
-			}
-			// erst melden, wenn die neuen Gegenstände beim Server sind (Valheim schickt neue Objekte mit dem nächsten Abgleich)
-			yield return new WaitForSeconds(1.5f);
-			Transport.ConfirmDelivered(playerId, delivery.record);
 		}
 	}
 
@@ -1095,6 +1105,9 @@ internal static class Show
 	/// <summary>
 	/// Wirft die Fracht ab. false: nichts abgeworfen (Daten unlesbar), die Fracht bleibt dann in der Luft. Einzelne Stapel, die
 	/// das Spiel nicht kennt (Mod entfernt), stehen im Log; sie gingen auch in einer Valheim-Kiste verloren.
+	/// Review 27.10.2026: Sobald die Daten gelesen sind, gilt die Fracht als abgeworfen (true), auch wenn danach etwas
+	/// schiefgeht, denn ein Teil kann schon am Boden liegen. Lieber ein Stapel verloren (der Server hebt den Datensatz 7 Tage
+	/// für den Admin auf) als dieselbe Fracht ein zweites Mal.
 	/// </summary>
 	private static bool Unload(ZPackage cargo, Vector3 impact)
 	{
@@ -1119,28 +1132,35 @@ internal static class Show
 			return false;
 		}
 		int count = 0;
-		foreach (ItemDrop.ItemData item in inventory.GetAllItems())
+		try
 		{
-			if (item?.m_dropPrefab == null)
+			foreach (ItemDrop.ItemData item in inventory.GetAllItems())
 			{
-				continue;
-			}
-			try
-			{
-				Vector2 circle = UnityEngine.Random.insideUnitCircle * 1.6f;
-				Vector3 spot = impact + new Vector3(circle.x, 0.8f, circle.y);
-				ItemDrop drop = ItemDrop.DropItem(item, 0, spot, Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f));
-				Rigidbody? body = drop != null ? drop.GetComponent<Rigidbody>() : null;
-				if (body != null)
+				if (item?.m_dropPrefab == null)
 				{
-					body.linearVelocity = new Vector3(circle.x * 1.5f, UnityEngine.Random.Range(3f, 6f), circle.y * 1.5f);
+					continue;
 				}
-				count++;
+				try
+				{
+					Vector2 circle = UnityEngine.Random.insideUnitCircle * 1.6f;
+					Vector3 spot = impact + new Vector3(circle.x, 0.8f, circle.y);
+					ItemDrop drop = ItemDrop.DropItem(item, 0, spot, Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f));
+					Rigidbody? body = drop != null ? drop.GetComponent<Rigidbody>() : null;
+					if (body != null)
+					{
+						body.linearVelocity = new Vector3(circle.x * 1.5f, UnityEngine.Random.Range(3f, 6f), circle.y * 1.5f);
+					}
+					count++;
+				}
+				catch (Exception e)
+				{
+					ServerPlugin.Log.LogError($"Walküren-Transport: {item.m_shared?.m_name} nicht abgeworfen: {e.Message}");
+				}
 			}
-			catch (Exception e)
-			{
-				ServerPlugin.Log.LogError($"Walküren-Transport: {item.m_shared?.m_name} nicht abgeworfen: {e.Message}");
-			}
+		}
+		catch (Exception e)
+		{
+			ServerPlugin.Log.LogError($"Walküren-Transport: Abwerfen nach {count} Stapeln abgebrochen, der Rest fehlt (Datensatz beim Server): {e}");
 		}
 		if (count < stored)
 		{
@@ -1165,6 +1185,7 @@ internal static class Show
 		long playerId = pkg.ReadLong();
 		FinaleAt[playerId] = Time.time;
 		Vector3 position = pkg.ReadVector3();
+		EndGuardFight(position); // vor der Abstandsprüfung (Review 27.10.2026)
 		if (!Near(position, Transport.ShowRange + 60f))
 		{
 			return;
@@ -1173,6 +1194,23 @@ internal static class Show
 		Sounds.Play(Sounds.Choir, position + Vector3.up * 20f, 1f, 300f, global: true);
 		MessageHud.instance?.ShowMessage(MessageHud.MessageType.Center, GcLoc.Get("gccr_egg_7"));
 		Music(Sounds.MusicEaster, FinaleSeconds + PickupSeconds(true) + 2f);
+	}
+
+	/// <summary>
+	/// Wetter und Musik des Wächter-Kampfs enden bei jedem Spieler, auch bei dem, der gerade weit weg ist (Review 27.10.2026):
+	/// Easter.Call setzt sie für 30 Minuten nur am Ort (Wetter des Ältesten, Musik des Eastereggs); bisher kamen sie bei
+	/// Spielern, die beim Finale fort waren, wieder, sobald sie zurückkamen. Nur diese beiden, erkannt am Ort des Kampfs.
+	/// </summary>
+	private static void EndGuardFight(Vector3 center)
+	{
+		if (env != null && envRange > 0f && Utils.DistanceXZ(envCenter, center) < 1f)
+		{
+			envUntil = 0f;
+		}
+		if (music != null && musicRange > 0f && Utils.DistanceXZ(musicCenter, center) < 1f)
+		{
+			musicUntil = 0f;
+		}
 	}
 
 	internal static void OnRaid(long sender, Vector3 position, string name)
@@ -1327,14 +1365,16 @@ internal static class Show
 		{
 			return null;
 		}
+		Player? player = Player.m_localPlayer;
+		if (player == null)
+		{
+			// Review 27.10.2026: ohne eigenen Spieler (tot, beim Laden) war das bisher schon „geladen“, und die Walküre fehlte
+			// für die ganze Sitzung. Jetzt beim nächsten Mal noch einmal versuchen.
+			return null;
+		}
 		valkyrieLoaded = true;
 		try
 		{
-			Player? player = Player.m_localPlayer;
-			if (player == null)
-			{
-				return null;
-			}
 			player.m_valkyrie.Load();
 			valkyriePrefab = player.m_valkyrie.Asset;
 		}

@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using GC.Server;
@@ -33,6 +36,8 @@ internal sealed class Tier
 	public int Station;
 	public float MinLength; // Mindestlänge in m (so nah hält sich das Tier, wenn der Halter läuft), Qualität 1
 	public float MaxLength; // Höchstlänge in m (darüber gedehnt und Verschleiß, ab +15 % zieht die Leine), Qualität 1
+	public float MaxLength4; // Höchstlänge auf Qualität 4; dazwischen gleichmäßig
+	public float Durability = 1f; // Haltbarkeit in Vielfachen von DurabilityPerLeashTier (Qualität 1)
 	public Color Color;
 	public ItemDrop? Prefab;
 	public CustomItem? Item;
@@ -55,7 +60,8 @@ internal sealed class Tier
 /// Schnellleiste. Bei Teleports des Halters kommt das Tier mit: durch Portale und in Dungeons.
 ///
 /// Leinenbonus (Gorduan): Angeleinte und angebundene Tiere haben mehr Leben und machen mehr Schaden, von +10 % (kleinste
-/// Leine) bis +100 % (größte Leine auf Qualität 4); Aufwerten erhöht ihn. Angewendet zusammen mit der Tierpflege (Care).
+/// Leine) bis +120 % (größte Leine auf Qualität 4, seit der Regel ×1,25 vom 27.10.2026); Aufwerten erhöht ihn. Angewendet
+/// zusammen mit der Tierpflege (Care).
 ///
 /// Längen und Zonen (Gorduan, 13.10.2026): Jede Stufe hat eine Mindestlänge (2 bis 10 m) und eine Höchstlänge (5 bis 20 m),
 /// Aufwerten verlängert beide leicht.
@@ -132,15 +138,18 @@ internal static class Plugin
 	// 20 m; Aufwerten verlängert nur wenig (+0,2 m / +0,5 m je Qualität), deshalb erreicht erst die Elch-Leine auf
 	// Qualität 4 genau 10 m und 20 m. Seit es eine Leine je Biom gibt (Gorduan, 19.10.2026, sieben Leinen): Höchstlänge in
 	// gleichen Schritten von 2,25 m, Mindestlänge gleichmäßig auf 0,1 m gerundet. Level bleibt die alte Nummer (gespeichert).
+	// Gorduan, 27.10.2026: „von der kleinsten Leine an min. ×1,25 pro Leine bei Haltbarkeit, Reichweite etc., aktuelle Werte
+	// niemals reduziert“: Höchstlänge auf Qualität 1 und 4 je für sich (×1,25 zur vorigen Leine, auf 0,25 m aufgerundet),
+	// Haltbarkeit Asksvin 6⅓ und Elch 8 statt 6 und 7 Stufen. Die Mindestlänge bleibt: Sie ist nur der Folgeabstand.
 	internal static readonly Tier[] Tiers =
 	{
-		new() { Level = 2, Rank = 1, Material = "DeerHide", Amount = 5, Station = 1, MinLength = 2.0f, MaxLength = 5.0f, Color = new Color(0.72f, 0.54f, 0.34f) },
-		new() { Level = 3, Rank = 2, Material = "TrollHide", Amount = 4, Station = 2, MinLength = 3.2f, MaxLength = 7.25f, Color = new Color(0.40f, 0.50f, 0.62f) },
-		new() { Level = 5, Rank = 3, Material = "WolfPelt", Amount = 4, Bar = "Iron", BarAmount = 2, Station = 3, MinLength = 4.5f, MaxLength = 9.5f, Color = new Color(0.86f, 0.86f, 0.90f) },
-		new() { Level = 6, Rank = 4, Material = "LoxPelt", Amount = 3, Bar = "BlackMetal", BarAmount = 2, Station = 3, MinLength = 5.7f, MaxLength = 11.75f, Color = new Color(0.64f, 0.50f, 0.32f) },
-		new() { Level = 7, Rank = 5, Material = "ScaleHide", Amount = 4, Bar = "BlackMetal", BarAmount = 2, Station = 4, MinLength = 6.9f, MaxLength = 14.0f, Color = new Color(0.45f, 0.64f, 0.56f) },
-		new() { Level = 8, Rank = 6, Material = "AskHide", Amount = 4, Bar = "FlametalNew", BarAmount = 2, Station = 4, MinLength = 8.2f, MaxLength = 16.25f, Color = new Color(0.66f, 0.30f, 0.24f) },
-		new() { Level = 10, Rank = 7, Material = "MooseHide", Amount = 4, Bar = "Gold", BarAmount = 2, Station = 4, MinLength = 9.4f, MaxLength = 18.5f, Color = new Color(0.50f, 0.38f, 0.26f) },
+		new() { Level = 2, Rank = 1, Material = "DeerHide", Amount = 5, Station = 1, MinLength = 2.0f, MaxLength = 5.0f, MaxLength4 = 6.5f, Durability = 1f, Color = new Color(0.72f, 0.54f, 0.34f) },
+		new() { Level = 3, Rank = 2, Material = "TrollHide", Amount = 4, Station = 2, MinLength = 3.2f, MaxLength = 7.25f, MaxLength4 = 8.75f, Durability = 2f, Color = new Color(0.40f, 0.50f, 0.62f) },
+		new() { Level = 5, Rank = 3, Material = "WolfPelt", Amount = 4, Bar = "Iron", BarAmount = 2, Station = 3, MinLength = 4.5f, MaxLength = 9.5f, MaxLength4 = 11.0f, Durability = 3f, Color = new Color(0.86f, 0.86f, 0.90f) },
+		new() { Level = 6, Rank = 4, Material = "LoxPelt", Amount = 3, Bar = "BlackMetal", BarAmount = 2, Station = 3, MinLength = 5.7f, MaxLength = 12.0f, MaxLength4 = 13.75f, Durability = 4f, Color = new Color(0.64f, 0.50f, 0.32f) },
+		new() { Level = 7, Rank = 5, Material = "ScaleHide", Amount = 4, Bar = "BlackMetal", BarAmount = 2, Station = 4, MinLength = 6.9f, MaxLength = 15.0f, MaxLength4 = 17.25f, Durability = 5f, Color = new Color(0.45f, 0.64f, 0.56f) },
+		new() { Level = 8, Rank = 6, Material = "AskHide", Amount = 4, Bar = "FlametalNew", BarAmount = 2, Station = 4, MinLength = 8.2f, MaxLength = 18.75f, MaxLength4 = 21.75f, Durability = 19f / 3f, Color = new Color(0.66f, 0.30f, 0.24f) },
+		new() { Level = 10, Rank = 7, Material = "MooseHide", Amount = 4, Bar = "Gold", BarAmount = 2, Station = 4, MinLength = 9.4f, MaxLength = 23.5f, MaxLength4 = 27.25f, Durability = 8f, Color = new Color(0.50f, 0.38f, 0.26f) },
 	};
 
 	/// <summary>
@@ -155,9 +164,8 @@ internal static class Plugin
 		["GC_Leash_SealHide"] = "GC_Leash_MooseHide",
 	};
 
-	/// <summary>Aufwerten verlängert nur wenig: Mindestlänge +0,2 m, Höchstlänge +0,5 m je Qualitätsstufe.</summary>
+	/// <summary>Aufwerten verlängert nur wenig: Mindestlänge +0,2 m je Qualitätsstufe (Höchstlänge: Tier.MaxLength4).</summary>
 	internal const float MinLengthPerQuality = 0.2f;
-	internal const float MaxLengthPerQuality = 0.5f;
 
 	/// <summary>Gorduan: Bis 90 % der Höchstlänge bewegt sich das Tier frei, die Leine wirkt nicht.</summary>
 	internal const float FreePart = 0.9f;
@@ -178,8 +186,11 @@ internal static class Plugin
 	/// </summary>
 	internal static float MinLength(Tier tier, int quality) => tier.MinLength + MinLengthPerQuality * (ClampQuality(quality) - 1);
 
-	/// <summary>Höchstlänge einer Leine dieser Stufe und Qualität (darüber zieht der Halter, die Leine verschleißt).</summary>
-	internal static float MaxLength(Tier tier, int quality) => Mathf.Max(MinLength(tier, quality) + 1f, tier.MaxLength + MaxLengthPerQuality * (ClampQuality(quality) - 1));
+	/// <summary>
+	/// Höchstlänge einer Leine dieser Stufe und Qualität (darüber zieht der Halter, die Leine verschleißt): von Qualität 1
+	/// bis 4 gleichmäßig. Erfüllen beide Enden die ×1,25-Regel, erfüllen sie auch die Stufen dazwischen.
+	/// </summary>
+	internal static float MaxLength(Tier tier, int quality) => Mathf.Max(MinLength(tier, quality) + 1f, Mathf.Lerp(tier.MaxLength, tier.MaxLength4, (ClampQuality(quality) - 1) / (float)(MaxQuality - 1)));
 
 	/// <summary>In der Leine: eingestellte Mindestlänge in m (Umschalt + Mausrad), fehlt = normale Mindestlänge.</summary>
 	internal const string KeyLength = "gc_leash_len";
@@ -238,14 +249,30 @@ internal static class Plugin
 	private static int ClampQuality(int quality) => Mathf.Clamp(quality, 1, MaxQuality);
 
 	/// <summary>
-	/// Leinenbonus für Leben und Schaden des Tiers (Gorduan): +10 % bei der kleinsten Leine bis +100 % bei der größten auf
-	/// Qualität 4. Je Leine 90 % ÷ Zahl der Leinen (sieben Leinen: +12,9 %), je Aufwertung ein Drittel davon (wie bei den
-	/// Längen erreicht eine voll aufgewertete Leine die nächste). Mit zehn Leinen waren das +9 % und +3 %.
+	/// Leinenbonus für Leben und Schaden des Tiers (Gorduan): ab +10 % bei der kleinsten Leine, je Leine +12,9 % (90 % ÷ sieben
+	/// Leinen), je Aufwertung ein Drittel davon. Seit 27.10.2026 mit Gorduans ×1,25-Regel (BonusQ1/BonusQ4): Asksvin-Haut
+	/// +76,8 %, Elchhaut +96 % (Qualität 4: +120 %); dazwischen gleichmäßig.
 	/// </summary>
 	internal static float LeashBonus(Tier tier, int quality)
 	{
+		int rank = Mathf.Clamp(tier.Rank, 1, Tiers.Length) - 1;
+		return Mathf.Lerp(BonusQ1[rank], BonusQ4[rank], (ClampQuality(quality) - 1) / (float)(MaxQuality - 1));
+	}
+
+	private static readonly float[] BonusQ1 = BonusChain(0);
+	private static readonly float[] BonusQ4 = BonusChain(MaxQuality - 1);
+
+	/// <summary>Bonus je Stärke für eine Qualität: der bisherige Wert, mindestens das 1,25-Fache der vorigen Leine (Gorduan, 27.10.2026).</summary>
+	private static float[] BonusChain(int upgrades)
+	{
 		float step = 0.90f / Tiers.Length;
-		return 0.10f + step * (Mathf.Clamp(tier.Rank, 1, Tiers.Length) - 1) + step / 3f * (ClampQuality(quality) - 1);
+		float[] chain = new float[Tiers.Length];
+		for (int i = 0; i < chain.Length; i++)
+		{
+			float old = 0.10f + step * i + step / 3f * upgrades;
+			chain[i] = i == 0 ? old : Mathf.Max(old, chain[i - 1] * 1.25f);
+		}
+		return chain;
 	}
 
 	/// <summary>
@@ -254,8 +281,8 @@ internal static class Plugin
 	/// </summary>
 	internal static float SlipFrom(float maxLength) => DragFrom(maxLength) + SlipDistance.Value;
 
-	/// <summary>Größte Höchstlänge einer gewöhnlichen Leine (Elch-Leine, Qualität 4), für Prüf-Umkreise.</summary>
-	internal const float LongestMaxLength = 20f;
+	/// <summary>Größte Höchstlänge einer gewöhnlichen Leine (Elch-Leine, Qualität 4: 27,25 m), für Prüf-Umkreise.</summary>
+	internal static readonly float LongestMaxLength = Tiers.Max(t => t.MaxLength4);
 
 	/// <summary>Im Tier: Mindest- und Höchstlänge der Leine, an der es hängt (aktiv oder angebunden), damit alle Spieler und der Besitzer sie kennen.</summary>
 	internal static readonly int MinLengthHash = "gc_leash_min".GetStableHashCode();
@@ -272,7 +299,7 @@ internal static class Plugin
 		CheckInterval = Gc.BindSynced(Config, section, "CheckInterval", 1f, "Je so viele Sekunden, die die Leine über ihre Höchstlänge gedehnt ist, verliert sie so viel Haltbarkeit, wie das Tier Leinenlast hat (gezählt wird die Zeit, nicht einzelne Stichproben). Kämpfen in Reichweite kostet nichts.", new AcceptableValueRange<float>(0.25f, 10f));
 		// Gorduan, 19.10.2026: eine Leine je Biom, die stärkste etwa doppelt so haltbar. Neuer Schlüssel, damit der neue Wert auch dort
 		// gilt, wo „DurabilityPerTier = 10“ schon in der Config steht
-		DurabilityStep = Gc.BindSynced(Config, section, "DurabilityPerLeashTier", 30, "Haltbarkeit pro Leinenstufe: Hirschleder 30, Trollleder 60, Wolfspelz 90 … Elchhaut 210 (Gorduan, 19.10.2026: eine Leine je Biom, die stärkste etwa doppelt so haltbar wie vorher). Löst DurabilityPerTier ab.", new AcceptableValueRange<int>(1, 100));
+		DurabilityStep = Gc.BindSynced(Config, section, "DurabilityPerLeashTier", 30, "Haltbarkeit pro Leinenstufe: Hirschleder 30, Trollleder 60, Wolfspelz 90 … Asksvin-Haut 190, Elchhaut 240 (Gorduan, 19.10.2026: eine Leine je Biom; 27.10.2026: je Leine mindestens ×1,25). Löst DurabilityPerTier ab.", new AcceptableValueRange<int>(1, 100));
 		PortalTravel = Gc.BindSynced(Config, section, "PortalTravel", true, "Angeleinte Tiere kommen bei Teleports mit: durch Portale und in Dungeons (hinein und hinaus).");
 		ChaseDistance = Gc.BindSynced(Config, section, "ChaseDistance", 20f, "Angeleinte Tiere kämpfen, bis der Gegner tot oder weiter als so viele Meter von ihnen weg ist; dann folgen sie wieder dem Spieler.", new AcceptableValueRange<float>(5f, 60f));
 		CommandMinLevel = Gc.BindSynced(Config, section, "CommandMinLevel", 10, "Befehle mit der Leine in der Hand (Linksklick hinschicken, Rechtsklick angreifen) nimmt ein Tier erst ab dieser Stufe an (Stufe gezüchteter Tiere, Tierpflege; gezähmte Tiere haben Stufe 0). Gilt nur, wenn die Tierpflege an ist.", new AcceptableValueRange<int>(0, 150));
@@ -296,6 +323,7 @@ internal static class Plugin
 		PrefabManager.OnPrefabsRegistered += Young.AddTameable; // vor dem Log: Jungtiere zählen dann mit
 		PrefabManager.OnPrefabsRegistered += Ranks.LogTameable;
 		LeashMagic.Init(harmony); // nur mit EpicLoot
+		LeashTooltipEditor.Register(); // EpicLoot 0.15.2: Länge und Bonus hinter die Werte
 	}
 
 	internal static void Update()
@@ -310,6 +338,7 @@ internal static class Plugin
 		Guard("Countdown", Countdown.Tick); // Zähmen, Geburt, Heranwachsen, Schlüpfen
 		Guard("Trugbilder", Illusions.Tick);
 		Guard("Verzauberungen", Bonds.Tick);
+		Guard("Sondereffekte", LeashUniqueEffects.Tick); // einzigartige Leinen (Gorduan, 27.10.2026)
 		Guard("Anzeigen", Bonds.TickVisuals);
 		Guard("Ohnmacht", Bonds.TickFaint); // eigener Schutz: sonst bliebe ein Tier bei einem Fehler oben in der Ohnmacht hängen
 		Guard("Seile", Rope.Tick);
@@ -337,7 +366,7 @@ internal static class Plugin
 		}
 	}
 
-	internal static int MaxDurability(Tier tier) => tier.Rank * Math.Max(1, DurabilityStep.Value);
+	internal static int MaxDurability(Tier tier) => Mathf.RoundToInt(tier.Durability * Math.Max(1, DurabilityStep.Value)); // Gorduan 27.10.2026: ×1,25-Regel (Tier.Durability)
 
 	/// <summary>Gorduan: Leinen lassen sich an der Werkbank aufwerten (Qualität 1 bis 4, wie Waffen und Rüstung).</summary>
 	internal const int MaxQuality = 4;
@@ -875,6 +904,14 @@ internal sealed class Link
 	public Character? AttackTarget;
 	public float AttackSince;
 
+	// Einzigartige Leinen (LeashUniqueEffects, Gorduan 27.10.2026): Ratatöskr (hinter der Zuggrenze fest seit, Abstand dabei, nächster
+	// Sprung), Sæhrimnir (gelaufene Zeit bis zum nächsten Fund), Bjarki (nächste Bärenwacht)
+	public float StuckSince = -1f;
+	public float StuckAt;
+	public float NextFetch;
+	public float ForageTime;
+	public float NextBearGuard;
+
 	private int Quality => Item != null ? Item.m_quality : 1;
 
 	/// <summary>Leinenbonus dieser Leine (Stufe und Qualität): Anteil mehr Leben und Schaden für das Tier.</summary>
@@ -1051,6 +1088,14 @@ internal static class Links
 	/// <summary>Leine aus der Liste nehmen, ohne das Tier zu verändern (es wird gerade angebunden).</summary>
 	public static void Forget(Link link) => Active.Remove(link);
 
+	private static readonly int EpicSpiritHash = "el-spirit".GetStableHashCode();
+
+	/// <summary>
+	/// Geistertier aus EpicLoots Effekt „SpiritAnimal“ (0.15.2: das Original-Prefab, gezähmt, nicht dauerhaft, ZDO-Schlüssel
+	/// „el-spirit“): vergeht nach Ablauf und darf nicht an die Leine (Review 27.10.2026: reiste sonst durchs Portal).
+	/// </summary>
+	private static bool EpicSpirit(Tameable tame) => tame.m_nview != null && tame.m_nview.IsValid() && tame.m_nview.GetZDO().GetLong(EpicSpiritHash) != 0L;
+
 	/// <summary>
 	/// E am Tier mit einer Leine in der Hand: anleinen; hängt es schon an einer deiner Leinen, lösen; ist es angebunden,
 	/// die Leine vom Pfosten nehmen.
@@ -1063,10 +1108,10 @@ internal static class Links
 			player.Message(MessageHud.MessageType.Center, GcLoc.Get("gcls_illusion_touch"));
 			return; // Lokis Trugbilder lassen sich nicht anleinen
 		}
-		if (Ranks.PrefabName(tame.gameObject).StartsWith("EL_", StringComparison.Ordinal))
+		if (Ranks.PrefabName(tame.gameObject).StartsWith("EL_", StringComparison.Ordinal) || EpicSpirit(tame))
 		{
 			player.Message(MessageHud.MessageType.Center, GcLoc.Get("gcls_summon_touch"));
-			return; // EpicLoots Beschwörungen (seit 0.15.0 Hels Diener) vergehen von selbst: keine Leine
+			return; // EpicLoots Beschwörungen (seit 0.15.0 Hels Diener, Geistertiere) vergehen von selbst: keine Leine
 		}
 		if (!tame.IsTamed())
 		{
@@ -1192,19 +1237,21 @@ internal static class Links
 		string name = link.Tame != null ? link.Tame.GetHoverName() : "";
 		if (release && link.View != null && link.View.IsValid())
 		{
-			if (!link.View.IsOwner())
-			{
-				link.View.ClaimOwnership();
-			}
 			ZDO zdo = link.View.GetZDO();
 			long session = zdo.GetLong(Plugin.HolderHash);
 			if (session == 0L || session == Session(link.Holder))
 			{
+				// nur, solange das Tier noch an dieser Leine hängt (Review 27.10.2026): Hat ein anderer Spieler es im selben Bild
+				// übernommen, blieben sonst sein Besitz, seine Längen und sein Bonus nicht stehen
+				if (!link.View.IsOwner())
+				{
+					link.View.ClaimOwnership();
+				}
 				zdo.Set(Plugin.HolderHash, 0L);
 				zdo.Set(Plugin.TierHash, 0);
+				ClearLengths(zdo);
+				Bonds.ClearLight(link.View);
 			}
-			ClearLengths(zdo);
-			Bonds.ClearLight(link.View);
 			RestoreAi(link);
 		}
 		if (messageKey != null && link.Holder != null && link.Holder == Player.m_localPlayer)
@@ -1241,6 +1288,7 @@ internal static class Links
 		{
 			zdo.Set(Plugin.BonusHash, 0f);
 		}
+		LeashUniqueEffects.ClearAnimal(zdo); // Mímir und Hel gehören zur Leine
 	}
 
 	/// <summary>Leinenbonus ins Tier schreiben, wenn er sich geändert hat (Leben und Schaden rechnet der Besitzer, Care).</summary>
@@ -1362,7 +1410,7 @@ internal static class Links
 			Detach(link, "gcls_detached");
 			return;
 		}
-		if (link.View.GetZDO().GetLong(Plugin.HolderHash) != Session(link.Holder))
+		if (link.View!.GetZDO().GetLong(Plugin.HolderHash) != Session(link.Holder)) // viewValid oben
 		{
 			Detach(link, "gcls_taken", false); // jemand anderes hat das Tier angeleint: nicht um den Besitz streiten
 			return;
@@ -1444,6 +1492,10 @@ internal static class Links
 			link.Ai.SetFollowTarget(link.Holder.gameObject);
 		}
 		float distance = Span(link.Holder.transform.position, link.Animal);
+		if (link.Bond.Fetch && LeashUniqueEffects.Fetch(link, distance))
+		{
+			distance = Span(link.Holder.transform.position, link.Animal); // Ratatöskr: neben dem Halter, statt sich zu lösen (Gorduan, 27.10.2026)
+		}
 		if (distance > link.SlipFrom)
 		{
 			Detach(link, "gcls_too_far"); // Sicherung: Die Leine konnte das Tier nicht nachziehen, sie rutscht aus der Hand
@@ -1671,6 +1723,9 @@ internal static class Rope
 	private static bool noShader;
 	private static bool reportedError;
 
+	/// <summary>Tiere ohne Leine und Pfosten, schon aufgeräumt (bis sich das ändert).</summary>
+	private static readonly HashSet<Tameable> Idle = new();
+
 	public static void Register(Tameable tame)
 	{
 		if (!Gc.IsHeadless) // der Server zeichnet nichts, also auch nichts merken
@@ -1707,6 +1762,7 @@ internal static class Rope
 	private static void Cleanup()
 	{
 		Known.RemoveWhere(t => t == null);
+		Idle.RemoveWhere(t => t == null);
 		Dead.Clear();
 		foreach (Tameable tame in Lines.Keys)
 		{
@@ -1750,7 +1806,21 @@ internal static class Rope
 			Hide(tame);
 			return;
 		}
-		if (Posts.IsTied(view.GetZDO()))
+		ZDO zdo = view.GetZDO();
+		if (!Posts.IsTied(zdo) && zdo.GetLong(Plugin.HolderHash) == 0L)
+		{
+			// weder angeleint noch angebunden (die meisten Tiere): nur beim Wechsel aufräumen (Review 27.10.2026: sonst jedes Bild
+			// für jedes geladene Tier mehrere Listen-Abfragen)
+			if (Idle.Add(tame))
+			{
+				Posts.NotTied(tame);
+				Hide(tame);
+				MissingSince.Remove(tame);
+			}
+			return;
+		}
+		Idle.Remove(tame);
+		if (Posts.IsTied(zdo))
 		{
 			if (Plugin.On)
 			{
@@ -1933,7 +2003,9 @@ internal static class Rope
 		}
 		float tolerance = 0.002f + 0.001f * distance;
 		bool moved = (start - view.Start).sqrMagnitude > tolerance * tolerance || (end - view.End).sqrMagnitude > tolerance * tolerance || Mathf.Abs(sag - view.Sag) > tolerance;
-		if (moved && view.Renderer.enabled && !view.Renderer.isVisible && Time.time - view.BuiltAt < 0.5f)
+		// sichtbar ab 10 m höchstens alle 0,15 s (Review 27.10.2026: ein Glied hat 24 Ecken, 10 m Seil etwa 4.000)
+		float wait = !view.Renderer.isVisible ? 0.5f : distance > 10f ? 0.15f : 0f;
+		if (moved && view.Renderer.enabled && Time.time - view.BuiltAt < wait)
 		{
 			moved = false;
 		}
@@ -2145,7 +2217,7 @@ internal static class Posts
 		{
 			pieceMask = LayerMask.GetMask("piece", "piece_nonsolid");
 		}
-		int count = Physics.OverlapSphereNonAlloc(anchor + Vector3.up * 0.5f, 1.5f, Overlap, pieceMask);
+		int count = Physics.OverlapSphereNonAlloc(anchor + Vector3.up * 0.5f, 1.5f, Overlap, pieceMask, QueryTriggerInteraction.Ignore);
 		for (int i = 0; i < count; i++)
 		{
 			Piece? piece = Overlap[i] != null ? Overlap[i].GetComponentInParent<Piece>() : null;
@@ -2319,6 +2391,9 @@ internal static class Posts
 			slot++;
 		}
 		Vector3 position = post.Knot + Vector3.up * (0.13f * slot);
+		// Review 27.10.2026 (nicht atomar): Leine vor dem Knoten speichern; geht danach etwas schief, verschwindet der Knoten
+		// wieder und die Leine bleibt in der Hand. Sonst warf der Knoten ohne Tier später eine zweite Leine mit derselben ID ab.
+		byte[] itemData = SaveItem(link.Item);
 		GameObject go = UnityEngine.Object.Instantiate(KnotPrefab, position, Quaternion.identity);
 		ZNetView? knotView = go.GetComponent<ZNetView>();
 		if (knotView == null || !knotView.IsValid())
@@ -2326,43 +2401,59 @@ internal static class Posts
 			UnityEngine.Object.Destroy(go);
 			return false;
 		}
-		ZDO knotZdo = knotView.GetZDO();
-		knotZdo.Set(Plugin.LeashIdHash, link.ItemId);
-		knotZdo.Set(Plugin.TierHash, link.Tier.Level);
-		knotZdo.Set(Plugin.PostHash, anchor);
-		knotZdo.Set(RadiusHash, post.Radius);
-		knotZdo.Set(ItemDataHash, SaveItem(link.Item)); // ganze Leine (Hersteller, Schlösser, Verzauberung …)
-		knotZdo.Set(MaxHealthHash, link.Item.GetMaxDurability()); // mit Verzauberung „Haltbarkeit"
-		knotZdo.Set(UnbreakableHash, link.Bond.Unbreakable ? 1 : 0);
-		knotZdo.Set(DamageFactorHash, Plugin.KnotDamageFactor(link.Tier, link.Item, link.Item.m_quality)); // gekürzt: weniger Schaden am Knoten
-		knotZdo.Set(ZDOVars.s_health, Mathf.Clamp(link.Item.m_durability, 0.01f, link.Item.GetMaxDurability()));
-		if (go.GetComponent<Piece>() is Piece knotPiece)
+		ZDO? tiedZdo = null;
+		try
 		{
-			knotPiece.m_creator = link.Holder.GetPlayerID(); // gilt als vom Spieler gebaut (ohne Plattform-ID, die der Server nicht braucht)
-			knotZdo.Set(ZDOVars.s_creator, knotPiece.m_creator);
-		}
-		go.GetComponent<LeashKnot>()?.Setup();
+			ZDO knotZdo = knotView.GetZDO();
+			knotZdo.Set(Plugin.LeashIdHash, link.ItemId);
+			knotZdo.Set(Plugin.TierHash, link.Tier.Level);
+			knotZdo.Set(Plugin.PostHash, anchor);
+			knotZdo.Set(RadiusHash, post.Radius);
+			knotZdo.Set(ItemDataHash, itemData); // ganze Leine (Hersteller, Schlösser, Verzauberung …)
+			knotZdo.Set(MaxHealthHash, link.Item.GetMaxDurability()); // mit Verzauberung „Haltbarkeit"
+			knotZdo.Set(UnbreakableHash, link.Bond.Unbreakable ? 1 : 0);
+			knotZdo.Set(DamageFactorHash, Plugin.KnotDamageFactor(link.Tier, link.Item, link.Item.m_quality)); // gekürzt: weniger Schaden am Knoten
+			knotZdo.Set(ZDOVars.s_health, Mathf.Clamp(link.Item.m_durability, 0.01f, link.Item.GetMaxDurability()));
+			if (go.GetComponent<Piece>() is Piece knotPiece)
+			{
+				knotPiece.m_creator = link.Holder.GetPlayerID(); // gilt als vom Spieler gebaut (ohne Plattform-ID, die der Server nicht braucht)
+				knotZdo.Set(ZDOVars.s_creator, knotPiece.m_creator);
+			}
+			go.GetComponent<LeashKnot>()?.Setup();
 
-		if (!link.View.IsOwner())
-		{
-			link.View.ClaimOwnership();
+			if (!link.View.IsOwner())
+			{
+				link.View.ClaimOwnership();
+			}
+			ZDO zdo = link.View.GetZDO();
+			tiedZdo = zdo;
+			zdo.Set(Plugin.TiedHash, 1);
+			zdo.Set(Plugin.LeashIdHash, link.ItemId);
+			zdo.Set(Plugin.PostHash, anchor);
+			zdo.Set(Plugin.TierHash, link.Tier.Level);
+			zdo.Set(Plugin.HolderHash, 0L);
+			zdo.Set(ZDOVars.s_follow, ""); // Valheims gespeichertes „Folgen" würde das Tier sonst jedes Bild wieder losschicken
+			// Längen der Leine (Stufe und Qualität); angebunden wirkt keine Verzauberung, also ohne „Leinenreichweite"
+			Links.WriteLengths(zdo, min, max);
+			Links.WriteBonus(zdo, Plugin.LeashBonus(link.Tier, link.Item.m_quality)); // Gorduan: auch am Pfosten mehr Leben und Schaden
+			Bonds.ClearLight(link.View);
+			if (link.Holder.IsItemEquiped(link.Item))
+			{
+				link.Holder.UnequipItem(link.Item, false); // RemoveItem legt nichts ab: sonst bliebe sie (unsichtbar) in der Hand
+			}
+			inventory.RemoveItem(link.Item); // die Leine hängt jetzt am Bauteil
 		}
-		ZDO zdo = link.View.GetZDO();
-		zdo.Set(Plugin.TiedHash, 1);
-		zdo.Set(Plugin.LeashIdHash, link.ItemId);
-		zdo.Set(Plugin.PostHash, anchor);
-		zdo.Set(Plugin.TierHash, link.Tier.Level);
-		zdo.Set(Plugin.HolderHash, 0L);
-		zdo.Set(ZDOVars.s_follow, ""); // Valheims gespeichertes „Folgen" würde das Tier sonst jedes Bild wieder losschicken
-		// Längen der Leine (Stufe und Qualität); angebunden wirkt keine Verzauberung, also ohne „Leinenreichweite"
-		Links.WriteLengths(zdo, min, max);
-		Links.WriteBonus(zdo, Plugin.LeashBonus(link.Tier, link.Item.m_quality)); // Gorduan: auch am Pfosten mehr Leben und Schaden
-		Bonds.ClearLight(link.View);
-		if (link.Holder.IsItemEquiped(link.Item))
+		catch (Exception e)
 		{
-			link.Holder.UnequipItem(link.Item, false); // RemoveItem legt nichts ab: sonst bliebe sie (unsichtbar) in der Hand
+			Plugin.Log.LogWarning($"Tierleinen: Anbinden abgebrochen, die Leine bleibt in der Hand: {e}");
+			ZNetScene.instance.Destroy(go);
+			if (tiedZdo != null)
+			{
+				tiedZdo.Set(Plugin.TiedHash, 0);
+				tiedZdo.Set(Plugin.LeashIdHash, "");
+			}
+			return false;
 		}
-		inventory.RemoveItem(link.Item); // die Leine hängt jetzt am Bauteil
 		Links.Forget(link);
 		Hold(link.Tame, anchor);
 		SeenTied[link.ItemId] = Time.time;
@@ -2412,6 +2503,7 @@ internal static class Posts
 	{
 		Requested.Clear();
 		Taken.Clear();
+		RideTakes.Clear();
 		if (ZRoutedRpc.instance == null)
 		{
 			return;
@@ -2602,6 +2694,10 @@ internal static class Posts
 		Vector3 knotPosition = reply.ReadVector3();
 		byte[] data = reply.ReadByteArray();
 		Requested.Remove(id);
+		if (durability >= 0f)
+		{
+			RideTakes.Remove(id); // Knoten ist weg: beim nächsten Anbinden mit derselben Leine wieder nehmen (Review 27.10.2026)
+		}
 		Player? player = Player.m_localPlayer;
 		Tier? tier = Plugin.TierAt(tierLevel);
 		if (durability < 0f)
@@ -2875,7 +2971,7 @@ internal static class Posts
 				{
 					MissingSince[tame] = Time.time;
 				}
-				else if (Time.time - since > 5f)
+				else if (Time.time - since > 20f) // Review 27.10.2026: 20 statt 5 s, ein träger Server schickt das Knoten-ZDO beim Einloggen später
 				{
 					MissingSince.Remove(tame);
 					FreeAnimal(id);
@@ -3581,6 +3677,8 @@ internal static class GameStartPatch
 		Posts.RegisterRpcs();
 		Care.RegisterRpcs(); // Tierpflege-Erfahrung für andere Spieler
 		Whistles.RegisterRpcs(); // Pfiffe anderer Spieler hören
+		LeashUniqueEffects.RegisterRpcs(); // Bärenwacht für Gegner, die wir besitzen
+		LeashUniqueEffects.Reset();
 		Bonds.Reset();
 		Illusions.Reset();
 		Behaviour.Reset();
@@ -3614,19 +3712,106 @@ internal static class LeashTooltipPatch
 {
 	private static void Postfix(ItemDrop.ItemData item, int qualityLevel, ref string __result)
 	{
-		if (item == null || !Plugin.IsLeash(item, out Tier tier))
+		if (item == null || !Plugin.IsLeash(item, out Tier tier) || LeashTooltipEditor.Handles())
 		{
-			return;
+			return; // mit EpicLoot 0.15.2 setzt der Tooltip-Editor die Zeilen hinter die Werte
 		}
-		int quality = Mathf.Max(1, qualityLevel);
-		__result += "\n" + GcLoc.Get("gcls_tooltip_length", Plugin.MinLength(tier, quality).ToString("0.#"), Plugin.MaxLength(tier, quality).ToString("0.#"));
+		foreach (string line in Lines(item, tier, Mathf.Max(1, qualityLevel)))
+		{
+			__result += "\n" + line;
+		}
+	}
+
+	internal static List<string> Lines(ItemDrop.ItemData item, Tier tier, int quality)
+	{
+		List<string> lines = new() { GcLoc.Get("gcls_tooltip_length", Plugin.MinLength(tier, quality).ToString("0.#"), Plugin.MaxLength(tier, quality).ToString("0.#")) };
 		float set = Plugin.SetLength(tier, item, quality);
 		if (set < Plugin.MinLength(tier, quality) - 0.01f)
 		{
-			__result += "\n" + GcLoc.Get("gcls_tooltip_len_set", set.ToString("0.#"));
+			lines.Add(GcLoc.Get("gcls_tooltip_len_set", set.ToString("0.#")));
 		}
-		__result += "\n" + GcLoc.Get("gcls_tooltip_bonus", Mathf.RoundToInt(Plugin.LeashBonus(tier, quality) * 100f));
+		lines.Add(GcLoc.Get("gcls_tooltip_bonus", Mathf.RoundToInt(Plugin.LeashBonus(tier, quality) * 100f)));
+		return lines;
 	}
+}
+
+/// <summary>
+/// EpicLoot 0.15.2 baut die Tooltips selbst und bietet anderen Mods einen Editor (API.AddTooltipEditor; Gorduan, 27.10.2026:
+/// „alle aktuellen Tools für das aktuelle EpicLoot umsetzen“): Länge und Bonus kommen als Zusatzzeilen direkt hinter die Werte
+/// (Anker „AfterStats“), bei verzauberten Leinen also nicht mehr unter die Effektliste. Ohne EpicLoot, mit älterem EpicLoot
+/// oder wenn eine andere Mod EpicLoots Tooltips ersetzt, hängt LeashTooltipPatch die Zeilen wie bisher an.
+/// </summary>
+internal static class LeashTooltipEditor
+{
+	private const string Id = "gorduan.gc.tiere.leash";
+	private const string ExtraList = "\"Extra\":[";
+	private static readonly Regex QualityField = new("\"Quality\":(\\d+)");
+	private static bool active;
+	private static MethodInfo? overridden;
+	private static FieldInfo? disabled;
+
+	internal static void Register()
+	{
+		try
+		{
+			Type? api = AccessTools.TypeByName("EpicLoot.API");
+			MethodInfo? add = api != null ? AccessTools.Method(api, "AddTooltipEditor", new[] { typeof(string), typeof(Func<ItemDrop.ItemData, string, string>) }) : null;
+			if (add == null || active)
+			{
+				return; // kein EpicLoot oder älter als 0.15.2: wie bisher anhängen
+			}
+			overridden = AccessTools.Method(api, "IsTooltipOverridden");
+			disabled = AccessTools.Field(AccessTools.TypeByName("EpicLoot.ItemTooltip"), "Disabled");
+			active = add.Invoke(null, new object[] { Id, (Func<ItemDrop.ItemData, string, string>)Edit }) is true;
+		}
+		catch (Exception e)
+		{
+			active = false;
+			Plugin.Log.LogWarning($"Tierleinen: EpicLoot-Tooltip-Editor nicht angemeldet, Länge und Bonus stehen wie bisher unten: {e.Message}");
+		}
+	}
+
+	/// <summary>Setzt gerade EpicLoot die Zeilen (Editor angemeldet, EpicLoots Tooltip weder abgeschaltet noch ersetzt)?</summary>
+	internal static bool Handles()
+	{
+		if (!active)
+		{
+			return false;
+		}
+		try
+		{
+			return disabled?.GetValue(null) is not true && overridden?.Invoke(null, null) is not true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	/// <summary>Zusatzzeilen in EpicLoots Tooltip-Daten (JSON, Liste „Extra“) einfügen; die Qualität kommt aus den Daten (beim Aufwerten die nächste).</summary>
+	private static string Edit(ItemDrop.ItemData item, string json)
+	{
+		if (item == null || string.IsNullOrEmpty(json) || !Plugin.IsLeash(item, out Tier tier))
+		{
+			return json;
+		}
+		int at = json.IndexOf(ExtraList, StringComparison.Ordinal);
+		if (at < 0)
+		{
+			return json;
+		}
+		Match match = QualityField.Match(json);
+		int quality = match.Success ? int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : item.m_quality;
+		StringBuilder sb = new();
+		foreach (string line in LeashTooltipPatch.Lines(item, tier, Mathf.Max(1, quality)))
+		{
+			sb.Append(sb.Length > 0 ? "," : "").Append("{\"Anchor\":\"AfterStats\",\"Text\":\"").Append(Escape(line)).Append("\"}");
+		}
+		int insert = at + ExtraList.Length;
+		return json.Insert(insert, sb.ToString() + (json.Length > insert && json[insert] != ']' ? "," : ""));
+	}
+
+	private static string Escape(string text) => text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "");
 }
 
 /// <summary>
@@ -4182,6 +4367,30 @@ internal static class RetiredLeashPatch
 			{
 				__instance.m_itemByHash[old] = kept;
 			}
+		}
+	}
+}
+
+/// <summary>
+/// Dasselbe für Objekte in der Welt (Review 27.10.2026): Eine alte Leine, die am Boden liegt, hat noch den alten Prefab-Hash.
+/// Ohne Eintrag löschten Host und Server sie beim Laden („Destroyed invalid prefab ZDO“), Spieler meldeten ständig
+/// „Missing prefab hash“. Nachgeschlagen erst, wenn Valheim den Hash nicht kennt (Reihenfolge zu Jötunn egal).
+/// </summary>
+[HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.GetPrefab), typeof(int))]
+internal static class RetiredLeashScenePatch
+{
+	private static Dictionary<int, int>? retired;
+
+	private static void Postfix(ZNetScene __instance, int hash, ref GameObject __result)
+	{
+		if (__result != null)
+		{
+			return;
+		}
+		retired ??= Plugin.RetiredPrefabs.ToDictionary(pair => pair.Key.GetStableHashCode(), pair => pair.Value.GetStableHashCode());
+		if (retired.TryGetValue(hash, out int kept) && __instance.m_namedPrefabs.TryGetValue(kept, out GameObject prefab))
+		{
+			__result = prefab;
 		}
 	}
 }

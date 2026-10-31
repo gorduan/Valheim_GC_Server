@@ -1,0 +1,16 @@
+{
+  "$locale": "de",
+  "gc.felder": {
+    "title": "Felder für den Kultivator",
+    "short": "Mit dem Pflug ein Feld abstecken: Darin springt die Vorschau auf den nächsten freien Platz, E halten pflanzt Reihe für Reihe.",
+    "body": "Wähle im Baumenü des Pflugs (Kultivators) „Feld markieren“: Linksklick setzt Eckpunkte, ein Klick auf den Startpunkt schließt das Feld, Rechtsklick nimmt den letzten Punkt zurück, und Esc verwirft die Zeichnung. Wählst du danach einen Samen, springt die Vorschau im Feld auf den nächsten freien Platz, an dem die Pflanze wachsen kann, in Reihen parallel zur ersten Kante und so dicht, wie Valheim es zulässt. E halten pflanzt einen Platz nach dem anderen, auch im Gehen, mit Valheims eigenem Klick: Kosten, [[valheim.stat.stamina|Ausdauer]] und [[valheim.skill.farming|Landwirtschaft]] zählen wie immer.\n\nFelder sieht jeder, der den Pflug in der Hand hält; mit „Feld markieren“ hebt ein Rechtsklick auf ein Feld es nach einer Rückfrage auf, die Pflanzen bleiben stehen. Die Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 3 „Vanilla+“) und wirkt nur, wenn auch der Server sie hat; mit PlantEasily pflanzt sie nicht automatisch.",
+    "aliases": ["Feld markieren"],
+    "see": ["gc.felder.fields"]
+  },
+  "gc.felder.fields": {
+    "title": "Felder ein- und ausschalten",
+    "short": "Zwei Schalter: Die Server-Regel erlaubt Felder auf dem Server, dein eigener Schalter zeigt und nutzt sie bei dir.",
+    "body": "„Felder für den Kultivator“ ist die [[gc.serverrules|Server-Regel]]: Ist sie aus, verschwindet „Feld markieren“ bei allen, und Felder werden weder gezeigt noch bepflanzt. „Felder anzeigen und bepflanzen“ unter „Felder: Anzeige“ gilt nur für dich, ebenso Farbe und Deckkraft der Fläche ({gc_felder_fields_fill}) und des Rands ({gc_felder_fields_line}); nachts wird die Farbe gedämpft.\n\nDie übrigen Regeln gibt der Server vor:\n- Wer Felder aufheben darf: alle, Ersteller und Admins, Ersteller samt Gildenleitung und Admins oder nur Admins; ohne Gilden-Mod zählt die Gildenleitung nicht\n- höchstens {gc_felder_fields_points} Eckpunkte je Feld und Kanten bis {gc_felder_fields_edge} (0 = unbegrenzt)\n- gepflanzt wird bis {gc_felder_fields_reach} um dich, beim Halten von E alle {gc_felder_fields_interval}\n- Abstand für Pflanzen ohne eigene Wachstumsregel: Sträucher {gc_felder_fields_bush}, Pilze {gc_felder_fields_mushroom}, Sonstiges {gc_felder_fields_other}\n- immer: Kanten dürfen sich nicht kreuzen, Felder sich nicht überschneiden, und keine Ecke liegt mehr als 100 m von der Mitte entfernt",
+    "see": ["gc.felder"]
+  }
+}

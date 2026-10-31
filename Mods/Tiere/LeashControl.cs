@@ -256,6 +256,23 @@ internal static class Control
 		link.View.GetZDO().Set(ReadyHash, cooldown > 0f ? ZNet.instance.GetTime().AddSeconds(cooldown).Ticks : 0L);
 	}
 
+	/// <summary>
+	/// Echo aus Ginnungagap (Gorduan, 27.10.2026): Die Befehlspause dieses Tiers endet sofort. Wie beim Folgen schreibt der Halter
+	/// ins Tier; angeleinte Tiere besitzt er ohnehin (Links), sonst übernimmt er sie wie dort.
+	/// </summary>
+	internal static void EndPause(Link link)
+	{
+		if (link.View == null || !link.View.IsValid() || link.View.GetZDO().GetLong(ReadyHash, 0L) == 0L)
+		{
+			return;
+		}
+		if (!link.View.IsOwner())
+		{
+			link.View.ClaimOwnership();
+		}
+		link.View.GetZDO().Set(ReadyHash, 0L);
+	}
+
 	/// <summary>Hinweis am Tier, wenn seine Leine in der Hand ist: Befehle ab welcher Stufe, bereit oder in wie vielen Sekunden.</summary>
 	internal static string Status(Player player, Link link)
 	{
@@ -366,6 +383,11 @@ internal static class Control
 			message = GcLoc.Get("gcls_cmd_too_far", name, Plugin.ChaseDistance.Value.ToString("0"));
 			return false;
 		}
+		if (Vector3.Distance(link.Holder.transform.position, target.transform.position) > FightReach(link))
+		{
+			message = GcLoc.Get("gcls_cmd_out_of_reach", name, FightReach(link).ToString("0"));
+			return false;
+		}
 		link.ClearCommands();
 		link.PaidOut = link.Shortened ? 1f : 0f; // gekürzte Leine gibt nach, zieht sich nach dem Kampf wieder ein
 		link.AttackTarget = target;
@@ -390,6 +412,7 @@ internal static class Control
 		Character? target = link.AttackTarget;
 		if (link.AttackTarget is not null && (target == null || target.IsDead() || !target.gameObject.activeInHierarchy
 			|| Vector3.Distance(link.Animal.transform.position, target.transform.position) > Plugin.ChaseDistance.Value
+			|| Vector3.Distance(link.Holder.transform.position, target.transform.position) > FightReach(link)
 			|| (Time.time - link.AttackSince > AttackTimeout && link.Animal.GetTimeSinceLastAttack() > AttackTimeout)))
 		{
 			link.AttackTarget = null; // besiegt, entkommen oder unerreichbar: wieder folgen
@@ -424,6 +447,13 @@ internal static class Control
 	/// Rand. Gorduan: Bei Befehlen gibt eine gekürzte Leine bis zur normalen Länge nach, also zählt hier die ungekürzte.
 	/// </summary>
 	internal static float FreeReach(Link link) => Mathf.Max(1f, Plugin.FreeUntil(link.FullStrainFrom) - 0.5f);
+
+	/// <summary>
+	/// So weit vom Halter darf ein Gegner sein, gegen den ein angeleintes Tier kämpft: Zuggrenze der Leine plus 2 m (Bisslänge).
+	/// Review 27.10.2026: Bis ChaseDistance (20 m vom Tier) zerrte das Tier an der Leine und verschliss sie im Kampf, obwohl
+	/// „Kämpfen in Reichweite kostet nichts“ gilt.
+	/// </summary>
+	internal static float FightReach(Link link) => link.DragFrom + 2f;
 
 	/// <summary>Punkt höchstens so weit (waagerecht) vom Halter, Höhe dann vom Boden.</summary>
 	internal static Vector3 Within(Vector3 holder, Vector3 point, float reach)

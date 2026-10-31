@@ -1,0 +1,28 @@
+{
+  "$locale": "de",
+  "gc.blitzspule": {
+    "title": "Blitzspulen",
+    "short": "Bis zu drei Spulen neben dem Vernichter fangen seinen Blitz ab, und er gibt einen Teil der Baumaterialien zurück.",
+    "body": "Der Vernichter zerstört mit einem Blitz, was in ihm liegt. Baust du mit dem Hammer unter Herstellung an der [[valheim.station.forge|Schmiede]] Blitzspulen daneben, nimmt jede Stufe der [[gc.blitzspule.chain|Spulen-Kette]] ein Drittel des Blitzschadens, und mit allen drei trifft er nichts mehr. Zugleich [[gc.blitzspule.recycling|gibt der Vernichter]] einen Teil der Baumaterialien zurück, je länger die Kette, desto mehr, mit EpicLoot auch Opfer-Produkte.\n\nSpule I braucht eine Drachenträne von Moder ([[valheim.biome.mountain]]), Spule II eine Königin-Beute ([[valheim.biome.mistlands]]) und Spule III Opferblut von Kall Fimbulbringer ([[valheim.biome.deepnorth]]). Die Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 4 „GC leicht“), Server und alle Spieler brauchen sie.",
+    "aliases": ["Blitzspule", "Blitzspulen"],
+    "see": ["gc.blitzspule.enabled", "gc.blitzspule.chain", "gc.blitzspule.recycling"]
+  },
+  "gc.blitzspule.enabled": {
+    "title": "Blitzspulen",
+    "short": "Server-Regel: Blitzspulen sind baubar und wirken. Aus: nicht mehr baubar, gebaute Spulen bleiben stehen, wirken aber nicht.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_blitzspule_enabled}; was die Spulen tun, steht unter [[gc.blitzspule]]. Die Werte darunter gibt ebenfalls der Server vor:\n\n- Reichweite: {gc_blitzspule_range}, so nah muss eine Spule am Vernichter stehen\n- Rückgabe mit Spule I, mit I und II und mit allen drei: {gc_blitzspule_rate1}, {gc_blitzspule_rate2} und {gc_blitzspule_rate3} der Baumaterialien\n- EpicLoot mindestens und höchstens: {gc_blitzspule_epicmin} und {gc_blitzspule_epicmax} der Opfer-Produkte; diese Zeilen erscheinen nur mit EpicLoot",
+    "see": ["gc.blitzspule.recycling"]
+  },
+  "gc.blitzspule.chain": {
+    "title": "Spulen-Kette",
+    "short": "Nur die lückenlose Kette ab Spule I wirkt: I, I+II oder I+II+III; ihre höchste Stufe bestimmt die Wirkung.",
+    "body": "Eine Spule gehört zu einem Vernichter, wenn sie höchstens {gc_blitzspule_range} von ihm entfernt steht. Spule II lässt sich nur bauen, wo Spule I schon steht, Spule III nur mit I und II, und eine zweite Spule derselben Stufe gar nicht. Reißt du eine Spule ab, wirken die Spulen darüber nicht mehr, bis die Lücke wieder geschlossen ist.\n\nJede Stufe der Kette nimmt ein Drittel des Blitzschadens, und die höchste bestimmt die [[gc.blitzspule.recycling|Rückgabe]]. Die Spulen selbst nehmen keinen Blitz- und keinen Feuerschaden.",
+    "see": ["gc.blitzspule"]
+  },
+  "gc.blitzspule.recycling": {
+    "title": "Rückgabe am Vernichter",
+    "short": "Mit Blitzspulen gibt der Vernichter einen Teil der Baumaterialien zurück, mit EpicLoot auch Opfer-Produkte.",
+    "body": "Zurück kommen die Zutaten der Rezepte, auch die der Aufwertungen bis zur höchsten normalen Qualität, für Stapel anteilig: {gc_blitzspule_rate1} mit Spule I, {gc_blitzspule_rate2} mit I und II, {gc_blitzspule_rate3} mit allen drei, je Sorte über die ganze Ladung abgerundet. EpicLoot-Items geben dazu zufällig {gc_blitzspule_epicmin} bis {gc_blitzspule_epicmax} ihrer Opfer-Produkte zurück; Spule II hebt die Untergrenze auf die Mitte, die [[valheim.skill.crafting|Herstellung]] des Spielers am Hebel anteilig, und mit allen drei Spulen oder Herstellung 100 gilt immer der Höchstwert. Die Rückgabe landet im Vernichter, was nicht hineinpasst, fällt davor, und der Spieler am Hebel bekommt eine Meldung.\n\nKeine Baumaterialien gibt es für Rezepte, die eine von mehreren Zutaten nehmen (etwa Roher Fisch), für Aufwertungen über die normale Qualität hinaus und in Welten ohne Herstellungskosten.",
+    "see": ["gc.blitzspule.chain"]
+  }
+}

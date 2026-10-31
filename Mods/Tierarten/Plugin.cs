@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using BepInEx;
 using GC.Shared;
 using HarmonyLib;
@@ -21,6 +23,7 @@ public partial class Plugin : BaseUnityPlugin
 		GC.Server.ServerPlugin.Module = Module;
 		Harmony harmony = new(GcMod.Guid);
 		Leash.Species.Init(Config);
+		Leash.YoungFighters.Init(Config); // vor GcMod.PatchAll: Die Patches der Jungtiere lesen seine Einstellungen (Review 27.10.2026)
 		Leash.BearSaddles.Init(Config); // nach Species: Bär und Unbjørn haben dann ihr Tameable, das Junge ist schon geklont
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => Leash.Plugin.On || Leash.Care.Enabled.Value; // wie GC_Tiere (Boss-Fortschritt)
@@ -44,7 +47,9 @@ public partial class Plugin : BaseUnityPlugin
 		GcMenuGroup species = Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("species_cap", Leash.Species.EffectCap, step: 10)
 			.Main("species_star1", Leash.Species.StarChance1, step: 0.1, unit: " %")
-			.Main("species_star2", Leash.Species.StarChance2, step: 0.1, unit: " %");
+			.Main("species_star2", Leash.Species.StarChance2, step: 0.1, unit: " %")
+			.Main("species_young_fight", Leash.YoungFighters.Enabled) // Gorduan, 27.10.2026: Jungtiere kämpfen mit
+			.Sub("species_young_damage", Leash.YoungFighters.DamagePercent, 5, " %");
 		foreach (Leash.Species.Kind kind in Leash.Species.All)
 		{
 			string key = kind.Key.ToLowerInvariant();
@@ -59,25 +64,30 @@ public partial class Plugin : BaseUnityPlugin
 		}
 	}
 
-	/// <summary>Valheim-Texte ($-Schlüssel) für Sättel und Bärenjunges (fehlten bisher, zeigten rohe Schlüssel).</summary>
+	/// <summary>
+	/// Valheim-Texte ($-Schlüssel) für Sättel, Reiten, Bärenjunges und die Jungen der zuschaltbaren Arten (fehlten bisher,
+	/// zeigten rohe Schlüssel; Gorduan, 30.10.2026: „[gc_deer_fawn]“, „[gc_ride]“). Die Jungen kommen aus Species.All, damit ein
+	/// neues Junges nicht wieder vergessen wird.
+	/// </summary>
 	private static void AddLocalization()
 	{
 		Jotunn.Entities.CustomLocalization localization = Jotunn.Managers.LocalizationManager.Instance.GetLocalization();
-		foreach (string key in new[] { "gc_saddle_bjorn", "gc_saddle_bjorn_desc", "gc_saddle_unbjorn", "gc_saddle_unbjorn_desc", "gc_bjorn_cub" })
+		IEnumerable<string> young = Leash.Species.All.Where(kind => kind.Child != null).Select(kind => kind.Child!.Name.TrimStart('$'));
+		foreach (string key in new[] { "gc_saddle_bjorn", "gc_saddle_bjorn_desc", "gc_saddle_unbjorn", "gc_saddle_unbjorn_desc", "gc_bjorn_cub", "gc_ride" }.Concat(young))
 		{
-			foreach (System.Collections.Generic.KeyValuePair<string, string> pair in GcLoc.AllLanguages(key))
+			foreach (KeyValuePair<string, string> pair in GcLoc.AllLanguages(key))
 			{
 				localization.AddTranslation(pair.Key, key, pair.Value);
 			}
 		}
 	}
 
+	/// <summary>
+	/// Verwandlung Bär → Unbjørn und Aufräumen beim Besitzer, auch auf dem dedizierten Server (Review 27.10.2026): Er besitzt
+	/// die Zonen um den Weltmittelpunkt dauerhaft; Bären dort verwandelten sich sonst nie.
+	/// </summary>
 	private void Update()
 	{
-		if (Gc.IsHeadless)
-		{
-			return;
-		}
-		Module.Guard("Tierarten", Leash.Species.Tick); // Verwandlung Bär → Unbjørn
+		Module.Guard("Tierarten", Leash.Species.Tick);
 	}
 }

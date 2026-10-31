@@ -24,7 +24,7 @@ namespace GC.Server.Leash;
 /// Runen, Härten, Sockel, Beute. Gelesen werden die Effekte direkt aus den Item-Daten (EpicLoot speichert sie als JSON in
 /// m_customData), ohne harte Abhängigkeit.
 /// </summary>
-internal static class LeashMagic
+internal static partial class LeashMagic
 {
 	internal const string EpicLootGuid = "randyknapp.mods.epicloot";
 	private const string MagicKey = "randyknapp.mods.epicloot#EpicLoot.MagicItemComponent";
@@ -37,8 +37,14 @@ internal static class LeashMagic
 	/// </summary>
 	private const string ValkyrieRequirement = "GC_IsValkyrieWhistle";
 	internal const string ValkyrieUnbreakable = "GC_LeashValkyrieUnbreakable";
-	/// <summary>Sättel (Gorduan, 20.10.2026): eigene Sattel-Effekte (Ausdauer); die Pfeifen-Effekte würfeln auch auf Sätteln.</summary>
+	/// <summary>Sättel (Gorduan, 20.10.2026): eigene Sattel-Effekte (Ausdauer); die Pfeifen-Effekte würfeln auch auf Sätteln (außer NotOnSaddles).</summary>
 	private const string SaddleRequirement = "GC_IsSaddle";
+	/// <summary>
+	/// Pfeifen-Effekte, die an Sätteln nicht wirken (Review 27.10.2026): Leuchten gibt es nur an der Leine, Angriffstempo nur,
+	/// wenn das Tier selbst angreift (beim Reiten greift der Reiter an). Sie würfeln an Sätteln nicht mehr; vorhandene Sättel
+	/// behalten ihre Werte (EpicLoot prüft die Bedingung nur, wenn ein Effekt neu dazukommt).
+	/// </summary>
+	private static readonly HashSet<string> NotOnSaddles = new() { "GC_LeashGlow", "GC_LeashAnimalAttackSpeed" };
 	/// <summary>Legendäre und mythische Tierpfeifen (Gorduan, 24.10.2026): je Boss eine Bedingung „GC_IsWhistle_&lt;Boss&gt;“.</summary>
 	private const string WhistleUniqueRequirement = "GC_IsWhistle";
 	private static readonly HashSet<string> WhistleEffects = new()
@@ -311,6 +317,7 @@ internal static class LeashMagic
 		["defeated_bonemass"] = 2, // Sumpf: Eisen
 		["defeated_dragon"] = 2, // Berge: noch Eisen
 		["defeated_goblinking"] = 3, // Ebenen: Walküre (Schwarzmetall)
+		["defeated_queen"] = 3, // Nebellande: keine eigene Pfeife, noch die Walküre (27.10.2026: Huldras Lockruf)
 		["defeated_fader"] = 4, // Aschlande: Flammenmetall
 		["defeated_frozenking_p3"] = 4, // Tiefer Norden: noch Flammenmetall
 	};
@@ -330,8 +337,8 @@ internal static class LeashMagic
 	/// <summary>
 	/// Beute: Tier-Tabellen von EpicLoot → passende Leine (1 % pro Kreatur, eigene unabhängige Tabelle). Seit 19.10.2026 eine
 	/// Leine je Biom (Gorduan): Tabellen mit Kreaturen aus zwei Biomen (Tier2: Schwarzwald, Tier8: Aschlande und Tiefer Norden)
-	/// nennen beide Leinen. EpicLoot 0.15.0 hat Björn, Lox, Fenris, Elch, Jötunn und weitere in die Elite-Tabellen verschoben;
-	/// damit sie weiter Leinen fallen lassen, tragen auch die Elite-Tabellen die Leine ihres Bioms.
+	/// nennen beide Leinen. Seit EpicLoot 0.15.0 (so auch 0.15.2) stehen Björn, Lox, Fenris, Elch, Jötunn und weitere in den
+	/// Elite-Tabellen; damit sie weiter Leinen fallen lassen, tragen auch die Elite-Tabellen die Leine ihres Bioms.
 	/// </summary>
 	private static readonly (string Table, string[] Leashes)[] Loot =
 	{
@@ -355,8 +362,9 @@ internal static class LeashMagic
 	};
 
 	/// <summary>
-	/// Hirsch und Robbe haben seit EpicLoot 0.15.0 gar keine EpicLoot-Beute mehr (friedliche Tiere): je eine eigene Tabelle nur
-	/// mit ihrer Leine, aber nur, solange EpicLoot für sie keine Tabelle kennt (eine eigene Tabelle ersetzte EpicLoots Verweis).
+	/// Hirsch und Robbe haben seit EpicLoot 0.15.0 (auch 0.15.2) gar keine EpicLoot-Beute mehr (friedliche Tiere): je eine
+	/// eigene Tabelle nur mit ihrer Leine, aber nur, solange EpicLoot für sie keine Tabelle kennt (eine eigene Tabelle ersetzte
+	/// EpicLoots Verweis).
 	/// Entschieden wird einmal beim Start mit der eigenen Config; EpicLoot trägt die Tabelle nach jedem Neuladen wieder ein.
 	/// Kennte erst die Config eines Servers Hirsch oder Robbe, verlören sie dort ihre übrige Beute (Prüfung 24.10.2026; mit
 	/// EpicLoots Standard-Config nie der Fall).
@@ -368,8 +376,8 @@ internal static class LeashMagic
 	};
 
 	/// <summary>
-	/// Tabellen aus Wiesen und Schwarzwald (EpicLoot 0.15.0: Tier0–2Mob, die Schwarzwald-Elite Björn/Troll in Tier3EliteMob,
-	/// dazu der Hirsch): Leinen fallen dort höchstens episch (Gorduan, 24.10.2026: legendär erst ab dem Sumpf).
+	/// Tabellen aus Wiesen und Schwarzwald (EpicLoot 0.15.0 und 0.15.2: Tier0–2Mob, die Schwarzwald-Elite Björn/Troll in
+	/// Tier3EliteMob, dazu der Hirsch): Leinen fallen dort höchstens episch (Gorduan, 24.10.2026: legendär erst ab dem Sumpf).
 	/// </summary>
 	private static readonly HashSet<string> NoLegendaryLoot = new() { "Tier0Mob", "Tier1Mob", "Tier2Mob", "Tier3EliteMob", "Deer" };
 
@@ -396,36 +404,92 @@ internal static class LeashMagic
 			yield return "gc_leg_" + key;
 			yield return "gc_leg_" + key + "_desc";
 		}
+		foreach (string key in UniqueLocalizationKeys())
+		{
+			yield return key;
+		}
 	}
 
 	// ------------------------------------------------------------------ Start
 
+	/// <summary>
+	/// Haken in EpicLoot (Review 27.10.2026): Jeder wird für sich angebunden. Ändert EpicLoot eine Methode, fehlt nur dieser
+	/// Haken (Warnung im Log), nicht die übrigen und nicht der Rest von GC_Tiere.
+	/// </summary>
+	[Flags]
+	internal enum Hooks
+	{
+		None = 0,
+		/// <summary>EpicLoot.CanBeMagicItem: Leinen, Pfeifen und Sättel dürfen magisch werden.</summary>
+		Magic = 1,
+		/// <summary>MagicItemEffectDefinition.CheckRequirements: an eigenen Items nur eigene Effekte (Würfeln, Verzaubern).</summary>
+		EffectLock = 2,
+		/// <summary>MagicItemEffectRequirements.CheckRequirements: dasselbe bei direkter Prüfung (Legendäre, Sockel, Übertragen).</summary>
+		RequirementLock = 4,
+		/// <summary>Shards.GetShardEffect: eigene Splitter-Effekte in eigenen Items.</summary>
+		Shards = 8,
+		/// <summary>ShardSocketManager.CanSocket: Splitter ohne eigenen Effekt nicht in eigene Items (seit 0.15.2 auch von EpicLoot geprüft).</summary>
+		Sockets = 16,
+		/// <summary>MagicEffectRarity.EnsureAnchor und GetTier: Seltenheits-Sterne getrennt nach EpicLoots und eigenen Effekten.</summary>
+		Flare = 32,
+	}
+
+	/// <summary>Angebundene Haken (Fähigkeiten der EpicLoot-Anbindung).</summary>
+	internal static Hooks Active { get; private set; }
+
+	internal static bool Has(Hooks hook) => (Active & hook) == hook;
+
 	internal static void Init(Harmony harmony)
 	{
-		if (!Chainloader.PluginInfos.ContainsKey(EpicLootGuid))
+		if (!Chainloader.PluginInfos.TryGetValue(EpicLootGuid, out BepInEx.PluginInfo info))
 		{
 			return; // ohne EpicLoot: Leinen wie immer
 		}
-		api = AccessTools.TypeByName("EpicLoot.API");
-		Type? core = AccessTools.TypeByName("EpicLoot.EpicLoot");
-		MethodInfo? canBeMagic = core != null ? AccessTools.Method(core, "CanBeMagicItem", new[] { typeof(ItemDrop.ItemData) }) : null;
-		if (api == null || canBeMagic == null)
-		{
-			Plugin.Log.LogWarning("Tierleinen: EpicLoot gefunden, aber die Schnittstelle fehlt. Leinen bleiben ohne Verzauberung.");
-			return;
-		}
-		harmony.Patch(canBeMagic, postfix: new HarmonyMethod(typeof(LeashMagic), nameof(CanBeMagicPostfix)));
-		PatchShards(harmony);
-		PatchFlare(harmony);
-		LockWeaponEffects(harmony);
-		Available = true;
+		string version = info?.Metadata?.Version?.ToString() ?? "?";
 		try
 		{
+			api = AccessTools.TypeByName("EpicLoot.API");
+			Type? core = AccessTools.TypeByName("EpicLoot.EpicLoot");
+			MethodInfo? canBeMagic = core != null ? AccessTools.Method(core, "CanBeMagicItem", new[] { typeof(ItemDrop.ItemData) }) : null;
+			if (api == null || canBeMagic == null)
+			{
+				Plugin.Log.LogWarning($"Tierleinen: EpicLoot {version} gefunden, aber die Schnittstelle fehlt. Leinen bleiben ohne Verzauberung.");
+				return;
+			}
+			TryPatch(harmony, canBeMagic, Hooks.Magic, postfix: nameof(CanBeMagicPostfix));
+			PatchShards(harmony);
+			PatchFlare(harmony);
+			LockWeaponEffects(harmony);
+			Available = true;
 			Register();
 		}
 		catch (Exception e)
 		{
-			Plugin.Log.LogWarning($"Tierleinen: EpicLoot-Einträge nicht vollständig angelegt: {e.Message}");
+			Plugin.Log.LogWarning($"Tierleinen: EpicLoot-Anbindung nicht vollständig: {e.GetBaseException().Message}");
+		}
+		Hooks missing = (Hooks.Magic | Hooks.EffectLock | Hooks.RequirementLock | Hooks.Shards | Hooks.Sockets | Hooks.Flare) & ~Active;
+		Plugin.Log.LogInfo($"Tierleinen: EpicLoot {version}, Haken aktiv: {Active}" + (missing != Hooks.None ? $"; fehlen: {missing}" : "") + ".");
+	}
+
+	/// <summary>Einen EpicLoot-Haken anbinden; schlägt es fehl, nur eine Warnung (Review 27.10.2026).</summary>
+	private static bool TryPatch(Harmony harmony, MethodBase? original, Hooks hook, string? prefix = null, string? postfix = null)
+	{
+		if (original == null)
+		{
+			return false;
+		}
+		try
+		{
+			harmony.Patch(original,
+				prefix: prefix != null ? new HarmonyMethod(typeof(LeashMagic), prefix) : null,
+				postfix: postfix != null ? new HarmonyMethod(typeof(LeashMagic), postfix) : null);
+			Active |= hook;
+			return true;
+		}
+		catch (Exception e)
+		{
+			Plugin.Log.LogWarning($"Tierleinen: EpicLoot-Haken {hook} ({original.DeclaringType?.Name}.{original.Name}) nicht angebunden: {e.GetBaseException().Message}");
+			return false;
 		}
 	}
 
@@ -439,50 +503,55 @@ internal static class LeashMagic
 	/// </summary>
 	private static void LockWeaponEffects(Harmony harmony)
 	{
-		Type? definition = AccessTools.TypeByName("EpicLoot.MagicItemEffectDefinition");
-		Type? requirements = AccessTools.TypeByName("EpicLoot.MagicItemEffectRequirements");
 		MethodInfo? byDefinition = null;
 		MethodInfo? byRequirements = null;
-		if (definition != null)
+		try
 		{
-			foreach (MethodInfo method in definition.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+			Type? definition = AccessTools.TypeByName("EpicLoot.MagicItemEffectDefinition");
+			Type? requirements = AccessTools.TypeByName("EpicLoot.MagicItemEffectRequirements");
+			if (definition != null)
 			{
-				if (method.Name == "CheckRequirements" && method.ReturnType == typeof(bool) && method.GetParameters().Length > 0 && method.GetParameters()[0].Name == "itemData")
+				definitionType ??= AccessTools.Property(definition, "Type"); // für DefinitionLockPostfix (sonst aus PatchFlare)
+				foreach (MethodInfo method in definition.GetMethods(BindingFlags.Public | BindingFlags.Instance))
 				{
-					byDefinition = method;
+					if (method.Name == "CheckRequirements" && method.ReturnType == typeof(bool) && method.GetParameters().Length > 0 && method.GetParameters()[0].Name == "itemData")
+					{
+						byDefinition = method;
+					}
+				}
+			}
+			if (requirements != null)
+			{
+				externalRequirements = AccessTools.Field(requirements, "ExternalRequirements");
+				foreach (MethodInfo method in requirements.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+				{
+					ParameterInfo[] parameters = method.GetParameters();
+					if (method.Name == "CheckRequirements" && method.ReturnType == typeof(bool) && parameters.Length > 2 && parameters[0].Name == "itemData" && parameters[2].IsOut)
+					{
+						byRequirements = method; // die Fassung mit „failure" (out), bei der alle anderen landen
+					}
 				}
 			}
 		}
-		if (requirements != null)
+		catch (Exception e)
 		{
-			externalRequirements = AccessTools.Field(requirements, "ExternalRequirements");
-			foreach (MethodInfo method in requirements.GetMethods(BindingFlags.Public | BindingFlags.Instance))
-			{
-				ParameterInfo[] parameters = method.GetParameters();
-				if (method.Name == "CheckRequirements" && method.ReturnType == typeof(bool) && parameters.Length > 2 && parameters[0].Name == "itemData" && parameters[2].IsOut)
-				{
-					byRequirements = method; // die Fassung mit „failure" (out), bei der alle anderen landen
-				}
-			}
+			Plugin.Log.LogWarning($"Tierleinen: EpicLoot-Sperre für Waffen-Effekte nicht gefunden: {e.GetBaseException().Message}");
 		}
-		if (byDefinition != null)
+		bool locked = definitionType != null && TryPatch(harmony, byDefinition, Hooks.EffectLock, postfix: nameof(DefinitionLockPostfix));
+		locked &= externalRequirements != null && TryPatch(harmony, byRequirements, Hooks.RequirementLock, postfix: nameof(RequirementsLockPostfix));
+		if (!locked)
 		{
-			harmony.Patch(byDefinition, postfix: new HarmonyMethod(typeof(LeashMagic), nameof(DefinitionLockPostfix)));
-		}
-		if (byRequirements != null && externalRequirements != null)
-		{
-			harmony.Patch(byRequirements, postfix: new HarmonyMethod(typeof(LeashMagic), nameof(RequirementsLockPostfix)));
-		}
-		if (byDefinition == null || byRequirements == null || externalRequirements == null)
-		{
-			Plugin.Log.LogWarning("Tierleinen: EpicLoot-Sperre für Waffen-Effekte nicht vollständig gefunden; Leinen könnten Waffen-Verzauberungen bekommen.");
+			Plugin.Log.LogWarning("Tierleinen: EpicLoot-Sperre für Waffen-Effekte nicht vollständig; Leinen könnten Waffen-Verzauberungen bekommen.");
 		}
 	}
 
-	/// <summary>Effekt-Auswahl (Würfeln, Verzaubern, Aufwerten): an Leinen nur die eigenen Leinen-Effekte.</summary>
+	/// <summary>
+	/// Effekt-Auswahl (Würfeln, Verzaubern, Aufwerten): an Leinen nur die eigenen Leinen-Effekte. Den Typ liest die
+	/// vorhandene PropertyInfo (Review 27.10.2026: vorher je Aufruf eine neue Traverse).
+	/// </summary>
 	private static void DefinitionLockPostfix(object __instance, ItemDrop.ItemData itemData, ref bool __result)
 	{
-		if (__result && itemData != null && Ours(itemData) && Traverse.Create(__instance).Property("Type").GetValue() is string type
+		if (__result && itemData != null && Ours(itemData) && definitionType?.GetValue(__instance) is string type
 			&& !type.StartsWith("GC_Leash", StringComparison.Ordinal) && !type.StartsWith("GC_Saddle", StringComparison.Ordinal))
 		{
 			__result = false;
@@ -557,7 +626,8 @@ internal static class LeashMagic
 	{
 		Func<ItemDrop.ItemData, object, string, bool, bool, bool, bool> isLeash = (item, magicItem, effectType, lootRoll, augmentRoll, runeRoll) => item != null && Plugin.IsLeash(item, out _);
 		Call("RegisterMagicEffectRequirement", Requirement, isLeash);
-		Func<ItemDrop.ItemData, object, string, bool, bool, bool, bool> isLeashOrWhistle = (item, magicItem, effectType, lootRoll, augmentRoll, runeRoll) => item != null && Ours(item);
+		Func<ItemDrop.ItemData, object, string, bool, bool, bool, bool> isLeashOrWhistle = (item, magicItem, effectType, lootRoll, augmentRoll, runeRoll) => item != null && Ours(item)
+			&& !(effectType != null && NotOnSaddles.Contains(effectType) && Saddles.IsSaddle(item));
 		Call("RegisterMagicEffectRequirement", WhistleRequirement, isLeashOrWhistle);
 		Func<ItemDrop.ItemData, object, string, bool, bool, bool, bool> isValkyrie = (item, magicItem, effectType, lootRoll, augmentRoll, runeRoll) => item != null && Whistles.IsWhistle(item, out WhistleTier tier) && tier.Valkyrie;
 		Call("RegisterMagicEffectRequirement", ValkyrieRequirement, isValkyrie);
@@ -598,7 +668,8 @@ internal static class LeashMagic
 			// nur die festen Effekte, keine Zufallseffekte dazu (Gorduan: legendär ein Drittel, mythisch nur die eigenen; Prüfung 24.10.2026)
 			whistles += Call("AddLegendaryItem", kind, UniqueJson(id, key, WhistleBossRequirement(boss), list, list.Length)) != null ? 1 : 0;
 		}
-		Plugin.Log.LogInfo($"Tierleinen: EpicLoot erkannt, {effects} Leinen-Effekte, {uniques} legendäre/mythische Leinen und {whistles} Pfeifen angelegt.");
+		RegisterUniques(ref effects, ref uniques, ref whistles, out int saddles);
+		Plugin.Log.LogInfo($"Tierleinen: EpicLoot erkannt, {effects} Leinen-Effekte, {uniques} einzigartige Leinen, {whistles} Pfeifen und {saddles} Sättel angelegt.");
 	}
 
 	/// <summary>Beute anmelden, sobald die Leinen-Items existieren (nur Stufen, deren Leine angelegt wurde).</summary>
@@ -719,10 +790,11 @@ internal static class LeashMagic
 			{
 				sb.Append(i > 0 ? "," : "").Append("{\"Item\":\"").Append(present[i]).Append("\",\"Weight\":1,\"Rarity\":").Append(rarity).Append('}');
 			}
-			// EpicLoot 0.15.0 steigert Beute je Stern (DefaultStarScaling: +14,9 % Chance, bessere Seltenheit); die Leinen
-			// bleiben bei 1 % für jede Kreatur, wie vorher
+			// EpicLoot steigert seit 0.15.0 (auch 0.15.2) Beute je Stern (DefaultStarScaling: +14,9 % Chance, bessere
+			// Seltenheit); die Leinen bleiben bei 1 % für jede Kreatur, wie vorher
 			sb.Append("]}],\"StarScaling\":{\"DropChance\":0,\"BonusDrops\":0,\"RarityShift\":0}}");
 		}
+		AppendSaddleLoot(sb, ref tables); // Sättel (0,5 % je Kreatur, LeashUniques.cs)
 		sb.Append(']');
 		return sb.ToString();
 	}
@@ -791,8 +863,8 @@ internal static class LeashMagic
 				Plugin.Log.LogInfo("Tierleinen: EpicLoot ohne Splitter-Sockel (ältere Fassung), eigene Items bekommen keine Splitter-Effekte.");
 				return;
 			}
-			harmony.Patch(getEffect, postfix: new HarmonyMethod(typeof(LeashMagic), nameof(ShardEffectPostfix)));
-			harmony.Patch(canSocket, postfix: new HarmonyMethod(typeof(LeashMagic), nameof(CanSocketPostfix)));
+			TryPatch(harmony, getEffect, Hooks.Shards, postfix: nameof(ShardEffectPostfix));
+			TryPatch(harmony, canSocket, Hooks.Sockets, postfix: nameof(CanSocketPostfix));
 		}
 		catch (Exception e)
 		{
@@ -851,7 +923,11 @@ internal static class LeashMagic
 		return definition;
 	}
 
-	/// <summary>Ein Splitter ohne eigenen Effekt (besondere und Boss-Splitter) passt nicht in eigene Items.</summary>
+	/// <summary>
+	/// Ein Splitter ohne eigenen Effekt (besondere und Boss-Splitter) passt nicht in eigene Items. Seit EpicLoot 0.15.2 lehnt
+	/// EpicLoot selbst solche Splitter ab (ShardSocketManager.ResolvePlacementEffect: „shardunsupported“); der Haken bleibt als
+	/// Sicherung für ältere Fassungen, schadet aber nicht (Review 27.10.2026).
+	/// </summary>
 	private static void CanSocketPostfix(ItemDrop.ItemData equipment, ItemDrop.ItemData input, ref bool __result)
 	{
 		if (!__result || equipment == null || input == null || !Ours(equipment) || resolveSocketed == null)
@@ -865,7 +941,7 @@ internal static class LeashMagic
 		}
 	}
 
-	// ------------------------------------------------------------------ Seltenheits-Sterne (EpicLoot 0.15.0)
+	// ------------------------------------------------------------------ Seltenheits-Sterne (seit EpicLoot 0.15.0, so auch 0.15.2)
 
 	private static FieldInfo? anchorField;
 	private static FieldInfo? rungsField;
@@ -873,64 +949,87 @@ internal static class LeashMagic
 	private static FieldInfo? selectionWeight;
 	private static PropertyInfo? definitionType;
 	private static MethodInfo? canRoll;
-	private static float ownAnchor;
-	private static float[] ownRungs = Array.Empty<float>();
 	private static bool flareReported;
 
 	/// <summary>
-	/// Seit EpicLoot 0.15.0 tragen seltene Effekte ★ bis ★★★: die drei kleinsten Auswahlgewichte unter dem Median aller
-	/// würfelbaren Effekte. Unsere Effekte würfeln nur an eigenen Items; zählten sie mit, nähmen ihre kleinen Gewichte
-	/// (Unzerstörbar 0,05, Walküre 0,03, Wiederkehr 0,1) EpicLoots seltenen Effekten die Sterne. Darum rechnet jede Gruppe
-	/// für sich, nach EpicLoots Regel: EpicLoots Effekte unter sich, unsere (GC_…) unter sich.
+	/// Eigene Sternstaffel (Gorduan, 30.10.2026, Antwort A): ★ die zehn seltenen Effekte, ★★ Standfest, ★★★ Wiederkehr und
+	/// Unzerstörbar (auch das alte der Walkürenpfeife). Alle anderen GC-Effekte tragen keine Sterne.
+	/// </summary>
+	private static readonly Dictionary<string, int> OwnStars = new()
+	{
+		["GC_LeashFireBite"] = 1, ["GC_LeashFrostBite"] = 1, ["GC_LeashThunder"] = 1, ["GC_LeashPoisonBite"] = 1, ["GC_LeashSpiritBite"] = 1,
+		["GC_LeashLifeSteal"] = 1, ["GC_LeashEvade"] = 1, ["GC_LeashDeter"] = 1, ["GC_LeashBerserk"] = 1, ["GC_LeashGlow"] = 1,
+		["GC_LeashSteadfast"] = 2,
+		["GC_LeashRevive"] = 3, ["GC_LeashUnbreakable"] = 3, [ValkyrieUnbreakable] = 3,
+	};
+
+	/// <summary>
+	/// Seit EpicLoot 0.15.0 (unverändert bis 0.15.4, MagicEffectRarity) tragen seltene Effekte ★ bis ★★★: die drei kleinsten
+	/// Auswahlgewichte unter dem Median aller würfelbaren Effekte. Unsere Effekte würfeln nur an eigenen Items; zählten sie
+	/// mit, nähmen ihre kleinen Gewichte (Unzerstörbar 0,05, Walküre 0,03, Wiederkehr 0,1) EpicLoots seltenen Effekten die Sterne. Darum zählt EpicLoots
+	/// Rechnung nur EpicLoots Effekte; unsere (GC_…) tragen die feste eigene Staffel OwnStars (Gorduan, 30.10.2026).
 	/// </summary>
 	private static void PatchFlare(Harmony harmony)
 	{
-		Type? flare = AccessTools.TypeByName("EpicLoot.MagicEffectRarity");
-		if (flare == null)
+		MethodInfo? ensure;
+		MethodInfo? getTier;
+		try
 		{
-			return; // EpicLoot vor 0.15.0: keine Sterne
+			Type? flare = AccessTools.TypeByName("EpicLoot.MagicEffectRarity");
+			if (flare == null)
+			{
+				return; // EpicLoot vor 0.15.0: keine Sterne
+			}
+			Type? definition = AccessTools.TypeByName("EpicLoot.MagicItemEffectDefinition");
+			Type? definitions = AccessTools.TypeByName("EpicLoot.MagicItemEffectDefinitions");
+			ensure = AccessTools.Method(flare, "EnsureAnchor");
+			getTier = definition != null ? AccessTools.Method(flare, "GetTier", new[] { definition }) : null;
+			canRoll = AccessTools.Method(flare, "CanRoll");
+			anchorField = AccessTools.Field(flare, "_anchorWeight");
+			rungsField = AccessTools.Field(flare, "_rungsBelowAnchor");
+			allDefinitions = definitions != null ? AccessTools.Field(definitions, "AllDefinitions") : null;
+			selectionWeight = definition != null ? AccessTools.Field(definition, "SelectionWeight") : null;
+			definitionType = definition != null ? AccessTools.Property(definition, "Type") : null;
 		}
-		Type? definition = AccessTools.TypeByName("EpicLoot.MagicItemEffectDefinition");
-		Type? definitions = AccessTools.TypeByName("EpicLoot.MagicItemEffectDefinitions");
-		MethodInfo? ensure = AccessTools.Method(flare, "EnsureAnchor");
-		MethodInfo? getTier = definition != null ? AccessTools.Method(flare, "GetTier", new[] { definition }) : null;
-		canRoll = AccessTools.Method(flare, "CanRoll");
-		anchorField = AccessTools.Field(flare, "_anchorWeight");
-		rungsField = AccessTools.Field(flare, "_rungsBelowAnchor");
-		allDefinitions = definitions != null ? AccessTools.Field(definitions, "AllDefinitions") : null;
-		selectionWeight = definition != null ? AccessTools.Field(definition, "SelectionWeight") : null;
-		definitionType = definition != null ? AccessTools.Property(definition, "Type") : null;
+		catch (Exception e)
+		{
+			Plugin.Log.LogWarning($"Tierleinen: EpicLoots Seltenheits-Sterne nicht gefunden ({e.GetBaseException().Message}); sie zählen die Leinen-Effekte mit.");
+			return;
+		}
 		if (ensure == null || getTier == null || canRoll == null || anchorField == null || rungsField == null || allDefinitions == null || selectionWeight == null || definitionType == null)
 		{
 			Plugin.Log.LogWarning("Tierleinen: EpicLoots Seltenheits-Sterne nicht gefunden; sie zählen die Leinen-Effekte mit.");
 			return;
 		}
-		harmony.Patch(ensure, prefix: new HarmonyMethod(typeof(LeashMagic), nameof(EnsureAnchorPrefix)));
-		harmony.Patch(getTier, prefix: new HarmonyMethod(typeof(LeashMagic), nameof(GetTierPrefix)));
+		// getrennte Sterne nur mit beiden Haken; fehlt einer, rechnet EpicLoot an dieser Stelle selbst (keine Fehler)
+		bool anchors = TryPatch(harmony, ensure, Hooks.None, prefix: nameof(EnsureAnchorPrefix));
+		bool tiers = TryPatch(harmony, getTier, Hooks.None, prefix: nameof(GetTierPrefix));
+		if (anchors && tiers)
+		{
+			Active |= Hooks.Flare;
+		}
 	}
 
 	private static bool IsOwnEffect(object definition) => definitionType!.GetValue(definition) is string type && type.StartsWith("GC_", StringComparison.Ordinal);
 
-	/// <summary>Median und Stufen darunter für beide Gruppen; EpicLoots Werte in EpicLoots Feldern, unsere hier.</summary>
+	/// <summary>Median und Stufen darunter nur aus EpicLoots Effekten, in EpicLoots Feldern.</summary>
 	private static void Anchors()
 	{
 		List<float> theirs = new();
-		List<float> own = new();
 		if (allDefinitions!.GetValue(null) is System.Collections.IDictionary all)
 		{
 			foreach (object? definition in all.Values)
 			{
-				if (definition == null || canRoll!.Invoke(null, new[] { definition }) is not true || selectionWeight!.GetValue(definition) is not float weight || weight <= 0f)
+				if (definition == null || IsOwnEffect(definition) || canRoll!.Invoke(null, new[] { definition }) is not true || selectionWeight!.GetValue(definition) is not float weight || weight <= 0f)
 				{
 					continue;
 				}
-				(IsOwnEffect(definition) ? own : theirs).Add(weight);
+				theirs.Add(weight);
 			}
 		}
 		(float anchor, float[] rungs) = Anchor(theirs);
 		rungsField!.SetValue(null, rungs);
 		anchorField!.SetValue(null, anchor);
-		(ownAnchor, ownRungs) = Anchor(own);
 	}
 
 	private static (float Anchor, float[] Rungs) Anchor(List<float> weights)
@@ -950,7 +1049,7 @@ internal static class LeashMagic
 
 	private static bool AnchorsStale() => anchorField!.GetValue(null) is float anchor && float.IsNaN(anchor);
 
-	/// <summary>Statt EpicLoots EnsureAnchor (alle Effekte): beide Gruppen getrennt. Bei einem Fehler EpicLoots Rechnung.</summary>
+	/// <summary>Statt EpicLoots EnsureAnchor (alle Effekte): nur EpicLoots Effekte. Bei einem Fehler EpicLoots Rechnung.</summary>
 	private static bool EnsureAnchorPrefix()
 	{
 		try
@@ -968,47 +1067,15 @@ internal static class LeashMagic
 		}
 	}
 
-	/// <summary>Sterne unserer Effekte nach EpicLoots Regel (Rang unter dem Median und Abstand zu ihm), aber unter unseren.</summary>
+	/// <summary>Sterne unserer Effekte: die feste eigene Staffel (OwnStars), unabhängig von Gewicht und Seltenheit.</summary>
 	private static bool GetTierPrefix(object effectDef, ref int __result)
 	{
 		if (effectDef == null || !IsOwnEffect(effectDef))
 		{
 			return true; // EpicLoots Effekte: EpicLoots Rechnung, mit dem Median ohne unsere
 		}
-		try
-		{
-			__result = 0;
-			if (canRoll!.Invoke(null, new[] { effectDef }) is not true || selectionWeight!.GetValue(effectDef) is not float weight || weight <= 0f)
-			{
-				return false;
-			}
-			if (AnchorsStale())
-			{
-				Anchors();
-			}
-			if (ownAnchor <= 0f)
-			{
-				return false;
-			}
-			int rank = 0;
-			for (int i = 0; i < ownRungs.Length && i < 3; i++)
-			{
-				if (UnityEngine.Mathf.Approximately(weight, ownRungs[i]))
-				{
-					rank = 3 - i;
-					break;
-				}
-			}
-			float ratio = weight / ownAnchor;
-			int byRatio = ratio < 0.0625f ? 3 : ratio < 0.125f ? 2 : ratio < 0.35f ? 1 : 0;
-			__result = Math.Min(rank, byRatio);
-			return false;
-		}
-		catch (Exception e)
-		{
-			ReportFlare(e);
-			return true;
-		}
+		__result = definitionType!.GetValue(effectDef) is string type && OwnStars.TryGetValue(type, out int stars) ? stars : 0;
+		return false;
 	}
 
 	private static void ReportFlare(Exception e)
@@ -1121,6 +1188,7 @@ internal static class LeashMagic
 			case "GC_LeashWhistleBlaze": s.Blaze += v; break;
 			case "GC_LeashWhistleHall": s.Hall = Math.Max(s.Hall, v); break;
 			case "GC_LeashWhistleRally": s.Rally += v; break;
+			default: ApplyUnique(s, type, v); break; // neue einzigartige Stücke (LeashUniques.cs)
 		}
 	}
 }

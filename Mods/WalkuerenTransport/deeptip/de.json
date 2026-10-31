@@ -1,0 +1,45 @@
+{
+  "$locale": "de",
+  "gc.walkuerentransport": {
+    "title": "Walküren-Transport (Mod)",
+    "short": "GC-Mod: Eine Walküre trägt deinen beladenen Karren durch die Luft, auch Fracht, die nicht durchs Portal darf.",
+    "body": "Mit der [[gc.walkuerentransport.whistle|Walkürenpfeife]] neben einem Karren pfeifen: Eine Walküre [[gc.walkuerentransport.pickup|holt ihn ab]], und der nächste Pfiff [[gc.walkuerentransport.delivery|ruft ihn]] dorthin, wo du stehst. Dazwischen liegt ein [[gc.walkuerentransport.courier_raid|Raid]], auf Wunsch auch ein [[gc.walkuerentransport.courier_easter|Easteregg]].\n\nDie Mod braucht [[gc.tiere|GC_Tiere]], denn die Walkürenpfeife ist eine der Tierpfeifen. Alle Werte sind [[gc.serverrules|Server-Regeln]]; [[gc.kern.stufe|Stufe]] 5 „GC“.",
+    "aliases": ["GC_WalkuerenTransport"],
+    "see": ["gc.about", "valheim.item.noteleport"]
+  },
+  "gc.walkuerentransport.courier": {
+    "title": "Walküren-Transport",
+    "short": "Walkürenpfeife am beladenen Karren: Eine Walküre holt ihn ab, der nächste Pfiff ruft ihn zu dir. Jetzt {gc_walkuerentransport_courier}.",
+    "body": "- [[gc.walkuerentransport.pickup|Abholen]]: Im Karren liegen {gc_walkuerentransport_courier_meat} Lox-Fleisch und {gc_walkuerentransport_courier_ymir} Ymir-Fleisch, du pfeifst höchstens 1 m daneben.\n- [[gc.walkuerentransport.courier_raid|Raid]] am Abholort: {gc_walkuerentransport_courier_raid}.\n- [[gc.walkuerentransport.delivery|Abliefern]]: Der nächste Pfiff wirft den Karren ab, wo immer du im Freien stehst.\n\nSo reist auch Fracht, die nicht durchs Portal darf ([[valheim.item.noteleport]]). Je Spieler ist ein Karren in der Luft, rufen kann ihn nur, wer ihn geschickt hat. Aus: keine Abholung, und die Walkürenpfeife lässt sich nicht mehr herstellen.",
+    "aliases": ["Walküren-Transport"]
+  },
+  "gc.walkuerentransport.whistle": {
+    "title": "Walkürenpfeife",
+    "short": "Die dritte der vier Tierpfeifen (Schwarzmetall + Donnerstein, Schmiede); sie ruft außerdem die Walküre für deinen Karren.",
+    "body": "Für Tiere wirkt sie wie eine [[gc.tiere.whistle|Tierpfeife]] (Befehlspause −35 %, beim Pfiff +18 % Tempo); dazu machen gehorchende Tiere 5 s lang 5 % zusätzlich als [[valheim.damage.lightning|Blitzschaden]] und 5 % weniger normalen Schaden. Höchstens 1 m neben einem beladenen Karren oder mit einem Karren in der Luft ruft sie statt der Tiere die Walküre ([[gc.walkuerentransport.courier]]). Sie zerbricht dabei nicht; herstellen lässt sie sich nur, solange der Walküren-Transport an ist.",
+    "aliases": ["Walkürenpfeife", "Walkürenpfeifen"]
+  },
+  "gc.walkuerentransport.pickup": {
+    "title": "Abholen",
+    "short": "Pfeife höchstens 1 m neben deinem Karren mit Lox-Fleisch und Ymir-Fleisch: Eine Walküre trägt ihn davon.",
+    "body": "Im Karren müssen {gc_walkuerentransport_courier_meat} Lox-Fleisch und {gc_walkuerentransport_courier_ymir} Ymir-Fleisch liegen; die Walküre nimmt beides als Lohn, der Rest der Fracht kommt später an. Der Karren darf nicht gezogen werden oder offen sein, niemand darf darauf sitzen, und in einer fremden Schutzzone geht es nicht. Es wird kurz dunkel, ein Gewitter zieht auf, und nach 3 s schlägt ein Blitz in den Karren, der Schaden macht: Geh nach dem Pfiff weg. Holt die Walküre gerade einen anderen Karren, wartet deiner in der Reihe.\n\nDanach beginnt am Abholort ein [[gc.walkuerentransport.courier_raid|Raid]]; erst wenn er vorbei ist, kannst du den Karren [[gc.walkuerentransport.delivery|abliefern]] lassen.",
+    "see": ["gc.walkuerentransport.courier"]
+  },
+  "gc.walkuerentransport.delivery": {
+    "title": "Abliefern",
+    "short": "Der nächste Pfiff mit einer Walkürenpfeife ruft deinen Karren: Er stürzt dort vom Himmel und zerschellt, die Fracht fällt zu Boden.",
+    "body": "Das geht überall im Freien, nicht in Dungeons, und erst, wenn der [[gc.walkuerentransport.courier_raid|Raid]] nach dem Abholen vorbei ist. Nach dem Pfiff warnt ein Zeichen am Boden, nach 3 s schlägt ein Blitz ein, dann fällt der Karren genau dort: Der Aufprall macht [[valheim.damage.blunt|Stumpfschaden]] in Höhe des Karrengewichts, Rüstung, [[valheim.combat.block|Blocken]] und Ausweichen helfen. Geh also nach dem Pfiff aus dem Weg. Zahme Tiere und Gebäude bleiben verschont; Lox-Fleisch und Ymir-Fleisch hat die Walküre behalten.",
+    "see": ["gc.walkuerentransport.pickup"]
+  },
+  "gc.walkuerentransport.courier_raid": {
+    "title": "Raid nach dem Abholen",
+    "short": "Nach dem Abholen beginnt am Karren ein Raid, der gerade möglich ist, auch ohne Gebäude. Jetzt {gc_walkuerentransport_courier_raid}.",
+    "body": "Welche Raids möglich sind, entscheidet Valheim nach besiegten Bossen und Biom. Valheim kennt nur einen Raid zugleich: Läuft schon einer, wartet dieser bis zu 10 Minuten; ist niemand mehr am Karren, fällt er aus. Erst wenn der Raid vorbei ist, lässt sich der Karren [[gc.walkuerentransport.delivery|abliefern]]. Mit dem [[gc.walkuerentransport.courier_easter|Easteregg]] kommen Kampfhühner. Aus: kein Raid, die Fracht ist sofort frei."
+  },
+  "gc.walkuerentransport.courier_easter": {
+    "title": "Easteregg",
+    "short": "Maßloses Schauspiel beim Abholen: Wächter, eine Möwe statt der Walküre und Kampfhühner. Jetzt {gc_walkuerentransport_courier_easter}.",
+    "body": "Acht Szenen mit Lärm, Blitzen, Beben und Feuer am Himmel; sie sehen gefährlich aus, Schaden macht aber wie sonst nur der eine Blitz. Dann erheben sich drei Wächter mit Bossbalken: Grauzwerg, Grauzwergen Berserker und Grauzwergen Schamane, mit zwei Sternen und doppeltem Leben und Schaden. Erst wenn alle drei gefallen sind, holt eine Möwe den Karren, und der Raid danach besteht aus Kampfhühnern, die wie Wildschweine zuschlagen, nur Spieler angreifen und keine Beute lassen. Das Abliefern bleibt gleich.",
+    "aliases": ["Kampfhuhn", "Kampfhühner"]
+  }
+}

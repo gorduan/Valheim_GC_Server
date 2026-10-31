@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GC.Shared;
 using HarmonyLib;
@@ -40,8 +41,15 @@ internal static class Young
 		}
 	}
 
+	/// <summary>
+	/// GC_Tierarten (Jungtiere kämpfen): darf dieses Tier gerade kämpfen? Ist der Schalter dort aus, bekommen Jungtiere keinen
+	/// Angriffsbefehl (Review 27.10.2026: die Meldung sagte sonst „greift an“, das Tier tat es nicht). Null = keine Einschränkung.
+	/// </summary>
+	internal static Func<Character, bool>? FightAllowed;
+
 	/// <summary>Kann das Tier angreifen? Jungtiere mit Tier-KI greifen nie an, andere nur mit Angriffen.</summary>
-	internal static bool CanAttack(Link link) => link.Ai != null && link.Animal is Humanoid humanoid && humanoid.m_defaultItems != null && humanoid.m_defaultItems.Length > 0;
+	internal static bool CanAttack(Link link) => link.Ai != null && link.Animal is Humanoid humanoid && humanoid.m_defaultItems != null && humanoid.m_defaultItems.Length > 0
+		&& (FightAllowed == null || FightAllowed(link.Animal));
 
 	/// <summary>
 	/// Das große Tier entsteht (Growup, im Awake): Name, Fütterer, „entwischt“ und eine Anbindung am Pfosten vom Jungtier

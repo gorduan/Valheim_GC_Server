@@ -1,0 +1,147 @@
+{
+  "$locale": "de",
+  "gc.tiere": {
+    "title": "Tiere: Leinen, Pfeifen, Tierpflege",
+    "short": "GC-Mod für zahme Tiere: an der Leine führen, per Klick oder Pfeife befehligen und mit Tierpflege stärker machen.",
+    "body": "Du führst zahme Tiere an der [[gc.tiere.leash|Leine]], gibst ihnen per Klick oder [[gc.tiere.whistle|Tierpfeife]] [[gc.tiere.commands|Befehle]] und machst sie mit dem Skill [[gc.tiere.care|Tierpflege]] stärker. Gezüchtete Tiere bekommen eine [[gc.tiere.breedlevel|Zucht-Stufe]], die durch [[gc.tiere.animalxp|Tier-Erfahrung]] weiter steigt. Countdowns über Tieren und Eiern (bis 20 m) zeigen, wann ein Tier zahm wird, zur Welt kommt, auswächst oder schlüpft.\n\n- Tierleinen: {gc_tiere_leash}, Tierpflege: {gc_tiere_care}\n- Mit EpicLoot: [[gc.tiere.magic|Verzauberungen]] und [[gc.tiere.unique|einzigartige Stücke]]\n- Darauf bauen auf: [[gc.tierarten]], [[gc.walkuerentransport|Walküren-Transport]], [[gc.futterfolge|Futter-Reihenfolge]], [[gc.zuchtgrenze|Zuchtgrenze]]\n\nAlle Werte sind [[gc.serverrules|Server-Regeln]]. [[gc.kern.stufe|Stufe]] 5 „GC“; solange Leinen oder Tierpflege an sind, zählt die Mod mit 5 % je Boss zum [[gc.kern.bossscale|Boss-Fortschritt]].",
+    "aliases": ["GC_Tiere"],
+    "see": ["gc.about", "gc.modswitch"]
+  },
+  "gc.tiere.leash": {
+    "title": "Tierleinen",
+    "short": "Leine in die Hand, E am zahmen Tier: Es folgt dir an der Leine, wird stärker und nimmt Klick-Befehle an.",
+    "body": "Je Biom gibt es eine Leine, hergestellt an der [[valheim.station.workbench|Werkbank]]: Hirschfell, Trollleder, Wolfspelz, Lox-Pelz, Schuppenhaut, Asksvin-Haut und Elchhaut, ab Wolfspelz mit Barren. Lege sie in die Schnellleiste oder die [[gc.tiere.leashbar|Leinenleiste]] und nimm sie mit ihrer Taste in die Hand: E an einem gezähmten Tier leint es an oder wieder ab, Links- und Rechtsklick sind [[gc.tiere.commands|Befehle]]. Jede Leine hält ein Tier, in der Schnellleiste hält nur eine Leine ein Tier.\n\n- Angeleinte Tiere bekommen den [[gc.tiere.leashbonus|Leinenbonus]].\n- Wie weit das Tier darf und wann die Leine verschleißt: [[gc.tiere.length|Leinenlänge]] und [[gc.tiere.leashload|Leinenlast]].\n- An Pfosten, Zäunen und Mauern [[gc.tiere.post|anbinden]]; auch [[gc.tiere.young|Jungtiere]] lassen sich anleinen.\n- Durch Portale und in Dungeons kommt das Tier mit: {gc_tiere_leash_portal}.\n- Reitest du dein angeleintes Tier, bleibt die Leine dran.\n\nJetzt {gc_tiere_leash}. Aus: Leinen und Pfeifen lassen sich nicht mehr herstellen und wirken nicht; vorhandene bleiben erhalten.",
+    "aliases": ["Leine", "Leinen", "Tierleine", "Tierleinen"],
+    "see": ["gc.tiere.whistle", "gc.tiere.care"]
+  },
+  "gc.tiere.care": {
+    "title": "Tierpflege",
+    "short": "Neuer Skill: Zahme Tiere in deiner Nähe werden stärker, Zähmen geht schneller, und Junge erben mehr. Jetzt {gc_tiere_care}.",
+    "body": "Erfahrung gibt es fürs Füttern mit hingeworfenem oder gepflücktem Futter ({gc_tiere_care_feed}, je Tier alle {gc_tiere_care_feed_cd}), fürs Streicheln ohne Leine in der Hand ({gc_tiere_care_pet}, je Tier alle {gc_tiere_care_pet_cd}), fürs Zähmen ({gc_tiere_care_tame}) und Züchten ({gc_tiere_care_breed}) und wenn ein Tier an deiner Leine etwas tötet ({gc_tiere_care_kill} je Stufe des Opfers).\n\nZahme Tiere bis {gc_tiere_care_radius} um dich bekommen mehr Leben, Schaden, Tempo und Heilung, und Zähmen geht schneller; auf Stufe 100 sind es +42 % Leben, +21 % Schaden, +10 % Tempo, 5 Leben + 0,42 % je Sekunde und dreifaches Zähmtempo. Es zählt der Spieler mit der höchsten Stufe in der Nähe, ein angeleintes Tier bekommt die seines Halters. Die Skill-Liste zeigt deine Boni, Alt+E an einem zahmen Tier dessen Boni.\n\nAußerdem öffnet die Tierpflege Plätze der [[gc.tiere.leashbar|Leinenleiste]], verkürzt [[gc.tiere.leash_cmd_cooldown|Befehlspause]] und [[gc.tiere.care_delay|Zögern]] und hebt die [[gc.tiere.breedlevel|Zucht-Stufe]] der Jungen. Aus: keine Erfahrung, keine Boni und keine Zucht-Stufen.",
+    "aliases": ["Tierpflege"],
+    "see": ["gc.tiere.animalxp", "valheim.skill.overview", "valheim.tame.taming"]
+  },
+  "gc.tiere.length": {
+    "title": "Leinenlänge",
+    "short": "Jede Leine hat eine Mindest- und eine Höchstlänge; darüber dehnt sie sich, verschleißt und zieht das Tier am Ende mit.",
+    "body": "Läufst du, hält das Tier die Mindestlänge; stehst du, streift es frei bis 90 % der Höchstlänge um dich herum. Bis zur Höchstlänge kostet nichts [[valheim.item.durability|Haltbarkeit]], auch Kämpfen nicht. Bis 15 % darüber (die Zuggrenze) dehnt sich die Leine und verliert je {gc_tiere_leash_interval} so viel Haltbarkeit, wie das Tier [[gc.tiere.leashload|Leinenlast]] hat. Dahinter ziehst du das Tier mit, bist dabei aber nur halb so schnell; kann die Leine es nicht nachziehen, etwa über eine tiefe Kante, rutscht sie {gc_tiere_leash_slip} hinter der Zuggrenze aus der Hand.\n\n- Mindest- und Höchstlänge reichen von 2 und 5 m (Hirschfell) bis 10 und 27,25 m (Elchhaut, [[valheim.item.quality|Qualität]] 4); der Tooltip zeigt sie als Länge.\n- Umschalt + Mausrad kürzt die Leine in der Hand bis auf 1 m, alle Bereiche schrumpfen mit. Gekürzt verschleißt sie beim Zerren stärker und gibt bei Befehlen bis zur normalen Länge nach.\n- Reißt die Leine, ist das Tier entwischt: Es gehorcht niemandem, bis du es mit einer anderen oder reparierten Leine wieder einfängst.",
+    "aliases": ["Leinenlänge", "Mindestlänge", "Höchstlänge", "Zuggrenze"],
+    "see": ["gc.tiere.care_delay"]
+  },
+  "gc.tiere.leashload": {
+    "title": "Leinenlast",
+    "short": "Wie stark ein Tier an der Leine zerrt: So viel Haltbarkeit verliert eine überdehnte Leine je Prüfung.",
+    "body": "Sie richtet sich nach Größe, Kraft und Gewicht des Tiers: Huhn 0,5, Wildschwein 1, Wolf 1,5, Asksvin 2,5, Elch 3, Lox 3,5, Jungtiere die Hälfte. Mit [[gc.tierarten|GC_Tierarten]]: Nixe und Hase 0,5, Hirsch 1,5, Robbe 2, Bär 3, Aasbär 3,5. Sie kostet nur, solange die Leine über ihre Höchstlänge gedehnt ist ([[gc.tiere.length|Leinenlänge]]), dann je {gc_tiere_leash_interval}.\n\nTiere anderer Mods schätzt die Mod aus ihren Spieldaten; Admins können eigene Werte in der Config festlegen (`AnimalRules`). Mit EpicLoot senkt die Verzauberung Leinenlast den Wert in Schritten von 0,5, höchstens bis 0,5.",
+    "aliases": ["Leinenlast"]
+  },
+  "gc.tiere.leashbonus": {
+    "title": "Leinenbonus",
+    "short": "Tiere an einer Leine haben mehr Leben und Schaden: von +10 % (Hirschfell) bis +120 % (Elchhaut, Qualität 4).",
+    "body": "Jede Leine gibt mindestens das 1,25-Fache der vorigen, jede Stufe [[valheim.item.quality|Qualität]] etwas mehr; der Tooltip der Leine zeigt den Wert. Der Bonus gilt, solange das Tier an einer wirksamen Leine hängt oder mit ihr [[gc.tiere.post|angebunden]] ist, und kommt zu den Boni der [[gc.tiere.care|Tierpflege]] dazu. Das Leben steigt als echtes Höchstleben, der Anteil des aktuellen Lebens bleibt gleich: Anleinen heilt also nicht.",
+    "aliases": ["Leinenbonus"]
+  },
+  "gc.tiere.commands": {
+    "title": "Befehle an der Leine",
+    "short": "Mit der Leine in der Hand schickt Linksklick das Tier an einen Ort, Rechtsklick lässt es einen Gegner angreifen.",
+    "body": "Befehle nimmt ein Tier erst ab Stufe {gc_tiere_leash_cmd_level} an ([[gc.tiere.leash_cmd_level|Mindeststufe]]); nach jedem Befehl folgt eine [[gc.tiere.leash_cmd_cooldown|Befehlspause]] von bis zu {gc_tiere_leash_cmd_cooldown}. Hältst du seine Leine, zeigt der Hinweis am Tier, ob es bereit ist.\n\n- Linksklick: Das Tier geht an die angezielte Stelle, höchstens so weit, wie die Leine es frei laufen lässt, und wartet dort. Unterwegs lässt es sich nicht ablenken.\n- Rechtsklick: Das Tier greift das anvisierte Ziel an, wenn das Ziel ein Gegner ist (keine Spieler, keine zahmen Tiere), höchstens {gc_tiere_leash_chase} vom Tier entfernt und in Reichweite der Leine. Es kämpft, bis der Gegner tot oder weiter weg ist.\n\nMit einer [[gc.tiere.whistle|Tierpfeife]] gelten die Befehle für alle Tiere an deinen Leinen. Jungtiere greifen nur an, wenn [[gc.tierarten.species_young_fight|Jungtiere kämpfen]] an ist (GC_Tierarten).",
+    "see": ["gc.tiere.obedience"]
+  },
+  "gc.tiere.post": {
+    "title": "Anbinden",
+    "short": "E an Pfosten, Zaun oder Mauer bindet dein angeleintes Tier dort fest; die Leine hängt dann als Knoten am Bauteil.",
+    "body": "Mit einer Leine in der Hand bindet E am Bauteil ihr Tier an, ohne Leine in der Hand alle deine angeleinten Tiere in Reichweite. Das Tier bleibt im Umkreis seiner Leine und behält den [[gc.tiere.leashbonus|Leinenbonus]]. Der Leinenknoten verliert nur durch direkten Schaden Haltbarkeit, davon ein Viertel, und lässt sich mit dem Hammer reparieren; wird er zerstört, ist das Tier frei und die Leine liegt kaputt am Boden.\n\nZurück nimmst du die Leine mit E am Knoten oder, mit einer Leine in der Hand, mit E am angebundenen Tier; hängen mehrere Tiere am Bauteil, erscheint eine Auswahl. Sie kommt in einen offenen Platz der [[gc.tiere.leashbar|Leinenleiste]] oder in die Schnellleiste, wenn dort noch keine Leine ein Tier hält.",
+    "aliases": ["Leinenknoten"]
+  },
+  "gc.tiere.leashbar": {
+    "title": "Leinenleiste",
+    "short": "Fünf eigene Plätze rechts neben der Schnellleiste für Leinen und Pfeifen; Alt+1 bis Alt+5 nimmt sie in die Hand.",
+    "body": "Die Plätze öffnen sich mit der [[gc.tiere.care|Tierpflege]] ab Stufe 1, 25, 50, 75 und 90; ist die Tierpflege aus, sind alle offen. Leinen und Pfeifen passen in jeden Platz, wirken aber nur in offenen: Dort hält eine Leine ihr Tier, und Alt+Zahl nimmt Leine oder Pfeife in die Hand. Mit der einen Leine der Schnellleiste führst du so bis zu sechs Tiere.\n\n- Eine Leine mit Tier lässt sich nicht in einen gesperrten Platz legen. Sinkt deine Tierpflege, bleibt die Leine liegen, ihr Tier ist aber frei.\n- Leinen vom Pfosten kommen nur in offene Plätze.\n- Beim Tod kommt die Leiste mit ins Grab. Beim Einsammeln kehrt jedes Stück in seinen alten Platz zurück; was dort inzwischen liegt, wandert ins Inventar.\n\nIm Inventar ziehst du Leinen hinein und heraus; an der Werkbank werden sie mit repariert.",
+    "aliases": ["Leinenleiste", "Leinenplatz"]
+  },
+  "gc.tiere.whistle": {
+    "title": "Tierpfeife",
+    "short": "Mit der Pfeife in der Hand gelten Links- und Rechtsklick für alle Tiere an deinen Leinen auf einmal.",
+    "body": "Es gibt vier Pfeifen: Edelholz an der [[valheim.station.workbench|Werkbank]], Eisen, die [[gc.walkuerentransport.whistle|Walkürenpfeife]] (nur mit dem Walküren-Transport) und Flammenkern an der [[valheim.station.forge|Schmiede]]. Linksklick schickt alle Tiere an deinen Leinen zum Ziel, im Kreis darum verteilt; Rechtsklick lässt alle angreifen. Je Tier gelten die Regeln der [[gc.tiere.commands|Befehle]], angebundene und gerittene Tiere hören nicht darauf.\n\n- Die [[gc.tiere.leash_cmd_cooldown|Befehlspause]] wird kürzer: Edelholz −6 %, Eisen −21 %, Walkürenpfeife −35 %, Flammenkern −50 %.\n- Jedes Tier, das gehorcht, ist 5 s lang schneller (+3 % bis +25 %), seine Leine nimmt so lange keinen Schaden, und [[gc.tiere.magic|Verzauberungen]] der Pfeife wirken mit.\n- Nach jedem Pfiff ist die Pfeife 5 s gesperrt.\n\nPfeifen wirken aus der Schnellleiste und aus offenen Plätzen der [[gc.tiere.leashbar|Leinenleiste]]. Tierpfeifen: {gc_tiere_leash_whistles}; sie brauchen die Tierleinen.",
+    "aliases": ["Tierpfeife", "Tierpfeifen", "Pfeife", "Pfeifen", "Pfiff"]
+  },
+  "gc.tiere.young": {
+    "title": "Jungtiere an der Leine",
+    "short": "Ferkel, Wolfsjunges, Lox-Kalb, Küken, Asksvin-Schlüpfling und Elchkalb lassen sich anleinen, anbinden und streicheln.",
+    "body": "In Valheim geht das bei Jungtieren nicht; mit dieser Mod folgen sie an der Leine wie die großen Tiere, mit halb so hoher [[gc.tiere.leashload|Leinenlast]]. Wächst ein Jungtier an der Leine oder am Pfosten auf, bleibt das große Tier daran, samt Namen. Angreifen lassen sie sich nur mit [[gc.tierarten.species_young_fight|Jungtiere kämpfen]] aus GC_Tierarten; sonst lehnen sie den Angriffsbefehl ab.",
+    "aliases": ["Jungtier", "Jungtiere"]
+  },
+  "gc.tiere.breedlevel": {
+    "title": "Zucht-Stufe",
+    "short": "Die Stufe eines zahmen Tiers (Lvl hinter dem Namen) aus Zucht und Kampf-Erfahrung; sie macht das Tier dauerhaft stärker.",
+    "body": "Ein Junges bekommt zufällig zwischen ¾ des Durchschnitts seiner Eltern und der Stufe des höheren Elternteils, dazu 0 bis ¼ der [[gc.tiere.care|Tierpflege]] seines Züchters. Züchter ist, wessen Futter die Mutter zuletzt gefressen hat, hingeworfen oder gepflückt; er muss bei der Geburt nicht da sein. Bei Eiern steht die Stufe schon im Ei, Eier verschiedener Stufe stapeln sich nicht.\n\n- Ein Tier mit Stufe hat dauerhaft mehr Leben, Schaden, Tempo und Heilung, auch ohne Spieler in der Nähe. Halbe Tier-Stufe und Tierpflege des Pflegers zählen zusammen höchstens 150 (mit GC_Tierarten einstellbar).\n- Weiter steigt die Stufe durch [[gc.tiere.animalxp|Tier-Erfahrung]], bis zur Höchststufe 150 oder mit [[gc.tierarten.maxlevel|GC_Tierarten]] der ihrer Art.\n- Als Partner zählt das nächste zahme Tier der Art, mit [[gc.futterfolge.partner|GC_Futterfolge]] der beste satte Partner.\n- Zum Testen setzt `gc_tierstufe` (Konsole, mit devcommands) die Stufe des Tiers unter dem Fadenkreuz.",
+    "aliases": ["Zucht-Stufe", "Tier-Stufe"],
+    "see": ["valheim.tame.breeding"]
+  },
+  "gc.tiere.animalxp": {
+    "title": "Tier-Erfahrung",
+    "short": "Zahme Tiere sammeln im Kampf Erfahrung und steigen auf; es steigt dieselbe Stufe wie aus der Zucht.",
+    "body": "Jeder Angriff, der einen Gegner trifft, bringt 1 Erfahrung, ein Kill dazu {gc_tiere_care_xp_kill} mal die Stufe des Opfers (ohne Stern 1, ein Stern 2, zwei Sterne 3). Es zählen nur Monster und wilde Tiere, keine Trainingspuppen. Eine Stufe kostet so viel wie bei Valheims Waffen-[[valheim.skill.overview|Fertigkeiten]] (1 bei Stufe 1, 178 bei 50, 501 bei 100, 920 bei 150), und die Tiere lernen {gc_tiere_care_xp_factor} so schnell wie dort; Valheims Welteinstellung für Fertigkeiten wirkt mit.\n\nBeim Aufstieg steht „Lvl X!“ über dem Tier, Alt+E zeigt den Fortschritt. Lokis Trugbilder geben ihre Erfahrung an ihr echtes Tier, Beschwörungen bekommen keine. Jetzt {gc_tiere_care_xp}; die Tier-Erfahrung braucht die [[gc.tiere.care|Tierpflege]].",
+    "aliases": ["Tier-Erfahrung"],
+    "see": ["gc.tiere.breedlevel", "gc.tierarten.maxlevel"]
+  },
+  "gc.tiere.saddle": {
+    "title": "Sättel",
+    "short": "Reiten mit Leine und, mit EpicLoot, verzauberte Sättel, deren Effekte beim Reiten auf Reittier und Reiter wirken.",
+    "body": "Reitest du dein angeleintes Tier, bleibt die Leine dran und der [[gc.tiere.leashbonus|Leinenbonus]] wirkt weiter; solange du im Sattel sitzt, zieht und verschleißt die Leine nicht und nimmt keine Befehle. Reitet jemand anderes, ist die Leine gelöst.\n\nMit EpicLoot würfeln Lox- und Asksvin-Sattel und die [[gc.tierarten.bearsaddle|Bärensättel]] die Kampf-Effekte der Pfeifen (ohne Leuchten und Angriffstempo) und eigene Effekte für die [[valheim.stat.stamina|Ausdauer]] des Reittiers. Beim [[valheim.skill.ride|Reiten]] wirken Tempo, Leben, Schutz und Ausdauer am Reittier, Schaden, Elemente, Lebensraub und Wucht an deinen Treffern. Beim Aufsatteln wandert das Sattel-Item samt Verzauberung ins Tier und kommt beim Herunterfallen zurück. Sättel fallen auch als Beute (0,5 % je Kreatur), dazu gibt es [[gc.tiere.unique|einzigartige Sättel]].",
+    "aliases": ["Sattel", "Sättel"]
+  },
+  "gc.tiere.magic": {
+    "title": "Verzauberte Leinen, Pfeifen und Sättel",
+    "short": "Mit EpicLoot lassen sich Leinen, Tierpfeifen und Sättel verzaubern; sie würfeln eigene Tier-Effekte statt Waffen-Effekten.",
+    "body": "Alle EpicLoot-Wege gelten: Verzaubern, Aufwerten, Entzaubern, Opfern, Runen und Sockel. Als Beute fällt mit 1 % je Kreatur eine Leine des Bioms, in Grasland und Düsterwald höchstens episch.\n\n- Leinen: Effekte für die Leine (Reichweite, Haltbarkeit, [[gc.tiere.leashload|Leinenlast]] …), für das Tier (Schaden, Leben, Tempo, Bisse mit Elementen, [[gc.tiere.obedience|Gehorsam]], [[gc.tiere.revive|Wiederkehr]] …) und für dich. Sie wirken, solange die Leine wirkt und ein Tier daran hängt; am Knoten nur Unzerstörbar und Haltbarkeit.\n- [[gc.tiere.whistle|Pfeifen]]: nur Kampf-Effekte fürs Tier, beim Pfiff 5 s lang für jedes Tier, das gehorcht.\n- [[gc.tiere.saddle|Sättel]]: wirken nur beim Reiten.\n\nSeltene Effekte tragen eine feste eigene Sternstaffel: ★ Feuer-, Frost-, Gift- und Geisterbiss, Donnerschlag, Lebensraub, Trugschleier, Abschreckung, Fenrirs Wut und Goldborsten; ★★ Standfest; ★★★ Wiederkehr und Unzerstörbar. Ohne EpicLoot bleiben Verzauberungen gespeichert, wirken aber nicht.",
+    "see": ["gc.tiere.unique", "gc.tiere.leash_loki"]
+  },
+  "gc.tiere.unique": {
+    "title": "Einzigartige Stücke",
+    "short": "Legendäre, mythische und uralte Leinen, Pfeifen und Sättel mit festen Sondereffekten, nur mit EpicLoot.",
+    "body": "Jedes Stück trägt einen Namen aus der nordischen Sage, etwa Gleipnir, Lokis Blendwerk oder Gjallarhorn, und feste Effekte, viele davon nur hier. EpicLoot wählt es als Beute oder beim Verzaubern erst, wenn du seinen Boss besiegt hast, und nur auf einer Leine oder Pfeife, die mindestens zu diesem Boss passt, oder auf dem passenden Sattel. Arten-Leinen wirken nur an ihrer Tierart, die Bären-Leine nur, wenn [[gc.tierarten.species_tame_bjorn|Bären zähmbar]] sind.\n\nZum Testen legt der Konsolenbefehl `gc_einzigartig` (mit devcommands) ein Stück ins Inventar, etwa `gc_einzigartig gleipnir 4` für Qualität 4; ohne Angabe listet er alle Stücke.",
+    "aliases": ["Arten-Leine"],
+    "see": ["gc.tiere.magic", "gc.tiere.leash_loki"]
+  },
+  "gc.tiere.obedience": {
+    "title": "Gehorsam",
+    "short": "EpicLoot-Effekt einer Leine: Solange du dich bewegst, läuft das Tier mit dir und lässt sich seltener ablenken.",
+    "body": "Bei 100 % greift das Tier unterwegs niemanden an. Darunter greift es nahe Gegner eher an als ferne: Die Chance ist (100 % − Gehorsam) × {gc_tiere_leash_chase} ÷ Abstand, alle 2 s neu gewürfelt. Solange du läufst, lässt es auch Futter mit der Wahrscheinlichkeit seines Gehorsams liegen. Bleibst du stehen, kämpft es normal, und einem Angriffsbefehl folgt es immer.",
+    "aliases": ["Gehorsam"]
+  },
+  "gc.tiere.revive": {
+    "title": "Wiederkehr",
+    "short": "Seltener EpicLoot-Effekt einer Leine: Ein tödlicher Treffer lässt das Tier nicht sterben, es fällt nur in Ohnmacht.",
+    "body": "In der Ohnmacht ist das Tier unsichtbar, reglos, unverwundbar und kein Ziel für Gegner; reiten oder anleinen lässt es sich dann nicht. Danach steht es mit vollem Leben auf, die Leine ist aber gelöst. Leinst du es neu an, wirkt die Wiederkehr wieder. Der Effekt würfelt erst ab legendär, und je besser die Seltenheit, desto kürzer die Ohnmacht.",
+    "aliases": ["Wiederkehr", "Ohnmacht"]
+  },
+  "gc.tiere.leash_loki": {
+    "title": "Lokis Trugbilder",
+    "short": "Die mythische Leine Lokis Blendwerk ruft ein oder zwei Trugbilder des Tiers, die mitkämpfen (nur mit EpicLoot).",
+    "body": "Wie viele es sind, würfelt EpicLoot einmal beim Erschaffen der Leine. Ein Trugbild ist eine Kopie des Tiers mit gleichen Sternen und gleichem Namen; es folgt dir und kämpft mit den Tier-Werten der Leine, lässt nichts fallen, frisst und vermehrt sich nicht und lässt sich weder anleinen noch befehligen. Seine Erfahrung bekommt das echte Tier.\n\nEin getötetes Trugbild kehrt nach {gc_tiere_leash_loki} von selbst zurück, solange das Tier an der Leine hängt. Die Zeit läuft in der Leine weiter, auch wenn du neu anleinst; Loki meldet beim Anleinen und beim Tod, wie lange es noch dauert. Wird die Leine gelöst, angebunden oder weggelegt, verschwinden die Trugbilder.",
+    "aliases": ["Lokis Trugbilder", "Trugbild", "Trugbilder"],
+    "see": ["gc.tiere.unique"]
+  },
+  "gc.tiere.leash_cmd_level": {
+    "title": "Befehle ab Tier-Stufe",
+    "short": "Klick-Befehle von Leine und Pfeife nimmt ein Tier erst ab dieser Stufe an; jetzt ab {gc_tiere_leash_cmd_level}.",
+    "body": "Gemeint ist die [[gc.tiere.breedlevel|Zucht-Stufe]], die als Lvl hinter dem Namen steht. Gezüchtete Tiere erben sie, frisch gezähmte haben 0 und steigen erst durch [[gc.tiere.animalxp|Tier-Erfahrung]] im Kampf auf. Die Grenze gilt nur, solange die [[gc.tiere.care|Tierpflege]] an ist; abgelehnte Befehle starten keine Pause."
+  },
+  "gc.tiere.leash_cmd_cooldown": {
+    "title": "Befehlspause",
+    "short": "Nach einem Befehl wartet ein Tier bis zu {gc_tiere_leash_cmd_cooldown}, bevor es den nächsten annimmt.",
+    "body": "Die Pause steht im Tier: Sie gilt auch nach neuem Anleinen und für andere Spieler. Sie wird kürzer um den Durchschnitt aus Tier-Stufe und deiner halben [[gc.tiere.care|Tierpflege]] in Prozent; Tier-Stufe 20 und Tierpflege 20 ergeben 15 % kürzer, ab 100 % gibt es keine Pause. Eine [[gc.tiere.whistle|Tierpfeife]] kürzt sie zusätzlich, von −6 % (Edelholz) bis −50 % (Flammenkern).",
+    "aliases": ["Befehlspause"]
+  },
+  "gc.tiere.leash_durability": {
+    "title": "Haltbarkeit der Leinen",
+    "short": "Grund-Haltbarkeit der Leinen: Die Hirschfell-Leine hat {gc_tiere_leash_durability}, jede bessere ein Vielfaches davon.",
+    "body": "Trollleder ×2, Wolfspelz ×3, Lox-Pelz ×4, Schuppenhaut ×5, Asksvin-Haut ×6⅓, Elchhaut ×8. Jede Stufe [[valheim.item.quality|Qualität]] bringt die Hälfte der Grund-Haltbarkeit dazu, Qualität 4 hat also das 2,5-Fache. Haltbarkeit verliert nur eine überdehnte Leine ([[gc.tiere.length|Leinenlänge]]) oder ein Knoten, der direkt getroffen wird; Leinen repariert die [[valheim.station.workbench|Werkbank]], Knoten der Hammer."
+  },
+  "gc.tiere.care_delay": {
+    "title": "Zögern beim Losgehen",
+    "short": "Läufst du los, zögert ein Tier an der Leine kurz, bevor es folgt: bis zu {gc_tiere_care_delay}, je nach Mischstufe.",
+    "body": "Die Bedenkzeit wird jedes Mal neu gewürfelt; so lange streift das Tier weiter herum, und die Leine zieht wie immer. Sie wird kürzer mit der Mischstufe = (Tier-Stufe + 2 × halbe [[gc.tiere.care|Tierpflege]] des Halters) ÷ 3; ab Mischstufe {gc_tiere_care_delay_level} folgt das Tier sofort. Eine neue Bedenkzeit gibt es erst, wenn du kurz gestanden hast. Ohne Tierpflege zögert kein Tier.",
+    "aliases": ["Mischstufe"]
+  }
+}

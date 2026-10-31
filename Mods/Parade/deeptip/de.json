@@ -1,0 +1,14 @@
+{
+  "$locale": "de",
+  "gc.parade": {
+    "title": "Parade mit Rückwurf",
+    "short": "Eine perfekte Parade schleudert Pfeile, Bolzen und feste Geschosse wie Steine zum Werfer zurück.",
+    "body": "[[valheim.combat.parry|Parierst]] du ein Geschoss und hält der [[valheim.combat.block|Block]], fliegt ein neues Geschoss von dir aus dorthin, wo der Werfer in diesem Moment stand. Es sucht kein Ziel: Wer ausweicht, wird nicht getroffen. Zurück fliegen Pfeile und Bolzen, auch Feuer-, Gift- und Frostpfeile (einstellbar), und feste Geschosse mit rein körperlichem Schaden wie Steine und Felsbrocken; Feuerbälle und andere Magie nie.\n\nDie Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 4 „GC leicht“), Server und alle Spieler brauchen sie. Solange sie läuft, zählt sie für die Automatik des [[gc.kern.bossscale|Boss-Fortschritts]] mit 2 % je Boss.",
+    "see": ["gc.parade.deflect"]
+  },
+  "gc.parade.deflect": {
+    "title": "Parade wirft Geschosse zurück",
+    "short": "Server-Regel: Perfekte Paraden werfen Geschosse zurück. Aus: Paraden wirken wie in Valheim.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_parade_deflect}; wie das Zurückwerfen funktioniert, steht unter [[gc.parade]]. Die Werte darunter gibt ebenfalls der Server vor:\n\n- Auch Pfeile und Bolzen: {gc_parade_deflect_arrows}. An fliegen sie immer zurück, auch Feuer-, Gift- und Frostpfeile; aus zählen sie wie alle anderen Geschosse.\n- Faktor auf den ursprünglichen Schaden des Geschosses: {gc_parade_deflect_damage}"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$locale": "de",
+  "gc.zuchtgrenze": {
+    "title": "Zuchtgrenze (Mod)",
+    "short": "GC-Mod: Mehr Tiere je Umkreis, bevor die Zucht stoppt; Tiere an Leinen zählen weniger.",
+    "body": "Valheim stoppt die [[valheim.tame.breeding|Zucht]], sobald zu viele Tiere einer Art beieinander stehen. Diese Mod hebt die Grenze an ([[gc.zuchtgrenze.breed]]); mit [[gc.tiere|GC_Tiere]] zählen Tiere an einer Leine oder an einem Pfosten nur anteilig.\n\nAlle Werte sind [[gc.serverrules|Server-Regeln]]. [[gc.kern.stufe|Stufe]] 4 „GC leicht“; eingeschaltet zählt die Mod mit 1 % je Boss zum [[gc.kern.bossscale|Boss-Fortschritt]].",
+    "aliases": ["GC_Zuchtgrenze"],
+    "see": ["gc.about"]
+  },
+  "gc.zuchtgrenze.breed": {
+    "title": "Zuchtgrenze",
+    "short": "Wie viele Tiere einer Art im Umkreis stehen dürfen, bevor keines mehr trächtig wird. Jetzt {gc_zuchtgrenze_breed}.",
+    "body": "Valheim zählt im Umkreis Erwachsene und Junge derselben Art, auch wilde, und lässt nur unter einer Grenze je Art Nachwuchs zu, etwa 4 Wölfe in 10 m. Hier gilt:\n\n- Grenze: {gc_zuchtgrenze_breed_factor} Valheims Wert, Umkreis: {gc_zuchtgrenze_breed_radius} Valheims Wert\n- Ein Tier an einer Leine oder an einem Pfosten zählt {gc_zuchtgrenze_breed_leashed} (mit GC_Tiere).\n- Bei Hühnern zählen Hennen und gelegte Eier, keine Küken, mit eigenen Werten: Grenze {gc_zuchtgrenze_breed_chicken_factor} und Umkreis {gc_zuchtgrenze_breed_chicken_radius} Valheims Wert, eine Henne an der Leine zählt {gc_zuchtgrenze_breed_chicken_leashed}.\n\nAus: genau wie Valheim. Die Grenzen je Art stehen beim Serverstart im Log.",
+    "aliases": ["Zuchtgrenze"]
+  }
+}

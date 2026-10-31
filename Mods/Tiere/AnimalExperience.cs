@@ -95,7 +95,8 @@ internal static class AnimalExperience
 			}
 			return;
 		}
-		Add(animal.m_nview.GetZDO(), amount);
+		ZDO zdo = animal.m_nview.GetZDO();
+		Add(zdo, amount * LeashUniqueEffects.Wisdom(zdo)); // Mímirs Weisheit der Leine: +x % (Gorduan, 27.10.2026)
 	}
 
 	private static void Send(ZDO zdo, float amount)

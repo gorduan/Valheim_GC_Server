@@ -1,0 +1,15 @@
+{
+  "$locale": "en",
+  "gc.leiter": {
+    "title": "Ladder",
+    "short": "A vertical ladder to build: E takes you to its top or bottom end, and several pieces stack.",
+    "body": "You build it with the hammer under Misc. at the [[valheim.station.workbench|workbench]]; each piece is 1 m high, and pieces placed on top of each other count as one long ladder. There is no climbing animation: E on the lower rungs takes you all the way up, on the upper rungs all the way down, Shift+E always down. At the top you land on the platform behind the ladder, at the bottom in front of it on the free side, without fall damage and never inside the area of someone else's ward.\n\nThe mod is part of GC Server ([[gc.kern.stufe|level]] 4 “GC light”), and the server and all players need it. Wood cost and distance are set in its [[gc.leiter.ladder|settings]].",
+    "aliases": ["vertical ladder"],
+    "see": ["gc.leiter.ladder"]
+  },
+  "gc.leiter.ladder": {
+    "title": "Ladder",
+    "short": "Server rule: the ladder can be built and used. Off: it can no longer be built, built ladders stay.",
+    "body": "This [[gc.serverrules|server rule]] is {gc_leiter_ladder}. When it is off, the [[gc.leiter|ladder]] disappears from the hammer; built ladders stay standing but take you nowhere.\n\n- Wood per 2 m of ladder: {gc_leiter_ladder_cost}; a 1 m piece costs half, rounded up (server rule)\n- Distance when getting off: {gc_leiter_ladder_exit}, how far in front of or behind the ladder you land (applies only to you)"
+  }
+}

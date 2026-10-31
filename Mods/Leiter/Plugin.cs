@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace GC.Server.ModLeiter;
 
 /// <summary>
-/// GC_Leiter (Gorduan), Stufe 4 „GC leicht“: Baubare Leiter, 1 und 2 m hoch, mit festem Vorne.
+/// GC_Leiter (Gorduan), Stufe 4 „GC leicht“: Baubare Leiter aus 1-m-Stücken, beliebig hoch stapelbar, mit festem Vorne.
 /// Früher Teil von GC_Server. Stufe, Seite und Abhängigkeiten stehen in der .csproj.
 /// </summary>
 public partial class Plugin : BaseUnityPlugin

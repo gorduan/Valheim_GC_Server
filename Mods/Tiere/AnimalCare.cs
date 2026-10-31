@@ -37,7 +37,8 @@ namespace GC.Server.Leash;
 /// gefressen hat (hingeworfen oder gepflückt), mit seiner Stufe von dem Moment; er muss bei der Geburt nicht da sein.
 ///
 /// Mehrspieler: Jeder Spieler veröffentlicht seine Stufe in seinem Spieler-ZDO. Tiere rechnet ihr Besitzer (wie Valheim
-/// selbst). Erfahrung für andere Spieler geht als Nachricht an deren Sitzung.
+/// selbst); besitzt der dedizierte Server ein Tier, übernimmt es ein Spieler in der Nähe. Erfahrung für andere Spieler geht
+/// als Nachricht an deren Sitzung; Fütterer und Züchter findet sie über ihre Spieler-ID auch nach einer Neuanmeldung.
 /// </summary>
 internal static class Care
 {
@@ -72,6 +73,15 @@ internal static class Care
 	internal static readonly int DropperSkillHash = "gc_care_dropper_skill".GetStableHashCode();
 	/// <summary>Im Tier: Tierpflege-Stufe des Fütterers aus seinem Futter (−1 oder fehlt: unbekannt, Futter von vor 1.5.0).</summary>
 	internal static readonly int FeederSkillHash = "gc_care_feeder_skill".GetStableHashCode();
+	/// <summary>
+	/// Im Tier und im Futter (Review 27.10.2026): Spieler-ID des Fütterers bzw. Fallenlassers. Die Sitzung (FeederHash,
+	/// DropperHash) wechselt bei jeder Anmeldung; über die Spieler-ID findet die Erfahrung für Zucht und Füttern ihn wieder.
+	/// Fehlt sie (Daten von vor 1.9.0), gilt die gespeicherte Sitzung wie bisher.
+	/// </summary>
+	internal static readonly int FeederIdHash = "gc_care_feeder_id".GetStableHashCode();
+	internal static readonly int DropperIdHash = "gc_care_dropper_id".GetStableHashCode();
+	/// <summary>EpicLoots Geistertier (Effekt SpiritAnimal, 0.15.2): im Tier-ZDO die Spieler-ID seines Herrn.</summary>
+	private static readonly int SpiritHash = "el-spirit".GetStableHashCode();
 	/// <summary>Im Tier: Höchstleben ohne Boni (Grundlage) und der zuletzt angewendete Faktor, damit jeder Besitzer gleich rechnet.</summary>
 	private static readonly int HpBaseHash = "gc_care_hpbase".GetStableHashCode();
 	private static readonly int HpFactorHash = "gc_care_hpfactor".GetStableHashCode();
@@ -126,6 +136,7 @@ internal static class Care
 			IncreaseStep = 1f,
 		});
 		CommandManager.Instance.AddConsoleCommand(new CareLevelCommand());
+		CommandManager.Instance.AddConsoleCommand(new UniqueCommand()); // einzigartige Stücke zum Testen (EpicLoot)
 		CustomLocalization localization = LocalizationManager.Instance.GetLocalization();
 		foreach (string key in new[] { "gcs_skill_care", "gcs_skill_care_desc" })
 		{
@@ -155,8 +166,8 @@ internal static class Care
 		}
 	}
 
-	/// <summary>Größte Erfahrung, die ein Ereignis geben kann (Beute: mal Stufe des Opfers, mit Mods bis 5 Sterne).</summary>
-	private static float MaxGrant() => Mathf.Max(FeedXp.Value, PetXp.Value, TameXp.Value, BreedXp.Value, KillXp.Value * 6f);
+	/// <summary>Größte Erfahrung, die ein Ereignis geben kann (Beute: mal Stufe des Opfers, mit Mods bis 5 Sterne; Mímir bis doppelt).</summary>
+	private static float MaxGrant() => Mathf.Max(FeedXp.Value, PetXp.Value, TameXp.Value, BreedXp.Value, KillXp.Value * 6f) * LeashUniqueEffects.WisdomFactorMax;
 
 	/// <summary>Erfahrung für den Spieler dieser Sitzung (lokal oder als Nachricht an seinen Rechner).</summary>
 	internal static void Grant(long session, float amount)
@@ -339,13 +350,19 @@ internal static class Care
 				continue;
 			}
 			ZNetView? view = animal.m_nview;
-			if (view == null || !view.IsValid() || !view.IsOwner())
+			if (view == null || !view.IsValid() || Summoned(animal))
 			{
-				continue; // rechnet sein Besitzer
+				continue; // beschworene Wesen (Dead Raiser, Spirit Caller, EpicLoots Geistertiere) sind keine Tiere
 			}
-			if (Summoned(animal))
+			if (!view.IsOwner())
 			{
-				continue; // beschworene Wesen (Dead Raiser, Spirit Caller) sind keine Tiere
+				// Review 27.10.2026: Um den Weltmittelpunkt besitzt der dedizierte Server die Tiere dauerhaft und rechnet keine
+				// Tierpflege (kein Spieler, ohne Grafik kein Update); ein Spieler bis 30 m übernimmt sie wie beim Anbinden
+				Posts.ClaimFromServer(view);
+				if (!view.IsOwner())
+				{
+					continue; // rechnet sein Besitzer
+				}
 			}
 			ZDO zdo = view.GetZDO();
 			float leash = LeashBonus(zdo);
@@ -365,22 +382,30 @@ internal static class Care
 		}
 	}
 
-	private static readonly Dictionary<string, bool> SummonedByPrefab = new();
+	private static readonly Dictionary<int, bool> SummonedByPrefab = new();
 
 	/// <summary>
 	/// Beschworen statt gezähmt: Die Beschwörungen von Valheim 1.0 (Skeleton_Friendly aus dem Dead Raiser, die Geister des
 	/// Spirit Caller) verschwinden mit Abstand oder nach dem Ausloggen ihres Besitzers (Tameable.m_unsummonDistance bzw.
-	/// m_unsummonOnOwnerLogoutSeconds); zahme Tiere und Jungtiere nie.
+	/// m_unsummonOnOwnerLogoutSeconds); zahme Tiere und Jungtiere nie. Review 27.10.2026: dazu EpicLoots Geistertiere
+	/// (Effekt SpiritAnimal): Valheims eigene Tiere, gezähmt und nicht dauerhaft, erkennbar nur je Tier am ZDO „el-spirit“
+	/// (Spieler-ID des Herrn), deshalb nicht im Speicher je Vorlage.
 	/// </summary>
 	internal static bool Summoned(Character animal)
 	{
-		string name = Utils.GetPrefabName(animal.gameObject);
-		if (!SummonedByPrefab.TryGetValue(name, out bool summoned))
+		ZNetView? view = animal.m_nview;
+		ZDO? zdo = view != null && view.IsValid() ? view.GetZDO() : null;
+		if (zdo != null && zdo.GetLong(SpiritHash, 0L) != 0L)
+		{
+			return true;
+		}
+		int prefab = zdo != null ? zdo.GetPrefab() : Utils.GetPrefabName(animal.gameObject).GetStableHashCode();
+		if (!SummonedByPrefab.TryGetValue(prefab, out bool summoned))
 		{
 			Tameable? tame = animal.GetComponent<Tameable>();
 			// Valheims eigenes Zeichen für Beschwörungen: Erfahrung geht an den Skill ihres Herrn (Character.RaiseSkill)
 			summoned = tame != null && (tame.m_unsummonDistance > 0f || tame.m_unsummonOnOwnerLogoutSeconds > 0f || tame.m_levelUpOwnerSkill != Skills.SkillType.None);
-			SummonedByPrefab[name] = summoned;
+			SummonedByPrefab[prefab] = summoned;
 		}
 		return summoned;
 	}
@@ -496,9 +521,9 @@ internal static class Care
 
 	/// <summary>
 	/// Ein Tier frisst Futter, das ein Spieler fallen ließ oder pflückte: Er wird sein Fütterer (mit seiner Stufe aus dem
-	/// Futter, −1 = unbekannt) und bekommt Erfahrung.
+	/// Futter, −1 = unbekannt, und seiner Spieler-ID) und bekommt Erfahrung.
 	/// </summary>
-	internal static void Fed(Tameable tame, long dropper, float skill)
+	internal static void Fed(Tameable tame, long dropper, long dropperId, float skill)
 	{
 		ZNetView? view = tame.m_nview;
 		if (dropper == 0L || view == null || !view.IsValid())
@@ -506,12 +531,20 @@ internal static class Care
 			return;
 		}
 		ZDO zdo = view.GetZDO();
+		long id = dropperId != 0L ? dropperId : PlayerIdOfSession(dropper); // Futter von vor 1.9.0 kennt nur die Sitzung
 		if (view.IsOwner())
 		{
-			bool other = zdo.GetLong(FeederHash, 0L) != dropper;
-			if (other)
+			long storedSession = zdo.GetLong(FeederHash, 0L);
+			long storedId = zdo.GetLong(FeederIdHash, 0L);
+			// derselbe Fütterer: nach Spieler-ID, wenn beide sie kennen (die Sitzung wechselt bei jeder Anmeldung)
+			bool other = id != 0L && storedId != 0L ? id != storedId : storedSession != dropper;
+			if (storedSession != dropper)
 			{
 				zdo.Set(FeederHash, dropper);
+			}
+			if (storedId != id)
+			{
+				zdo.Set(FeederIdHash, id);
 			}
 			// Futter von vor 1.5.0 kennt keine Stufe (−1): Die Stufe desselben Fütterers bleibt stehen, die eines früheren
 			// Fütterers gilt aber nicht für den neuen.
@@ -524,13 +557,93 @@ internal static class Care
 		{
 			return;
 		}
-		string key = zdo.m_uid.UserID + ":" + zdo.m_uid.ID + ":" + dropper;
+		string key = zdo.m_uid.UserID + ":" + zdo.m_uid.ID + ":" + (id != 0L ? id : dropper);
 		if (FeedUntil.TryGetValue(key, out float until) && Time.time < until)
 		{
 			return;
 		}
 		FeedUntil[key] = Time.time + FeedCooldown.Value;
-		Grant(dropper, FeedXp.Value);
+		long feeder = SessionOfPlayer(id);
+		GrantPlayer(id, dropper, FeedXp.Value * LeashUniqueEffects.WisdomFor(zdo, feeder != 0L ? feeder : dropper)); // Mímir: der Halter füttert sein Tier
+	}
+
+	/// <summary>Erfahrung für den Spieler mit dieser Spieler-ID (aktuelle Sitzung), sonst für die gespeicherte Sitzung.</summary>
+	internal static void GrantPlayer(long playerId, long session, float amount)
+	{
+		long current = SessionOfPlayer(playerId);
+		Grant(current != 0L ? current : session, amount);
+	}
+
+	/// <summary>
+	/// Aktuelle Sitzung des Spielers mit dieser Spieler-ID (Review 27.10.2026): aus den Spielfiguren hier, sonst über Valheims
+	/// Spielerliste und die Spieler-ZDOs. 0, wenn er nicht zu finden ist (offline oder sein ZDO hier unbekannt).
+	/// </summary>
+	internal static long SessionOfPlayer(long playerId)
+	{
+		if (playerId == 0L)
+		{
+			return 0L;
+		}
+		foreach (Player player in Player.GetAllPlayers())
+		{
+			if (player != null && player.GetPlayerID() == playerId)
+			{
+				return Links.Session(player);
+			}
+		}
+		if (ZNet.instance == null || ZDOMan.instance == null)
+		{
+			return 0L;
+		}
+		foreach (ZNet.PlayerInfo info in ZNet.instance.GetPlayerList())
+		{
+			ZDO? zdo = info.m_characterID.IsNone() ? null : ZDOMan.instance.GetZDO(info.m_characterID);
+			if (zdo != null && zdo.GetLong(ZDOVars.s_playerID, 0L) == playerId)
+			{
+				return info.m_characterID.UserID;
+			}
+		}
+		return 0L;
+	}
+
+	/// <summary>Spieler-ID zur Sitzung (Spielfigur hier oder Spieler-ZDO aus Valheims Spielerliste), 0, wenn unbekannt.</summary>
+	internal static long PlayerIdOfSession(long session)
+	{
+		Player? player = Links.FindBySession(session);
+		if (player != null)
+		{
+			return player.GetPlayerID();
+		}
+		if (session == 0L || ZNet.instance == null || ZDOMan.instance == null)
+		{
+			return 0L;
+		}
+		foreach (ZNet.PlayerInfo info in ZNet.instance.GetPlayerList())
+		{
+			if (info.m_characterID.UserID == session)
+			{
+				ZDO? zdo = ZDOMan.instance.GetZDO(info.m_characterID);
+				return zdo != null ? zdo.GetLong(ZDOVars.s_playerID, 0L) : 0L;
+			}
+		}
+		return 0L;
+	}
+
+	/// <summary>Aktuelle Sitzung des Fütterers eines Tiers: über seine Spieler-ID, sonst die gespeicherte (Daten von vor 1.9.0).</summary>
+	internal static long FeederSession(ZDO zdo)
+	{
+		long current = SessionOfPlayer(zdo.GetLong(FeederIdHash, 0L));
+		return current != 0L ? current : zdo.GetLong(FeederHash, 0L);
+	}
+
+	/// <summary>Spieler-ID des Fütterers mitnehmen (Aufwachsen, Verwandlung in einen Unbjørn); Young.CopyState kennt nur die Sitzung.</summary>
+	internal static void CopyFeederId(ZDO from, ZDO to)
+	{
+		long id = from.GetLong(FeederIdHash, 0L);
+		if (id != 0L)
+		{
+			to.Set(FeederIdHash, id);
+		}
 	}
 
 	/// <summary>Streicheln: Erfahrung, je Tier höchstens alle PetCooldown Sekunden (im Spieler gespeichert, Weltzeit).</summary>
@@ -550,7 +663,7 @@ internal static class Care
 		}
 		list[id] = now + PetCooldown.Value;
 		WritePets(player, list);
-		player.RaiseSkill(Skill, PetXp.Value);
+		player.RaiseSkill(Skill, PetXp.Value * LeashUniqueEffects.WisdomFor(view.GetZDO(), Links.Session(player))); // Mímir: das Tier an der eigenen Leine
 	}
 
 	/// <summary>
@@ -596,16 +709,61 @@ internal static class Care
 		player.m_customData[PetKey] = sb.ToString();
 	}
 
-	/// <summary>Ein Item am Boden merkt sich, wer es fallen ließ oder pflückte, und dessen Tierpflege-Stufe (fürs Füttern).</summary>
-	internal static void MarkDropper(ItemDrop item, long session, float skill)
+	/// <summary>
+	/// Ein Item am Boden merkt sich, wer es fallen ließ oder pflückte, dessen Tierpflege-Stufe und Spieler-ID (fürs Füttern).
+	/// Review 27.10.2026: nur mit Tierpflege und nur Futter, sonst bekam jedes fallengelassene Item die Werte umsonst.
+	/// playerId 0: aus der Sitzung suchen.
+	/// </summary>
+	internal static void MarkDropper(ItemDrop item, long session, long playerId, float skill)
 	{
-		if (session == 0L || item == null || item.m_nview == null || !item.m_nview.IsValid() || !item.m_nview.IsOwner())
+		if (session == 0L || item == null || !Enabled.Value || !IsFood(item.m_itemData) || item.m_nview == null || !item.m_nview.IsValid() || !item.m_nview.IsOwner())
 		{
 			return;
 		}
 		ZDO zdo = item.m_nview.GetZDO();
 		zdo.Set(DropperHash, session);
 		zdo.Set(DropperSkillHash, Mathf.Clamp(skill, 0f, 100f)); // Trank- und Ausrüstungs-Boni nicht über 100
+		long id = playerId != 0L ? playerId : PlayerIdOfSession(session);
+		if (id != 0L)
+		{
+			zdo.Set(DropperIdHash, id);
+		}
+	}
+
+	/// <summary>Item-Namen (m_shared.m_name), die Tiere fressen: Futter aller Vorlagen mit Monster-KI, dazu angemeldetes (AddFood).</summary>
+	private static readonly HashSet<string> FoodNames = new();
+	private static bool foodScanned;
+
+	/// <summary>Weiteres Futter, das erst zur Laufzeit in die Futterlisten kommt (GC_Tierarten: Bär, Nixe, Hirsch, Hase, Robbe).</summary>
+	internal static void AddFood(string itemName) => FoodNames.Add(itemName);
+
+	/// <summary>Frisst irgendein Tier dieses Item? Beim ersten Aufruf im Spiel einmal alle Vorlagen durchsehen.</summary>
+	internal static bool IsFood(ItemDrop.ItemData? item)
+	{
+		if (item?.m_shared == null)
+		{
+			return false;
+		}
+		if (!foodScanned && ZNetScene.instance != null)
+		{
+			foodScanned = true;
+			foreach (GameObject prefab in ZNetScene.instance.m_prefabs)
+			{
+				MonsterAI? ai = prefab != null ? prefab.GetComponent<MonsterAI>() : null;
+				if (ai == null || ai.m_consumeItems == null)
+				{
+					continue;
+				}
+				foreach (ItemDrop food in ai.m_consumeItems)
+				{
+					if (food != null && food.m_itemData?.m_shared != null)
+					{
+						FoodNames.Add(food.m_itemData.m_shared.m_name);
+					}
+				}
+			}
+		}
+		return FoodNames.Contains(item.m_shared.m_name);
 	}
 
 	/// <summary>
@@ -643,10 +801,10 @@ internal static class Care
 		return 0f;
 	}
 
-	/// <summary>Zähmer: wessen Futter das Tier zuletzt fraß, sonst der nächste Spieler.</summary>
+	/// <summary>Zähmer: wessen Futter das Tier zuletzt fraß (auch nach einer Neuanmeldung), sonst der nächste Spieler.</summary>
 	internal static long CaretakerOf(Character animal, ZDO zdo, float range)
 	{
-		long feeder = zdo.GetLong(FeederHash, 0L);
+		long feeder = FeederSession(zdo);
 		if (feeder != 0L && Links.FindBySession(feeder) != null)
 		{
 			return feeder;
@@ -692,6 +850,11 @@ internal static class Care
 		if (birth.Source is Growup && birth.Source.GetComponent<Character>() is Character young)
 		{
 			Young.CopyState(young, born); // Name, Anbindung am Pfosten usw. ziehen mit um (Gorduan: Jungtiere an der Leine)
+			ZNetView? from = young.m_nview;
+			if (from != null && from.IsValid())
+			{
+				CopyFeederId(from.GetZDO(), view.GetZDO());
+			}
 		}
 		long breeder = 0L;
 		float level = birth.Parent != null ? BirthLevel(birth.Parent, out breeder) : birth.Level;
@@ -702,8 +865,14 @@ internal static class Care
 		}
 		if (birth.Parent != null)
 		{
-			Grant(breeder, BreedXp.Value);
+			Grant(breeder, BreedXp.Value * ParentWisdom(birth.Parent, breeder));
 		}
+	}
+
+	/// <summary>Mímir (Gorduan, 27.10.2026): Hängt das Muttertier an der Leine seines Züchters, zählt dessen Zucht-Erfahrung +x %.</summary>
+	private static float ParentWisdom(Procreation parent, long breeder)
+	{
+		return parent.m_nview != null && parent.m_nview.IsValid() ? LeashUniqueEffects.WisdomFor(parent.m_nview.GetZDO(), breeder) : 1f;
 	}
 
 	/// <summary>Ei gelegt: Stufe ins Ei schreiben (schlüpft später), Züchter bekommt Erfahrung.</summary>
@@ -723,7 +892,7 @@ internal static class Care
 			egg.m_itemData.m_customData[LevelKey] = Mathf.Min(level, SpeciesLink.MaxLevel(birth.Parent.m_character)).ToString("0.##", CultureInfo.InvariantCulture);
 			egg.Save();
 		}
-		Grant(breeder, BreedXp.Value);
+		Grant(breeder, BreedXp.Value * ParentWisdom(birth.Parent, breeder));
 	}
 
 	/// <summary>
@@ -767,10 +936,11 @@ internal static class Care
 	/// Züchter (Gorduan, 18.10.2026: „das Futter muss zählen“): wessen Futter das Muttertier zuletzt gefressen hat, mit seiner
 	/// Stufe aus diesem Futter. Er muss bei der Geburt weder in der Nähe noch online sein. Futter von vor 1.5.0 kennt keine
 	/// Stufe: dann seine aktuelle, falls er zu finden ist. Hat das Tier nie Futter eines Spielers gefressen, zählt niemand.
+	/// Review 27.10.2026: Die Erfahrung findet ihn über seine Spieler-ID auch nach einer Neuanmeldung (FeederSession).
 	/// </summary>
 	private static float BreederSkill(ZDO zdo, out long breeder)
 	{
-		breeder = zdo.GetLong(FeederHash, 0L);
+		breeder = FeederSession(zdo);
 		if (breeder == 0L)
 		{
 			return 0f;
@@ -938,17 +1108,20 @@ internal static class CareDropPatch
 	private static void Finalizer() => Dropping = false;
 }
 
-/// <summary>Das fallengelassene Item merkt sich den Spieler und seine Tierpflege-Stufe (Fütterer, Züchter).</summary>
+/// <summary>
+/// Das fallengelassene Item merkt sich den Spieler, seine Tierpflege-Stufe und Spieler-ID (Fütterer, Züchter); nur Futter
+/// und nur mit Tierpflege (Review 27.10.2026).
+/// </summary>
 [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.DropItem))]
 internal static class CareDropMarkPatch
 {
 	private static void Postfix(ItemDrop __result)
 	{
 		Player? local = Player.m_localPlayer;
-		if (CareDropPatch.Dropping && local != null)
+		if (CareDropPatch.Dropping && local != null && __result != null && Care.Enabled.Value && Care.IsFood(__result.m_itemData))
 		{
 			long session = Links.Session(local);
-			Care.MarkDropper(__result, session, Care.SkillOfSession(session));
+			Care.MarkDropper(__result, session, local.GetPlayerID(), Care.SkillOfSession(session));
 		}
 	}
 }
@@ -995,7 +1168,7 @@ internal static class CarePickMarkPatch
 	{
 		if (CarePickPatch.Picker != 0L)
 		{
-			Care.MarkDropper(item, CarePickPatch.Picker, CarePickPatch.Skill);
+			Care.MarkDropper(item, CarePickPatch.Picker, 0L, CarePickPatch.Skill); // Spieler-ID sucht MarkDropper, nur bei Futter
 		}
 	}
 }
@@ -1006,6 +1179,7 @@ internal static class CareConsumeSourcePatch
 {
 	internal static ItemDrop? Item;
 	internal static long Dropper;
+	internal static long DropperId;
 	internal static float DropperSkill;
 
 	private static void Prefix(ItemDrop __instance)
@@ -1013,6 +1187,7 @@ internal static class CareConsumeSourcePatch
 		Item = __instance;
 		ZDO? zdo = __instance.m_nview != null && __instance.m_nview.IsValid() ? __instance.m_nview.GetZDO() : null;
 		Dropper = zdo != null ? zdo.GetLong(Care.DropperHash, 0L) : 0L;
+		DropperId = zdo != null ? zdo.GetLong(Care.DropperIdHash, 0L) : 0L;
 		DropperSkill = zdo != null ? zdo.GetFloat(Care.DropperSkillHash, -1f) : -1f;
 	}
 }
@@ -1025,7 +1200,7 @@ internal static class CareFeedPatch
 	{
 		if (item != null && CareConsumeSourcePatch.Item == item)
 		{
-			Care.Fed(__instance, CareConsumeSourcePatch.Dropper, CareConsumeSourcePatch.DropperSkill);
+			Care.Fed(__instance, CareConsumeSourcePatch.Dropper, CareConsumeSourcePatch.DropperId, CareConsumeSourcePatch.DropperSkill);
 		}
 		CareConsumeSourcePatch.Item = null;
 	}
@@ -1075,7 +1250,8 @@ internal static class CareKillPatch
 		}
 		if (holder != 0L)
 		{
-			Care.Grant(holder, Care.KillXp.Value * Mathf.Max(1, __instance.GetLevel()));
+			// Mímirs Weisheit der Leine (im Tier, der Besitzer des Opfers ist oft ein anderer Spieler; Gorduan, 27.10.2026)
+			Care.Grant(holder, Care.KillXp.Value * Mathf.Max(1, __instance.GetLevel()) * LeashUniqueEffects.Wisdom(zdo));
 		}
 	}
 }

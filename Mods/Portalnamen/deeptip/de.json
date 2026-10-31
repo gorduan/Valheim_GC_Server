@@ -1,0 +1,16 @@
+{
+  "$locale": "de",
+  "gc.portalnamen": {
+    "title": "Portalnamen",
+    "short": "Beim Umbenennen eines Portals erscheint daneben eine Liste gemerkter Namen; ein Klick benennt das Portal um.",
+    "body": "Öffnest du den Dialog zum Umbenennen eines Portals, steht am rechten Bildrand eine Liste: oben deine eigenen Namen, darunter die Server-Liste, wenn der Server die Mod hat. Ein Klick auf einen Namen benennt das Portal sofort um, „+ Namen aus dem Feld merken“ übernimmt den eingetippten Namen, und „×“ löscht einen Eintrag. Da Portale mit gleicher Kennung miteinander verbunden sind, triffst du so jeden Namen genau.\n\nDeine eigene Liste liegt nur auf deinem PC; die Server-Liste ist für alle gleich, und wer sie bearbeiten darf, legt eine [[gc.serverrules|Server-Regel]] fest. Die Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 1 „Sehr Vanilla“).",
+    "aliases": ["Portalnamen"],
+    "see": ["gc.portalnamen.portalnames"]
+  },
+  "gc.portalnamen.portalnames": {
+    "title": "Portalnamen ein- und ausschalten",
+    "short": "Zwei Schalter: deine eigene Namensliste beim Umbenennen und die gemeinsame Server-Liste.",
+    "body": "„Portalnamen-Liste“ gilt nur für dich und zeigt die Liste neben dem Dialog. Ist „Klick benennt sofort um“ aus (gerade {gc_portalnamen_portalnames_click}), schreibt ein Klick den Namen nur ins Eingabefeld; deine Namen stehen in `BepInEx/config/gorduan.gc_client.portalnames.txt`.\n\n„Server-Liste der Portalnamen“ ist eine [[gc.serverrules|Server-Regel]]: Sie gibt allen Spielern dieselbe Liste mit bis zu 200 Namen, auf dem Server je Welt gespeichert. Darunter steht, wer sie bearbeiten darf, nur Admins oder alle; sehen und benutzen können sie immer alle.",
+    "see": ["gc.portalnamen"]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$locale": "en",
+  "gc.zuchtgrenze": {
+    "title": "Breeding limit (Mod)",
+    "short": "GC mod: more animals per area before breeding stops; animals on leashes count less.",
+    "body": "Valheim stops [[valheim.tame.breeding|breeding]] as soon as too many animals of a kind stand together. This mod raises the limit ([[gc.zuchtgrenze.breed]]); with [[gc.tiere|GC_Tiere]] animals on a leash or at a post count only partly.\n\nAll values are [[gc.serverrules|server rules]]. [[gc.kern.stufe|Level]] 4 “GC light”; while on, the mod adds 1 % per boss to the [[gc.kern.bossscale|boss progression]].",
+    "aliases": ["GC_Zuchtgrenze"],
+    "see": ["gc.about"]
+  },
+  "gc.zuchtgrenze.breed": {
+    "title": "Breeding limit",
+    "short": "How many animals of a kind may stand nearby before none of them gets pregnant any more. Currently {gc_zuchtgrenze_breed}.",
+    "body": "Valheim counts adults and young of the same kind nearby, wild ones too, and only allows offspring below a limit per species, such as 4 wolves within 10 m. Here:\n\n- Limit: {gc_zuchtgrenze_breed_factor} Valheim's value, range: {gc_zuchtgrenze_breed_radius} Valheim's value\n- An animal on a leash or at a post counts {gc_zuchtgrenze_breed_leashed} (with GC_Tiere).\n- Chickens count hens and laid eggs, not chicks, with their own values: limit {gc_zuchtgrenze_breed_chicken_factor} and range {gc_zuchtgrenze_breed_chicken_radius} Valheim's value, a hen on a leash counts {gc_zuchtgrenze_breed_chicken_leashed}.\n\nOff: exactly as in Valheim. The limits per species are written to the server log at start.",
+    "aliases": ["breeding limit"]
+  }
+}

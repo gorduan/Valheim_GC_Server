@@ -180,24 +180,8 @@ internal static class GuardRagdollPatch
 	}
 }
 
-/// <summary>Leiche eines Wächters bei den anderen Spielern (Valheim gleicht die Größe nicht ab).</summary>
-[HarmonyPatch(typeof(Ragdoll), "Awake")]
-internal static class GuardRagdollAwakePatch
-{
-	private static void Postfix(Ragdoll __instance)
-	{
-		ZNetView? nview = __instance.GetComponent<ZNetView>();
-		if (nview == null || !nview.IsValid())
-		{
-			return;
-		}
-		float scale = nview.GetZDO().GetFloat(Guards.RagdollScaleHash, 0f);
-		if (scale > 0f)
-		{
-			__instance.transform.localScale = Vector3.one * scale;
-		}
-	}
-}
+// Leiche eines Wächters bei den anderen Spielern: setzt GC_Kern (Kern\Features\RagdollScale.cs, gleicher Schlüssel);
+// der frühere eigene Ragdoll.Awake-Patch tat dasselbe doppelt (Review 27.10.2026).
 
 /// <summary>
 /// Drei Bossbalken untereinander (Prüfung 2): Valheim legt jeden Bossbalken an dieselbe Stelle oben, dann wäre nur der

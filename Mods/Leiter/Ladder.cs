@@ -482,7 +482,14 @@ public class LadderClimb : MonoBehaviour, Interactable, Hoverable
 				?? Ground(bottomPoint + front * distance, 2.5f) ?? bottomPoint + front * distance;
 		}
 
+		if (!PrivateArea.CheckAccess(target, 0f, true, false))
+		{
+			user.Message(MessageHud.MessageType.Center, "$msg_privatezone"); // Review 27.10.2026: nicht durch eine Wand in fremde Schutzbereiche
+			return false;
+		}
+
 		user.transform.position = target;
+		user.m_maxAirAltitude = target.y; // wie Valheims Teleport: sonst zählt der Abstieg beim ersten Bodenkontakt als Sturz (Review 27.10.2026)
 		Rigidbody? body = user.GetComponent<Rigidbody>();
 		if (body != null)
 		{

@@ -1,0 +1,15 @@
+{
+  "$locale": "de",
+  "gc.spitzhacke": {
+    "title": "Spitzhacke als Waffe",
+    "short": "Die mittlere Maustaste schlägt mit jeder Spitzhacke wie mit einem Streitkolben; der Linksklick baut weiter ab.",
+    "body": "Mit der mittleren Maustaste führst du mit jeder Spitzhacke den Hauptangriff eines bronzenen Streitkolbens aus: gleiche Bewegung, Dreierkette, Reichweite und [[valheim.stat.stamina|Ausdauer]]. Der Schaden ist der deiner Spitzhacke, gegen Gegner {gc_spitzhacke_pickaxe_enemy} und gegen Erz und Gestein {gc_spitzhacke_pickaxe_ore}; der Wert gegen Erz liegt normalerweise unter 100 %, damit der Kampfschlag nicht schneller abbaut. Der Linksklick bleibt der normale Abbau-Schlag.\n\nDie Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 4 „GC leicht“), Server und alle Spieler brauchen sie. Solange sie läuft, zählt sie für die Automatik des [[gc.kern.bossscale|Boss-Fortschritts]] mit 1 % je Boss.",
+    "aliases": ["Streitkolben-Schlag"],
+    "see": ["gc.spitzhacke.pickaxe"]
+  },
+  "gc.spitzhacke.pickaxe": {
+    "title": "Spitzhacke: Streitkolben-Schlag",
+    "short": "Server-Regel: Kampfschlag der Spitzhacke auf der mittleren Maustaste. Aus: Spitzhacken haben wieder keinen Zweitangriff.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_spitzhacke_pickaxe}; wie der Schlag funktioniert, steht unter [[gc.spitzhacke]]. Auch die Werte gibt der Server vor, damit alle mit denselben Zahlen spielen:\n\n- Schaden gegen Gegner: {gc_spitzhacke_pickaxe_enemy} des Spitzhacken-Schadens; der letzte Schlag der Kette zählt wie beim Streitkolben doppelt\n- Schaden gegen Erz und Gestein: {gc_spitzhacke_pickaxe_ore}, bei jedem Schlag der Kette gleich"
+  }
+}

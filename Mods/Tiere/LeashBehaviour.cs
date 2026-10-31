@@ -86,9 +86,24 @@ internal static class Behaviour
 	/// <summary>Bewegt sich der Halter gerade (waagerecht mehr als 1 m/s)?</summary>
 	internal static bool Moving(Player holder)
 	{
-		Vector3 velocity = holder.GetVelocity();
+		Vector3 velocity = DeckVelocity(holder);
 		velocity.y = 0f;
 		return velocity.sqrMagnitude > 1f;
+	}
+
+	/// <summary>
+	/// Tempo des Halters gegenüber dem Boden, auf dem er steht (Review 27.10.2026): Auf einem fahrenden Schiff galt er sonst
+	/// immer als „läuft“, und ein Tier an Deck drängte zum Heck oder über Bord. Wie PullPatch (Tempo an Deck).
+	/// </summary>
+	internal static Vector3 DeckVelocity(Player holder)
+	{
+		Vector3 velocity = holder.GetVelocity();
+		Rigidbody? ground = holder.IsOnGround() ? holder.m_lastGroundBody : null;
+		if (ground != null)
+		{
+			velocity -= ground.GetPointVelocity(holder.transform.position);
+		}
+		return velocity;
 	}
 
 	/// <summary>Halter des Tiers, wenn es an einer eigenen aktiven Leine hängt (nicht unterwegs) oder ein eigenes Trugbild ist.</summary>
@@ -155,7 +170,7 @@ internal static class Behaviour
 		velocity.y = 0f;
 		float ahead = animal.GetRadius() + 0.8f + Mathf.Min(velocity.magnitude * 0.2f, 2f);
 		Vector3 probe = feet + direction * ahead + Vector3.up * SafeDrop;
-		bool ground = Physics.Raycast(probe, Vector3.down, out RaycastHit hit, SafeDrop * 2f, groundMask) && hit.point.y >= feet.y - SafeDrop;
+		bool ground = Physics.Raycast(probe, Vector3.down, out RaycastHit hit, SafeDrop * 2f, groundMask, QueryTriggerInteraction.Ignore) && hit.point.y >= feet.y - SafeDrop;
 		bool ledge = !ground && Floating.GetLiquidLevel(probe) < feet.y - SafeDrop;
 		Ledges[animal] = new LedgeCheck { Ledge = ledge, Direction = direction, Until = Time.time + 0.1f };
 		return ledge;
@@ -288,9 +303,10 @@ internal static class LeashTargetPatch
 			Drop(__instance, ref canHearTarget, ref canSeeTarget); // Befehl „hingehen": unterwegs nicht ablenken lassen
 			return;
 		}
-		if (Vector3.Distance(self.transform.position, target.transform.position) > Plugin.ChaseDistance.Value)
+		if (Vector3.Distance(self.transform.position, target.transform.position) > Plugin.ChaseDistance.Value
+			|| (link != null && Vector3.Distance(holder.transform.position, target.transform.position) > Control.FightReach(link)))
 		{
-			Drop(__instance, ref canHearTarget, ref canSeeTarget); // zu weit weg: Kampf abbrechen, dem Spieler folgen
+			Drop(__instance, ref canHearTarget, ref canSeeTarget); // zu weit weg oder außer Reichweite der Leine: Kampf abbrechen, dem Spieler folgen
 			return;
 		}
 		if (Bonds.TryGet(self, out BondStats bond) && bond.Obedience > 0f && Behaviour.Moving(holder) && !Behaviour.MayAttack(self, target, bond.Obedience))
@@ -372,7 +388,7 @@ internal static class LeashFollowPatch
 		Vector3 position = __instance.transform.position;
 		Vector3 holderPosition = go.transform.position;
 		float distance = Links.Span(holderPosition, self); // wie die Leine misst (Höhenunterschiede bis 1,5 m zählen nicht)
-		Vector3 velocity = holder.GetVelocity();
+		Vector3 velocity = Behaviour.DeckVelocity(holder);
 		velocity.y = 0f;
 		bool moving = velocity.sqrMagnitude > 1f;
 		if (link != null)
@@ -476,7 +492,7 @@ internal static class LeashFoodPatch
 [HarmonyPatch(typeof(Tameable), nameof(Tameable.Command))]
 internal static class CommandPatch
 {
-	private static bool Prefix(Tameable __instance, Humanoid user)
+	private static bool Prefix(Tameable __instance, Humanoid user, bool message)
 	{
 		if (__instance.m_nview == null || !__instance.m_nview.IsValid())
 		{
@@ -489,7 +505,13 @@ internal static class CommandPatch
 		{
 			return true;
 		}
-		if (user != null && user == Player.m_localPlayer)
+		if (__instance.m_nview.IsOwner() && zdo.GetString(ZDOVars.s_follow).Length > 0)
+		{
+			// Review 27.10.2026: Ein gespeichertes Folgen (etwa von einer anderen Mod) ließ Valheims UpdateSavedFollowTarget jedes
+			// Bild Command(spieler, false) rufen; hier abgelehnt, also das Folgen beim Besitzer löschen
+			zdo.Set(ZDOVars.s_follow, "");
+		}
+		if (message && user != null && user == Player.m_localPlayer)
 		{
 			user.Message(MessageHud.MessageType.Center, GcLoc.Get(illusion ? "gcls_illusion_touch" : "gcls_escaped", __instance.GetHoverName()));
 		}

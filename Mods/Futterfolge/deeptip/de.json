@@ -1,0 +1,26 @@
+{
+  "$locale": "de",
+  "gc.futterfolge": {
+    "title": "Futter-Reihenfolge (Mod)",
+    "short": "GC-Mod: Zahme Tiere sehen Futter weiter, und das Tier mit der höchsten Stufe frisst zuerst.",
+    "body": "Die Mod sorgt dafür, dass bei knappem Futter die besten Tiere satt werden und sich paaren ([[gc.futterfolge.enabled]]). Mit [[gc.tiere|GC_Tiere]] zählt dabei die [[gc.tiere.breedlevel|Zucht-Stufe]], sonst Valheims Sterne; mit GC_Tiere zählt bei der Zucht außerdem der [[gc.futterfolge.partner|beste Partner]].\n\nAlle Werte außer der Rang-Anzeige sind [[gc.serverrules|Server-Regeln]]. [[gc.kern.stufe|Stufe]] 4 „GC leicht“; eingeschaltet zählt die Mod mit 1 % je Boss zum [[gc.kern.bossscale|Boss-Fortschritt]].",
+    "aliases": ["GC_Futterfolge"],
+    "see": ["gc.about", "valheim.tame.breeding"]
+  },
+  "gc.futterfolge.enabled": {
+    "title": "Futter-Reihenfolge",
+    "short": "Zahme Tiere sehen Futter {gc_futterfolge_range} so weit wie in Valheim, wenn ein Weg hinführt; die höchste Stufe frisst zuerst.",
+    "body": "Hungrige zahme Tiere derselben Sorte stellen sich an, nach Stufe und dann nach Sternen. Jungtiere sind eine eigene Sorte; satte Tiere und Tiere im Kampf oder unter einem Reiter stehen nicht an. Der Reihe nach nimmt jedes Tier ein Stück vom nächsten Futter, das es erreicht. Ranghöheren lässt ein Tier höchstens {gc_futterfolge_wait} den Vortritt, dann frisst es trotzdem.\n\n- Trächtige zuletzt: {gc_futterfolge_pregnant}\n- Wilde Tiere sehen Futter beim Zähmen ebenso weit, ohne Reihenfolge: {gc_futterfolge_wild}\n- Tiere an einer Leine oder am Pfosten zählen nur für Futter, das sie dort erreichen.\n\nJetzt {gc_futterfolge_enabled}. Aus: wie in Valheim.",
+    "aliases": ["Futter-Reihenfolge", "Futter-Rang"]
+  },
+  "gc.futterfolge.partner": {
+    "title": "Bester Partner",
+    "short": "Mit GC_Tiere zählt für die Stufe des Jungen der beste satte Partner beim Trächtigwerden. Jetzt {gc_futterfolge_partner}.",
+    "body": "Wird ein Tier trächtig, merkt es sich die höchste [[gc.tiere.breedlevel|Zucht-Stufe]] unter den satten Partnern seiner Art im Partner-Umkreis, statt bei der Geburt das nächste Tier zu nehmen. Daraus und aus seiner eigenen Stufe würfelt GC_Tiere die Stufe des Jungen. Am trächtigen Tier zeigt der Hinweis „Partner: Lvl X“. Ohne GC_Tiere gibt es keine Zucht-Stufen, die Einstellung erscheint dann nicht."
+  },
+  "gc.futterfolge.rank": {
+    "title": "Futter-Rang anzeigen",
+    "short": "Zeigt am hungrigen zahmen Tier, an welcher Stelle es beim Fressen steht; deine eigene Einstellung, jetzt {gc_futterfolge_rank}.",
+    "body": "Der Hinweis lautet etwa „Futter-Rang 2 von 5“, dazu „Lässt ranghöheren Tieren den Vortritt“, solange das Tier wartet. Die Einstellung gilt nur für dich, nicht für den Server. Die Reihenfolge selbst: [[gc.futterfolge.enabled]]."
+  }
+}

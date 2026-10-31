@@ -1,0 +1,136 @@
+{
+  "$locale": "de",
+  "gc.tierarten": {
+    "title": "Tierarten und Sättel",
+    "short": "GC-Mod: Höchststufe je Art, Sterne bei der Geburt, mehr Beute, weitere zähmbare Tiere, Bärenjunge, Aasbär und Bärensättel.",
+    "body": "Die Mod erweitert [[gc.tiere|GC_Tiere]] und braucht sie. Jede Tierart bekommt eine eigene [[gc.tierarten.maxlevel|Höchststufe]], Junge haben eine kleine Chance auf [[gc.tierarten.stars|einen Stern mehr]], und Tiere mit Stufe lassen [[gc.tierarten.loot|mehr Beute]] fallen. Zuschaltbar zähmen lassen sich [[gc.tierarten.species_tame_bjorn|Bär]], [[gc.tierarten.species_tame_neck|Nixe]], [[gc.tierarten.species_tame_deer|Hirsch]], [[gc.tierarten.species_tame_hare|Hase]] und [[gc.tierarten.species_tame_seal|Robbe]], jeweils mit eigenen Jungen ([[gc.tierarten.bearcub|Bärenjunges]] und [[gc.tierarten.young|weitere]]); beim Bären kommen [[gc.tierarten.unbjorn|Aasbär]] und [[gc.tierarten.bearsaddle|Sättel]] dazu. Außerdem können [[gc.tierarten.species_young_fight|Jungtiere kämpfen]].\n\nAlle Werte sind [[gc.serverrules|Server-Regeln]]. [[gc.kern.stufe|Stufe]] 5 „GC“; solange Leinen oder Tierpflege an sind, zählt die Mod mit 5 % je Boss zum [[gc.kern.bossscale|Boss-Fortschritt]].",
+    "aliases": ["GC_Tierarten"],
+    "see": ["gc.about", "gc.modswitch"]
+  },
+  "gc.tierarten.maxlevel": {
+    "title": "Höchststufe je Art",
+    "short": "Bis zu dieser Stufe steigt ein Tier durch Zucht und Erfahrung: Lox und Aasbär 300, Wolf und Bär 200, sonst 150.",
+    "body": "Die Grenze gilt für die [[gc.tiere.breedlevel|Zucht-Stufe]] bei Geburt und im Ei, für den Aufstieg durch [[gc.tiere.animalxp|Tier-Erfahrung]] und für den Testbefehl `gc_tierstufe`; Jungtiere zählen zu ihrer Art. Höhere Stufen machen ein Tier stärker, aber nur langsam, siehe [[gc.tierarten.species_cap]]. Jetzt gilt:\n\n- Wolf {gc_tierarten_species_max_wolf}, Lox {gc_tierarten_species_max_lox}, Wildschwein {gc_tierarten_species_max_boar}, Huhn {gc_tierarten_species_max_hen}\n- Asksvin {gc_tierarten_species_max_asksvin}, Elch {gc_tierarten_species_max_moose}, Bär {gc_tierarten_species_max_bjorn}, Aasbär {gc_tierarten_species_max_unbjorn}\n- Nixe {gc_tierarten_species_max_neck}, Hirsch {gc_tierarten_species_max_deer}, Hase {gc_tierarten_species_max_hare}, Robbe {gc_tierarten_species_max_seal}, andere Tiere {gc_tierarten_species_max_other}",
+    "aliases": ["Höchststufe"]
+  },
+  "gc.tierarten.species_cap": {
+    "title": "Grenze eigene Stufe + Pfleger",
+    "short": "Für die Boni zählen halbe Tier-Stufe und Tierpflege des Pflegers zusammen höchstens bis hier; jetzt {gc_tierarten_species_cap}.",
+    "body": "Pfleger ist der Halter eines angeleinten Tiers, sonst der Spieler mit der höchsten [[gc.tiere.care|Tierpflege]] in der Nähe. Je höher die eigene [[gc.tiere.breedlevel|Zucht-Stufe]], desto weniger bringt der Pfleger: Bei der Grenze 150 und Tier-Stufe 300 bringt er nichts mehr. Alle Stufen-Boni sind mit 5/12 gerechnet, damit hohe Stufen nicht übermächtig werden; der [[gc.tiere.leashbonus|Leinenbonus]] kommt unabhängig davon dazu."
+  },
+  "gc.tierarten.species_star1": {
+    "title": "Stern-Chance 0 → 1",
+    "short": "Chance, dass ein Junges oder Ei ohne Stern doch einen bekommt; jetzt {gc_tierarten_species_star1}.",
+    "body": "Gewürfelt wird bei jeder Geburt und beim Legen eines Eis; mehr als einen Stern zusätzlich gibt es nie. Der Züchter erfährt es per Meldung. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star2": {
+    "title": "Stern-Chance 1 → 2",
+    "short": "Chance, dass ein Junges oder Ei mit einem Stern zwei bekommt; jetzt {gc_tierarten_species_star2}.",
+    "body": "Gilt für Junge von Müttern mit einem Stern, auch für Eier beim Legen. Der Züchter erfährt es per Meldung. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.stars": {
+    "title": "Sterne bei der Geburt",
+    "short": "Ein Junges kann mit einem Stern mehr zur Welt kommen als seine Mutter, nie mit mehr als einem zusätzlich.",
+    "body": "Valheim gibt dem Jungen die Sterne der Mutter. Hat sie keinen, bekommt das Junge mit {gc_tierarten_species_star1} Chance einen; hat sie einen, mit {gc_tierarten_species_star2} Chance zwei. Bei Eiern wird beim Legen gewürfelt. Der Züchter bekommt eine Meldung, sonst der nächste Spieler bis 30 m. Was Sterne bringen: [[valheim.tame.breeding]]."
+  },
+  "gc.tierarten.loot": {
+    "title": "Mehr Beute nach Stufe",
+    "short": "Ein Tier mit Zucht-Stufe lässt beim Tod mit 50 % Chance mehr Beute fallen; je höher die Stufe, desto mehr.",
+    "body": "Das Höchstmaß ist 1 + Stufe ÷ 50: bei [[gc.tiere.breedlevel|Zucht-Stufe]] 50 das Doppelte, bei 100 bis zum Dreifachen, bei 300 bis zum Siebenfachen. Gewürfelt wird zwischen dem Doppelten (bei niedriger Stufe dem Höchstmaß) und dem Höchstmaß, Reste werden zufällig gerundet. Valheims Sterne zählen wie immer dazu; je Beute-Eintrag fallen höchstens 100 Stück."
+  },
+  "gc.tierarten.species_young_fight": {
+    "title": "Jungtiere kämpfen",
+    "short": "Zahme Jungtiere greifen Gegner an wie zahme Erwachsene, auch auf Befehl von Leine und Pfeife. Jetzt {gc_tierarten_species_young_fight}.",
+    "body": "Gilt für Ferkel, Wolfsjunges, Lox-Kalb, Asksvin-Schlüpfling, Elchkalb und [[gc.tierarten.bearcub|Bärenjunges]], nicht für Küken. Sie machen {gc_tierarten_species_young_damage} des Schadens eines Erwachsenen gleicher Stufe, behalten aber Leben und Tempo des Jungtiers. Spieler und zahme Tiere greifen sie nie an. Aus: Sie suchen sich keine Gegner und lehnen Angriffsbefehle ab.",
+    "see": ["gc.tiere.young"]
+  },
+  "gc.tierarten.species_max_wolf": {
+    "title": "Höchststufe Wolf",
+    "short": "Bis zu dieser Stufe steigen Wolf und Wolfsjunges durch Zucht und Erfahrung; jetzt {gc_tierarten_species_max_wolf}.",
+    "body": "Standard 200, mehr als bei den meisten Tieren. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_lox": {
+    "title": "Höchststufe Lox",
+    "short": "Bis zu dieser Stufe steigen Lox und Lox-Kalb durch Zucht und Erfahrung; jetzt {gc_tierarten_species_max_lox}.",
+    "body": "Standard 300, zusammen mit dem Aasbären die höchste Grenze. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_boar": {
+    "title": "Höchststufe Wildschwein",
+    "short": "Bis zu dieser Stufe steigen Wildschwein und Ferkel durch Zucht und Erfahrung; jetzt {gc_tierarten_species_max_boar}.",
+    "body": "Standard 150. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_hen": {
+    "title": "Höchststufe Huhn",
+    "short": "Bis zu dieser Stufe steigen Henne und Küken durch Zucht und Erfahrung; jetzt {gc_tierarten_species_max_hen}.",
+    "body": "Standard 150. Die Stufe eines Eis ist schon beim Legen auf diesen Wert begrenzt. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_asksvin": {
+    "title": "Höchststufe Asksvin",
+    "short": "Bis zu dieser Stufe steigen Asksvin und Asksvin-Schlüpfling durch Zucht und Erfahrung; jetzt {gc_tierarten_species_max_asksvin}.",
+    "body": "Standard 150. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_moose": {
+    "title": "Höchststufe Elch",
+    "short": "Bis zu dieser Stufe steigen Elch und Elchkalb durch Zucht und Erfahrung; jetzt {gc_tierarten_species_max_moose}.",
+    "body": "Standard 150. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_unbjorn": {
+    "title": "Höchststufe Aasbär",
+    "short": "Bis zu dieser Stufe steigt ein Aasbär durch Erfahrung; jetzt {gc_tierarten_species_max_unbjorn}.",
+    "body": "Standard 300. Ein [[gc.tierarten.unbjorn|Aasbär]] entsteht nur aus einem Bären, behält dessen Stufe und steigt danach durch Kämpfe weiter; Junge bekommt er nicht. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_other": {
+    "title": "Höchststufe andere Tiere",
+    "short": "Bis zu dieser Stufe steigen alle übrigen zahmen Tiere, auch aus anderen Mods; jetzt {gc_tierarten_species_max_other}.",
+    "body": "Standard 150. Was eine höhere Stufe bringt: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_tame_bjorn": {
+    "title": "Bären zähmbar",
+    "short": "Bären lassen sich zähmen, anleinen und reiten, bekommen Junge und können zum Aasbären werden. Jetzt {gc_tierarten_species_tame_bjorn}.",
+    "body": "Bären fressen Honig, Himbeeren, Blaubeeren und Moltebeeren; wie beim [[valheim.tame.taming|Zähmen]] in Valheim brauchen sie 30 Minuten satt und ohne Angst, mit [[gc.tiere.care|Tierpflege]] weniger. Zahme Bären greifen wilde Bären nicht von selbst an, auf Befehl schon. Höchststufe {gc_tierarten_species_max_bjorn}.\n\n- [[gc.tierarten.bearcub|Bärenjunge]] aus der Zucht\n- Verdorbenes Fleisch verwandelt einen Bären in einen [[gc.tierarten.unbjorn|Aasbären]]\n- [[gc.tierarten.bearsaddle|Bärensattel und Aasbär-Sattel]] an der Schmiede\n\nAus (Standard): Bären verhalten sich wie in Valheim, und die Sättel lassen sich nicht herstellen."
+  },
+  "gc.tierarten.species_tame_neck": {
+    "title": "Nixen zähmbar",
+    "short": "Nixen fressen rohen Fisch und lassen sich in 30 Minuten zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_neck}.",
+    "body": "Wirf rohen Fisch in ihre Nähe; satt und ohne Angst wird die Nixe in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller. Zahme Nixen bekommen [[gc.tierarten.young|Junge]] (Junge Nixe) und lassen sich wie jedes zahme Tier anleinen. Höchststufe {gc_tierarten_species_max_neck}. Aus (Standard): wie in Valheim."
+  },
+  "gc.tierarten.species_tame_deer": {
+    "title": "Hirsche zähmbar",
+    "short": "Hirsche fressen Beeren und Pilze vom Boden und lassen sich zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_deer}.",
+    "body": "Futter: Himbeeren, Blaubeeren und Pilz. Hirsche fliehen vor dir: Leg das Futter hin und halte Abstand, dann fressen sie es im Umkreis von 10 m und werden in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller. Gezähmt fliehen sie nicht mehr, suchen hungrig selbst Futter und bekommen [[gc.tierarten.young|Hirschkälber]]. Angreifen können sie nicht, Angriffsbefehle lehnen sie ab. Höchststufe {gc_tierarten_species_max_deer}. Aus (Standard): wie in Valheim."
+  },
+  "gc.tierarten.species_tame_hare": {
+    "title": "Hasen zähmbar",
+    "short": "Hasen der Nebellande fressen Pilze vom Boden und lassen sich zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_hare}.",
+    "body": "Futter: Pilz, Gelber Pilz und Jotun-Bläschen. Hasen leben in den [[valheim.biome.mistlands|Nebellanden]] und fliehen vor dir: Leg das Futter hin und halte Abstand, dann fressen sie es im Umkreis von 10 m und werden in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller. Gezähmt fliehen sie nicht mehr und bekommen [[gc.tierarten.young|Junghasen]]; angreifen können sie nicht. Höchststufe {gc_tierarten_species_max_hare}. Aus (Standard): wie in Valheim."
+  },
+  "gc.tierarten.species_tame_seal": {
+    "title": "Robben zähmbar",
+    "short": "Robben im Hohen Norden fressen rohen Fisch vom Boden und lassen sich zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_seal}.",
+    "body": "Robben leben im [[valheim.biome.deepnorth|Hohen Norden]] und fliehen vor dir: Leg den Fisch hin und halte Abstand, dann fressen sie ihn im Umkreis von 10 m und werden in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller. Gezähmt fliehen sie nicht mehr und bekommen [[gc.tierarten.young|Robbenjunge]]; angreifen können sie nicht. Höchststufe {gc_tierarten_species_max_seal}. Aus (Standard): wie in Valheim."
+  },
+  "gc.tierarten.bearcub": {
+    "title": "Bärenjunges",
+    "short": "Das Junge zahmer Bären: ein Drittel so groß, mit einem Drittel Leben; nach 100 Minuten ist es ein Bär.",
+    "body": "Zahme, satte Bären bekommen Junge wie der Lox, solange [[gc.tierarten.species_tame_bjorn|Bären zähmbar]] sind. Das Junge erbt seine [[gc.tiere.breedlevel|Zucht-Stufe]] wie jedes Tier, lässt sich anleinen und kämpft, solange [[gc.tierarten.species_young_fight|Jungtiere kämpfen]] an ist, mit {gc_tierarten_species_young_damage} des Schadens eines Bären. Wächst es heran, bleiben Stufe, Name und Leine.",
+    "aliases": ["Bärenjunges", "Bärenjunge", "Bärenjungen"]
+  },
+  "gc.tierarten.unbjorn": {
+    "title": "Aasbär",
+    "short": "Frisst ein Bär verdorbenes Fleisch, wird er 30 Minuten später zum Aasbären, ob zahm oder wild.",
+    "body": "Das geht nur, solange [[gc.tierarten.species_tame_bjorn|Bären zähmbar]] sind. Stufe, Sterne, Name, Leine, Pfosten und Zahm-Status bleiben; ein Bärensattel fällt dabei herunter, und Spieler bis 40 m bekommen eine Meldung. Ist niemand in der Nähe, verwandelt sich der Bär, sobald seine Gegend wieder geladen ist. Ein zahmer Aasbär greift alles Wilde von selbst an, aber nie Spieler oder zahme Tiere. Aasbären lassen sich nicht zähmen und bekommen keine Jungen; ihre Höchststufe ist {gc_tierarten_species_max_unbjorn}, geritten werden sie mit dem [[gc.tierarten.bearsaddle|Aasbär-Sattel]].",
+    "aliases": ["Aasbär", "Aasbären", "Aasbär"]
+  },
+  "gc.tierarten.bearsaddle": {
+    "title": "Bärensattel",
+    "short": "Sättel für zahme Bären und Aasbären, an der Schmiede und nur, solange Bären zähmbar sind; geritten wird wie auf dem Lox.",
+    "body": "- Bärensattel: 5 Bärenfell, 10 Bronze\n- Aasbär-Sattel: 5 Aasbären-Brustkorb, 5 Bärenfell, 20 Schwarzmetall\n\nLeg den Sattel einem zahmen Bären oder Aasbären auf; danach reitet E das Tier, auch wenn du auf den Körper statt auf den Sattel schaust. Mit einer Leine in der Hand bleibt E bei der Leine. Verwandelt sich ein gesattelter Bär in einen Aasbären, fällt der Sattel herunter. Mit EpicLoot lassen sich beide verzaubern wie alle [[gc.tiere.saddle|Sättel]].",
+    "aliases": ["Bärensattel", "Aasbär-Sattel"]
+  },
+  "gc.tierarten.young": {
+    "title": "Junge der neuen Arten",
+    "short": "Zahme Hirsche, Hasen, Robben und Nixen bekommen Junge: Hirschkalb, Junghase, Robbenjunges und Junge Nixe.",
+    "body": "Die Jungen sind halb so groß, haben halbes Leben und wachsen in 50 Minuten zum Tier heran, der Junghase in 25; zahm sind sie wie ihre Eltern. Gezüchtet wird nur, solange die Art zähmbar ist, und die [[gc.tiere.breedlevel|Zucht-Stufe]] erben sie wie jedes Tier. Anleinen lassen sie sich wie alle [[gc.tiere.young|Jungtiere]].",
+    "aliases": ["Hirschkalb", "Junghase", "Robbenjunges", "Junge Nixe"]
+  }
+}

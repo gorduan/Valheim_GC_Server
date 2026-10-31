@@ -1,0 +1,16 @@
+{
+  "$locale": "en",
+  "gc.portalnamen": {
+    "title": "Portal names",
+    "short": "When you rename a portal, a list of saved names appears beside it; a click renames the portal.",
+    "body": "When you open the dialog to rename a portal, a list appears at the right edge of the screen: your own names at the top, below them the server list if the server has the mod. A click on a name renames the portal at once, “+ Save the name from the field” keeps the name you typed, and “×” deletes an entry. Since portals with the same tag are connected to each other, this way you always hit a name exactly.\n\nYour own list stays on your PC; the server list is the same for everyone, and a [[gc.serverrules|server rule]] decides who may edit it. The mod is part of GC Server ([[gc.kern.stufe|level]] 1 “Very vanilla”).",
+    "aliases": ["portal names"],
+    "see": ["gc.portalnamen.portalnames"]
+  },
+  "gc.portalnamen.portalnames": {
+    "title": "Switching portal names on and off",
+    "short": "Two switches: your own name list when renaming and the shared server list.",
+    "body": "“Portal name list” applies only to you and shows the list beside the dialog. When “A click renames right away” is off (currently {gc_portalnamen_portalnames_click}), a click only writes the name into the input field; your names are kept in `BepInEx/config/gorduan.gc_client.portalnames.txt`.\n\n“Server list of portal names” is a [[gc.serverrules|server rule]]: it gives every player the same list of up to 200 names, stored on the server per world. Below it you find who may edit it, admins only or everyone; everyone can always see and use it.",
+    "see": ["gc.portalnamen"]
+  }
+}

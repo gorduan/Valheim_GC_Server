@@ -1,0 +1,15 @@
+{
+  "$locale": "en",
+  "gc.spitzhacke": {
+    "title": "Pickaxe as weapon",
+    "short": "The middle mouse button swings any pickaxe like a mace; left click still mines.",
+    "body": "With the middle mouse button every pickaxe performs the main attack of a bronze mace: the same motion, three-hit combo, reach and [[valheim.stat.stamina|stamina]]. The damage is your pickaxe's, {gc_spitzhacke_pickaxe_enemy} against enemies and {gc_spitzhacke_pickaxe_ore} against ore and rock; the ore value normally stays below 100 % so the combat swing is no faster way to mine. Left click stays the normal mining swing.\n\nThe mod is part of GC Server ([[gc.kern.stufe|level]] 4 “GC light”), and the server and all players need it. While it runs, it counts with 1 % per boss for the automatic mode of [[gc.kern.bossscale|boss progression]].",
+    "aliases": ["mace swing"],
+    "see": ["gc.spitzhacke.pickaxe"]
+  },
+  "gc.spitzhacke.pickaxe": {
+    "title": "Pickaxe: mace swing",
+    "short": "Server rule: combat swing of the pickaxe on the middle mouse button. Off: pickaxes have no secondary attack again.",
+    "body": "This [[gc.serverrules|server rule]] is {gc_spitzhacke_pickaxe}; how the swing works is explained under [[gc.spitzhacke]]. The server sets the values too, so everyone plays with the same numbers:\n\n- Damage against enemies: {gc_spitzhacke_pickaxe_enemy} of the pickaxe damage; the last hit of the combo counts double, as with a mace\n- Damage against ore and rock: {gc_spitzhacke_pickaxe_ore}, the same for every hit of the combo"
+  }
+}

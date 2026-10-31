@@ -122,6 +122,7 @@ internal static class Whistles
 
 	internal static void CreateItems()
 	{
+		WhistleUniqueEffects.CreateStatusEffects(); // Eirs Weise, Ráns Netz (Gorduan, 27.10.2026): unabhängig von den Pfeifen, bei allen gleich
 		int created = 0;
 		foreach (WhistleTier tier in Tiers)
 		{
@@ -431,10 +432,14 @@ internal static class Whistles
 		{
 			return; // Walkürenpfeife am beladenen Karren oder mit Karren in der Luft: die Walküre statt der Tiere
 		}
+		bool woke = WhistleUniqueEffects.Wake(player, item); // Hermóðs Weckruf (Gorduan, 27.10.2026): Ohnmächtige hängen an keiner Leine
 		List<Link> links = MyAnimals(player);
 		if (links.Count == 0)
 		{
-			Gc.TopLeft(GcLoc.Get("gcwh_none"));
+			if (!woke)
+			{
+				Gc.TopLeft(GcLoc.Get("gcwh_none"));
+			}
 			return;
 		}
 		if (!Control.Aim(out Vector3 point))
@@ -489,10 +494,14 @@ internal static class Whistles
 		{
 			return;
 		}
+		bool woke = WhistleUniqueEffects.Wake(player, item);
 		List<Link> links = MyAnimals(player);
 		if (links.Count == 0)
 		{
-			Gc.TopLeft(GcLoc.Get("gcwh_none"));
+			if (!woke)
+			{
+				Gc.TopLeft(GcLoc.Get("gcwh_none"));
+			}
 			return;
 		}
 		Character? target = player.GetHoverCreature();
@@ -519,6 +528,9 @@ internal static class Whistles
 	/// die übrigen Verzauberungen BuffSeconds lang am Tier hängt, geschieht einmal beim Pfiff, nur wenn ein Tier gehorcht hat.
 	/// Gjallarhorns Hall lässt Gegner um dich taumeln (keine Bosse, wie die Abschreckung), Heimdalls Weckruf heilt die Tiere,
 	/// Surts Glutwelle versengt Gegner um jedes Tier (jeden nur einmal). Treffer und Heilung gehen per RPC an den Besitzer.
+	/// Seit 27.10.2026 (Gorduan) auch die neuen einzigartigen Pfeifen (WhistleUniqueEffects): Lockruf, Weise, Netz, Urleere. Hall
+	/// und Heimdalls Weckruf (Rally) hängen nur an den Werten, wirken also auf jeder Pfeife gleich (auch auf Hermóðs Ruf und dem
+	/// Echo aus Ginnungagap); Urleere und Hall zusammen lassen jeden Gegner nur einmal taumeln.
 	/// </summary>
 	private static void Mythic(Player player, ItemDrop.ItemData item, List<Link> obeyed)
 	{
@@ -527,15 +539,16 @@ internal static class Whistles
 			return;
 		}
 		BondStats bond = Bonds.Of(item);
-		if (bond.Hall <= 0f && bond.Rally <= 0f && bond.Blaze <= 0f)
+		float stagger = Mathf.Max(bond.Hall, WhistleUniqueEffects.Trigger(player, bond, obeyed)); // Urleere: Gegner bis 15 m
+		if (stagger <= 0f && bond.Rally <= 0f && bond.Blaze <= 0f)
 		{
 			return;
 		}
-		if (bond.Hall > 0f)
+		if (stagger > 0f)
 		{
 			Vector3 centre = player.transform.position;
 			Near.Clear();
-			Character.GetCharactersInRange(centre, bond.Hall, Near);
+			Character.GetCharactersInRange(centre, stagger, Near);
 			foreach (Character other in Near)
 			{
 				if (Foe(player, other) && other.m_staggerWhenBlocked && !other.IsBoss())
@@ -581,7 +594,7 @@ internal static class Whistles
 	/// Gegner für Hall und Glutwelle: lebt, kein Spieler, nicht zahm, und Valheim hält ihn für feindlich. Gültige ZNetView: Ein
 	/// gerade entferntes Objekt steht bis zum Ende des Bilds noch in der Liste, ohne ZDO (Prüfung 24.10.2026).
 	/// </summary>
-	private static bool Foe(Character self, Character other)
+	internal static bool Foe(Character self, Character other)
 	{
 		return other != null && other != self && other.m_nview != null && other.m_nview.IsValid() && !other.IsDead() && !other.IsPlayer() && !other.IsTamed()
 			&& BaseAI.IsEnemy(self, other);
@@ -622,9 +635,11 @@ internal static class Whistles
 	/// <summary>Das Tier hat gehorcht: BuffSeconds lang Tempo und die Verzauberungen der Pfeife, kein Leinenschaden.</summary>
 	private static void Buff(Link link, ItemDrop.ItemData item, WhistleTier tier)
 	{
-		BondStats bond = Bonds.Of(item).ForWhistle(tier.Speed); // neues Objekt: die Zusätze ändern nichts an der Pfeife selbst
+		BondStats magic = Bonds.Of(item);
+		BondStats bond = magic.ForWhistle(tier.Speed); // neues Objekt: die Zusätze ändern nichts an der Pfeife selbst
 		bond.Lightning += tier.ExtraLightning;
 		bond.NormalAfter += tier.ExtraNormal;
+		WhistleUniqueEffects.AddPack(bond, magic.Pack, link); // Fenrirs Heulen (Gorduan, 27.10.2026): je weiterem Tier an deinen Leinen
 		link.WhistleBond = bond;
 		link.WhistleUntil = Time.time + BuffSeconds;
 		link.WhistleBase = null; // Bonds.Current bildet die Werte neu
@@ -644,6 +659,7 @@ internal static class Whistles
 		sfxSearched = false;
 		sfx = null;
 		LastHeard.Clear();
+		WhistleUniqueEffects.RegisterRpcs(); // Lockruf, Weckruf und Urleere beim Besitzer (Gorduan, 27.10.2026)
 	}
 
 	/// <summary>Pfiff an alle (auch an sich selbst: ZRoutedRpc.Everybody läuft auch lokal).</summary>
@@ -669,7 +685,7 @@ internal static class Whistles
 			return; // auch beim Empfänger gebremst, nicht nur beim Absender
 		}
 		LastHeard[sender] = Time.time;
-		AudioClip clip = ClipFor(Mathf.Clamp(level, 1, Tiers.Length));
+		AudioClip clip = ClipFor(ValidTone(level));
 		GameObject go = new("GC_Whistle_Sound");
 		go.transform.position = position;
 		AudioSource source = go.AddComponent<AudioSource>();
@@ -682,6 +698,23 @@ internal static class Whistles
 		source.outputAudioMixerGroup = SfxGroup();
 		source.Play();
 		UnityEngine.Object.Destroy(go, clip.length + 0.25f);
+	}
+
+	/// <summary>
+	/// Tonhöhe aus dem Netz: die einer Pfeife (WhistleTier.Tone, auch der Ruf der Walkürenpfeife, 9), sonst auf die Stufen
+	/// begrenzt, damit fremde Werte keine beliebigen Töne erzeugen. Review 27.10.2026: Bis dahin kappte die Grenze auch den
+	/// Walküren-Ruf auf Stufe 4.
+	/// </summary>
+	private static int ValidTone(int level)
+	{
+		foreach (WhistleTier tier in Tiers)
+		{
+			if (tier.Tone == level)
+			{
+				return level;
+			}
+		}
+		return Mathf.Clamp(level, 1, Tiers.Length);
 	}
 
 	/// <summary>Valheims Mischpult-Gruppe für Geräusche (damit die Lautstärke-Einstellung gilt).</summary>
@@ -790,4 +823,36 @@ internal static class WhistleTooltipPatch
 
 	/// <summary>Kaufmännisch gerundet (Mathf.RoundToInt rundet 12,5 auf 12).</summary>
 	private static int Rounded(float value) => (int)Math.Floor(value + 0.5f);
+}
+
+/// <summary>
+/// „Hinterhältigkeit“ (Valheims Rückenstich-Faktor) bedeutet für Leinen und Pfeifen nichts (Gorduan, 31.10.2026: Tooltips aufs
+/// Minimum): die Zeile fliegt raus, ob noch als $item_backstab oder schon übersetzt (EpicLoot baut seine Tooltips fertig).
+/// Läuft zuletzt, also nach EpicLoot und nach LeashTooltipPatch und WhistleTooltipPatch.
+/// </summary>
+[HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetTooltip), new Type[] { typeof(ItemDrop.ItemData), typeof(int), typeof(bool), typeof(float), typeof(int), typeof(bool) })]
+internal static class NoBackstabLinePatch
+{
+	private static readonly System.Text.RegularExpressions.Regex Tags = new("<[^>]+>");
+
+	[HarmonyPriority(Priority.Last)]
+	private static void Postfix(ItemDrop.ItemData item, ref string __result)
+	{
+		if (item == null || string.IsNullOrEmpty(__result) || !(Plugin.IsLeash(item, out _) || Whistles.IsWhistle(item, out _)))
+		{
+			return;
+		}
+		string label = Localization.instance != null ? Localization.instance.Localize("$item_backstab") : "";
+		List<string> kept = new();
+		foreach (string line in __result.Split('\n'))
+		{
+			string plain = Tags.Replace(line, "").TrimStart();
+			if (plain.StartsWith("$item_backstab") || (label.Length > 0 && !label.StartsWith("[") && plain.StartsWith(label + ":")))
+			{
+				continue;
+			}
+			kept.Add(line);
+		}
+		__result = string.Join("\n", kept);
+	}
 }

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Outfit (Gorduan): Kleiderschrank und Outfit. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Outfit</AssemblyName>
+    <RootNamespace>GC.Server.ModOutfit</RootNamespace>
+    <Product>GC_Outfit</Product>
+    <Version>1.9.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>outfit</GcId>
+    <GcStufe>1</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig></GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Outfit</GcTitel>
+    <GcBeschreibung>Kleiderschrank: Ausrüstung ins Outfit legen und ihr Aussehen tragen, Werte und Angriffe bleiben die der getragenen Ausrüstung. Das Outfit bleibt beim Tod, ändern lässt es sich nur am Schrank.</GcBeschreibung>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\*.gcm" />
+    <EmbeddedResource Include="Assets\*.png" />
+    <Reference Include="UnityEngine.ImageConversionModule" HintPath="$(Managed)\UnityEngine.ImageConversionModule.dll" Private="false" />
+  </ItemGroup>
+</Project>

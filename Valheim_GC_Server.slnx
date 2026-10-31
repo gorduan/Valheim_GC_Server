@@ -9,6 +9,9 @@
     <Project Path="Patcher/Server/GC_ModSchalter_Server.csproj" />
   </Folder>
   <Folder Name="/Mods/" />
+  <Folder Name="/Mods/Blitzspule/">
+    <Project Path="Mods/Blitzspule/GC_Blitzspule.csproj" />
+  </Folder>
   <Folder Name="/Mods/Felder/">
     <Project Path="Mods/Felder/GC_Felder.csproj" />
   </Folder>
@@ -17,6 +20,9 @@
   </Folder>
   <Folder Name="/Mods/Leiter/">
     <Project Path="Mods/Leiter/GC_Leiter.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Outfit/">
+    <Project Path="Mods/Outfit/GC_Outfit.csproj" />
   </Folder>
   <Folder Name="/Mods/Parade/">
     <Project Path="Mods/Parade/GC_Parade.csproj" />

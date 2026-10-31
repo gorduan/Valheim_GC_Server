@@ -1,0 +1,35 @@
+{
+  "$locale": "de",
+  "gc.outfit": {
+    "title": "Outfit",
+    "short": "Trag das Aussehen anderer Ausrüstung: Dein Charakter zeigt das Outfit, Werte und Angriffe bleiben die der echten Teile.",
+    "body": "Am [[gc.outfit.wardrobe|Kleiderschrank]] legst du Rüstung und Waffen in dein Outfit. Trägst du ein Teil, dessen [[gc.outfit.slots|Platz]] im Outfit belegt ist, zeigt dein Charakter das Outfit-Teil; Werte, Angriffe und Effekte bleiben die des echten Teils. Ein leerer Platz zeigt das echte Teil, ohne getragenes Teil zeigt der Platz nichts, und Rüstung kannst du ganz [[gc.outfit.hide|ausblenden]].\n\nTeile im Outfit liegen nicht im Inventar: Sie zählen nicht zum [[valheim.stat.carryweight|Gewicht]], bleiben beim Tod bei dir und lassen sich nur am Schrank wechseln. Alle Mitspieler sehen dein Outfit, sogar ohne die Mod, weil Valheim das Aussehen wie normale Ausrüstung überträgt; die Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 1 „Sehr Vanilla“).",
+    "aliases": ["Outfit"],
+    "see": ["gc.outfit.wardrobe", "gc.outfit.enabled"]
+  },
+  "gc.outfit.enabled": {
+    "title": "Outfits und Kleiderschrank",
+    "short": "Server-Regel für Outfits. Aus: Alle sehen die echte Ausrüstung, und der Kleiderschrank lässt sich nicht bauen.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_outfit_enabled}. Ist sie aus, sieht jeder die echte Ausrüstung, der [[gc.outfit.wardrobe|Kleiderschrank]] verschwindet aus dem Hammer, und am vorhandenen Schrank kannst du Teile nur noch herausnehmen; das Fenster heißt dann „Outfit (auf diesem Server aus)“. Dein [[gc.outfit|Outfit]] bleibt gespeichert und zeigt sich wieder, sobald die Regel an ist.",
+    "see": ["gc.outfit"]
+  },
+  "gc.outfit.wardrobe": {
+    "title": "Kleiderschrank",
+    "short": "Möbelstück, an dem du dein Outfit änderst; gebaut mit dem Hammer an der Werkbank aus 10 Edelholz und 10 Bronzenägeln.",
+    "body": "Du baust ihn mit dem Hammer unter Möbel an der [[valheim.station.workbench|Werkbank]]. E am Schrank öffnet seine Türen und dein Inventar; wo sonst eine Truhe steht, siehst du die 18 [[gc.outfit.slots|Plätze]] deines Outfits in drei Tabellen: Rüstung, Einhandwaffen, Zweihand und Fernkampf. Ziehen und Ablegen geht wie bei einer Truhe, Umschalt-Klick legt ein Teil in seinen Platz oder zurück ins Inventar, und ein Teil, das dort schon lag, tauscht mit ihm. Das Auge neben einem Platz oder ein Rechtsklick darauf [[gc.outfit.hide|blendet ihn aus]].\n\nDer Schrank selbst hat keinen Inhalt, im Bereich eines fremden Wächtersteins öffnet er sich nicht, und gehst du mehr als 4 m weg, schließt sich das Fenster.",
+    "aliases": ["Kleiderschrank"],
+    "see": ["gc.outfit"]
+  },
+  "gc.outfit.slots": {
+    "title": "Outfit-Plätze",
+    "short": "18 Plätze: sechs für Rüstungsteile vom Helm bis zum Gürtel, zwölf für Waffenarten. Werkzeuge gehören nicht hinein.",
+    "body": "Die sechs Rüstungsplätze nehmen nur Teile ihrer Art. Die zwölf Waffenplätze stehen für Schwert, Axt, Keule, Messer, Speer, Stangenwaffe (Atgeir), Zweihandschwert, Zweihandaxt, Zweihandkeule, Bogen, Armbrust und Stab; hinein passt jede Waffe, und sie zeigt sich, sobald du eine Waffe dieser Art hältst. So kann ein Schwert in deiner Hand wie eine Axt aussehen.\n\nWerkzeuge wie Spitzhacke, Pflug oder Angel haben keinen Platz, und die Fackel bleibt immer echt.",
+    "see": ["gc.outfit"]
+  },
+  "gc.outfit.hide": {
+    "title": "Teile ausblenden",
+    "short": "Das Auge neben einem Platz am Kleiderschrank blendet das Teil aus: Dein Charakter zeigt dort nichts.",
+    "body": "Das geht für jeden Platz: Bei Rüstung zeigt dein Charakter dort nichts, bei Waffen ist eine Waffe dieser Art in der Hand und auf dem Rücken unsichtbar. Ein Rechtsklick auf den Platz wirkt genauso. Ist ein Teil ausgeblendet, ist das Auge durchgestrichen und die Zeile grau; ein zweiter Klick zeigt das Teil wieder. Die Werte des getragenen Teils bleiben, nur sein Aussehen verschwindet.",
+    "see": ["gc.outfit.wardrobe"]
+  }
+}

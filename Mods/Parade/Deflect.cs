@@ -149,6 +149,7 @@ internal static class GameStartPatch
 }
 
 [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.BlockAttack))]
+[HarmonyAfter("randyknapp.mods.epicloot")] // EpicLoots „Paradefenster“ kürzt m_blockTimer im eigenen Prefix: erst danach lesen (Review 27.10.2026)
 internal static class BlockAttackPatch
 {
 	private struct State

@@ -394,7 +394,7 @@ internal static class Illusions
 		{
 			groundMask = LayerMask.GetMask("Default", "static_solid", "Default_small", "piece", "terrain", "vehicle");
 		}
-		if (Physics.Raycast(point + Vector3.up * 3f, Vector3.down, out RaycastHit hit, 8f, groundMask) && Mathf.Abs(hit.point.y - center.y) < 2.5f)
+		if (Physics.Raycast(point + Vector3.up * 3f, Vector3.down, out RaycastHit hit, 8f, groundMask, QueryTriggerInteraction.Ignore) && Mathf.Abs(hit.point.y - center.y) < 2.5f)
 		{
 			return hit.point + Vector3.up * 0.1f;
 		}

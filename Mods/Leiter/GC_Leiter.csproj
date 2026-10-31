@@ -15,6 +15,6 @@
     <GcAlteConfig>gorduan.gc_server.cfg</GcAlteConfig>
     <GcAusgleich>0</GcAusgleich>
     <GcTitel>Leiter</GcTitel>
-    <GcBeschreibung>Baubare Leiter, 1 und 2 m hoch, mit festem Vorne.</GcBeschreibung>
+    <GcBeschreibung>Baubare Leiter aus 1-m-Stücken, beliebig hoch stapelbar, mit festem Vorne.</GcBeschreibung>
   </PropertyGroup>
 </Project>

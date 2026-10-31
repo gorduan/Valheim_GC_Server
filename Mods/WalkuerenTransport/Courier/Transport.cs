@@ -230,6 +230,11 @@ internal static class Transport
 			Gc.Center(GcLoc.Get("gccr_cart_busy"));
 			return true;
 		}
+		if (SeatTaken(cart))
+		{
+			Gc.Center(GcLoc.Get("gccr_cart_seat"));
+			return true;
+		}
 		// fremde Schutzzone: wie Valheims Kisten (Prüfung 19.10.: sonst ließe sich ein Karren aus fremder Basis verschicken)
 		if (container.m_checkGuardStone && !PrivateArea.CheckAccess(cart.transform.position))
 		{
@@ -238,6 +243,17 @@ internal static class Transport
 		waitUntil = Time.time + 8f;
 		ZRoutedRpc.instance.InvokeRoutedRPC(RpcSend, player.GetPlayerID(), cart.m_nview.GetZDO().m_uid);
 		return true;
+	}
+
+	/// <summary>
+	/// Sitzt jemand auf dem Karren? (Review 27.10.2026: Valheims Vagon.InUse prüft nur Ziehen und offene Kiste, nicht den Sitz.)
+	/// Wie Valheims Chair.IsInUse: ein Spieler genau am Sitzpunkt. Auch fremde Sitzende stehen dort genau, ihre Lage kommt
+	/// relativ zum Karren über das Netz (Player.GetRelativePosition).
+	/// </summary>
+	internal static bool SeatTaken(Vagon vagon)
+	{
+		Chair? chair = vagon.m_chair != null ? vagon.m_chair : vagon.GetComponentInChildren<Chair>();
+		return chair != null && chair.m_attachPoint != null && chair.IsInUse();
 	}
 
 	/// <summary>Nächster Karren (Valheims „Cart“) höchstens 1 m neben dem Spieler: Abstand der Körpermitte zum Kasten.</summary>
@@ -350,8 +366,8 @@ internal static class Transport
 	}
 
 	/// <summary>
-	/// Fracht liegt am Boden: dem Server melden, erst dann löscht er sie. Mit dem Datensatz: so zählt auch eine späte Meldung
-	/// (Prüfung 19.10.: sonst ließe sich dieselbe Fracht ein zweites Mal rufen).
+	/// Fracht liegt am Boden: dem Server melden, im selben Bild, in dem die Gegenstände entstehen (Review 27.10.2026, Show.Drop).
+	/// Mit dem Datensatz: so zählt auch eine späte Meldung (Prüfung 19.10.: sonst ließe sich dieselbe Fracht ein zweites Mal rufen).
 	/// </summary>
 	internal static void ConfirmDelivered(long playerId, ZDOID record)
 	{
@@ -390,6 +406,12 @@ internal static class Transport
 		if (vagon.InUse())
 		{
 			ZRoutedRpc.instance.InvokeRoutedRPC(server, RpcClaimFailed, playerId, whistler, cart, "gccr_cart_busy");
+			return;
+		}
+		if (SeatTaken(vagon))
+		{
+			// Review 27.10.2026: sonst verschwände der Karren unter einem sitzenden Spieler
+			ZRoutedRpc.instance.InvokeRoutedRPC(server, RpcClaimFailed, playerId, whistler, cart, "gccr_cart_seat");
 			return;
 		}
 		if (!container.CheckAccess(playerId))
@@ -434,10 +456,13 @@ internal static class Transport
 	/// <summary>Angefragter Karren: wer gepfiffen hat, wem der Karren gehört (nur der darf die Fracht melden), welcher Karren.</summary>
 	private sealed class Reservation
 	{
+		public long PlayerId;
 		public long Peer;
 		public long Owner;
 		public ZDOID Cart;
 		public double Until;
+		/// <summary>Abgelaufen: bis dahin zählt noch eine späte Meldung ihres Besitzers (Late).</summary>
+		public double LateUntil;
 	}
 
 	private sealed class Pickup
@@ -481,7 +506,22 @@ internal static class Transport
 	/// <summary>Server-Prüfung beim Abschicken: Spieler und Karren höchstens so weit auseinander (Mitte zu Mitte, ZDO-Positionen).</summary>
 	private const float SendReach = 4f;
 
+	/// <summary>
+	/// So lange nach dem Ablauf einer Anfrage nimmt der Server die Fracht ihres Besitzers noch an (Review 27.10.2026): Der
+	/// Besitzer leert und entfernt den Karren, bevor der Server die Fracht gespeichert hat, danach gibt es sie nur noch in
+	/// seiner Meldung.
+	/// </summary>
+	private const double LateSeconds = 600.0;
+
+	/// <summary>Höchstens so lange nach dem Erscheinen der Wächter, dann kommt das Finale von selbst (Review 27.10.2026).</summary>
+	private const double FightSeconds = 20.0 * 60.0;
+
+	/// <summary>So oft löscht der Server abgelieferte Fracht, die älter als 7 Tage ist.</summary>
+	private const double PurgeSeconds = 600.0;
+
 	private static readonly Dictionary<long, Reservation> Reserved = new();
+	private static readonly List<Reservation> Late = new();
+	private static double nextPurge;
 	private static readonly Dictionary<long, Lend> Delivering = new();
 	private static readonly List<Pickup> Queue = new();
 	private static readonly List<Fight> Fights = new();
@@ -677,7 +717,7 @@ internal static class Transport
 			return;
 		}
 		long owner = zdo.GetOwner();
-		Reserved[id] = new Reservation { Peer = sender, Owner = owner, Cart = cart, Until = now + 60.0 };
+		Reserved[id] = new Reservation { PlayerId = id, Peer = sender, Owner = owner, Cart = cart, Until = now + 60.0 };
 		ZRoutedRpc.instance.InvokeRoutedRPC(owner, cart, RpcClaim, id, sender, MeatAmount.Value);
 	}
 
@@ -703,12 +743,23 @@ internal static class Transport
 		{
 			return;
 		}
-		if (Expected(sender, playerId, whistler, cart) == null)
+		if (Expected(sender, playerId, whistler, cart) != null)
 		{
-			ServerPlugin.Log.LogWarning($"Walküren-Transport: Fracht für {playerId} von {sender} ohne passende Anfrage abgelehnt.");
-			return;
+			Reserved.Remove(playerId);
 		}
-		Reserved.Remove(playerId);
+		else
+		{
+			// Review 27.10.2026: Der Besitzer hat den Karren schon geleert und entfernt, die Fracht gibt es nur noch hier. Eine
+			// späte Meldung des reservierten Besitzers zählt noch, wenn der Spieler keine Fracht hat; sonst steht sie ganz im Log.
+			Reservation? late = Late.Find(r => r.PlayerId == playerId && r.Owner == sender && r.Peer == whistler && r.Cart == cart);
+			if (late == null || Store.StateOf(playerId) != CargoState.None)
+			{
+				ServerPlugin.Log.LogWarning($"Walküren-Transport: Fracht für {playerId} von {sender} abgelehnt ({(late == null ? "ohne passende Anfrage" : "der Spieler hat schon Fracht")}), Karren bei {position:F0}. Zum Retten (Base64 für new ZPackage(…): Breite, Höhe, Füllung, Inventar): {cargo.GetBase64()}");
+				return;
+			}
+			Late.Remove(late);
+			ServerPlugin.Log.LogInfo($"Walküren-Transport: späte Fracht für {playerId} von {sender} angenommen.");
+		}
 		int width = cargo.ReadInt();
 		int height = cargo.ReadInt();
 		float fill = cargo.ReadSingle();
@@ -790,8 +841,14 @@ internal static class Transport
 	}
 
 	/// <summary>
-	/// Fracht liegt am Boden: Der genannte Datensatz wird gelöscht, wenn er diesem Spieler gehört, auch wenn die Meldung spät
-	/// kommt (Prüfung 19.10.: eine Fracht darf nie ein zweites Mal fallen).
+	/// Fracht liegt am Boden: Der genannte Datensatz gilt als abgeliefert, wenn er diesem Spieler gehört und in der Luft ist,
+	/// auch wenn die Meldung spät kommt (Prüfung 19.10.: eine Fracht darf nie ein zweites Mal fallen).
+	/// Review 27.10.2026 (Verdopplung beim Ausloggen direkt nach dem Aufprall): Der Spieler meldet jetzt im selben Bild, in dem
+	/// er die Gegenstände erzeugt. Die Meldung geht als Routed-RPC sofort in die Leitung, seine neuen ZDOs folgen erst mit dem
+	/// nächsten Abgleich (ZDOMan, alle 0,05 s, beim Ausloggen FlushClientObjects) auf derselben Verbindung, kommen also danach
+	/// an. Der Datensatz wird nicht gelöscht, sondern 7 Tage als „abgeliefert“ aufbewahrt (Store.MarkDelivered): Stürzt das
+	/// Spiel genau zwischen Meldung und Abgleich ab, fehlen die Gegenstände, die Fracht ist aber für den Admin noch da.
+	/// Die Meldung des abwerfenden Spielers zählt auch, wenn sein Spieler-ZDO gerade fehlt (vom Aufprall getötet).
 	/// </summary>
 	private static void RPC_Delivered(long sender, long playerId, ZDOID recordId)
 	{
@@ -799,20 +856,22 @@ internal static class Transport
 		{
 			return;
 		}
-		long id = Verified(sender, playerId, true, out _);
+		bool lent = Delivering.TryGetValue(playerId, out Lend lend) && lend.Peer == sender && lend.Cargo == recordId;
+		long id = lent ? playerId : Verified(sender, playerId, true, out _);
 		if (id == 0L)
 		{
+			ServerPlugin.Log.LogWarning($"Walküren-Transport: Meldung „abgeliefert“ für {playerId} von {sender} ohne passende Lieferung abgelehnt.");
 			return;
 		}
-		if (Delivering.TryGetValue(id, out Lend lend) && (lend.Peer == sender || lend.Cargo == recordId))
+		if (Delivering.TryGetValue(id, out lend) && (lend.Peer == sender || lend.Cargo == recordId))
 		{
 			Delivering.Remove(id);
 		}
 		ZDO? record = Store.Find(recordId);
-		if (record != null && Store.PlayerOf(record) == id)
+		if (record != null && Store.PlayerOf(record) == id && Store.StateOfRecord(record) == CargoState.Carried)
 		{
-			ServerPlugin.Log.LogInfo($"Walküren-Transport: Fracht von {Store.Describe(record)} abgeliefert.");
-			Store.Remove(record);
+			Store.MarkDelivered(record);
+			ServerPlugin.Log.LogInfo($"Walküren-Transport: Fracht von {Store.Describe(record)} abgeliefert (der Datensatz bleibt {Store.KeepDelivered.TotalDays:0} Tage für den Admin).");
 		}
 		SendState(sender, id);
 	}
@@ -848,14 +907,31 @@ internal static class Transport
 					(expired ??= new List<long>()).Add(pair.Key);
 				}
 			}
-			expired?.ForEach(key => Reserved.Remove(key));
+			expired?.ForEach(key =>
+			{
+				// abgelaufen, aber eine späte Meldung des Besitzers zählt noch eine Weile (Review 27.10.2026, RPC_Stored)
+				Reservation old = Reserved[key];
+				old.LateUntil = now + LateSeconds;
+				Late.Add(old);
+				Reserved.Remove(key);
+			});
+		}
+		if (Late.Count > 0)
+		{
+			Late.RemoveAll(r => r.LateUntil < now);
+		}
+		if (now >= nextPurge)
+		{
+			nextPurge = now + PurgeSeconds;
+			Store.PurgeDelivered();
 		}
 		if (Delivering.Count > 0)
 		{
 			List<long>? gone = null;
 			foreach (KeyValuePair<long, Lend> pair in Delivering)
 			{
-				// getrennt: die Fracht bleibt in der Luft, man kann sie noch einmal rufen (keine Zeitgrenze, Prüfung 19.10.)
+				// getrennt: die Fracht bleibt in der Luft, man kann sie noch einmal rufen (keine Zeitgrenze, Prüfung 19.10.). Ohne
+				// Meldung gab es kein Abwerfen: sie geht im selben Bild wie die Gegenstände und kommt vor ihnen an (Review 27.10.2026)
 				bool connected = pair.Value.Peer == ZDOMan.GetSessionID() || ZNet.instance.GetPeer(pair.Value.Peer) != null;
 				if (!connected)
 				{
@@ -905,9 +981,10 @@ internal static class Transport
 	{
 		ZDO? record = Store.Find(pickup.Cargo);
 		bool raid = RaidAfter.Value;
-		if (record != null)
+		if (record != null && Store.StateOfRecord(record) == CargoState.Waiting)
 		{
-			// Gorduan: Event 2 erst, wenn der Raid vorbei ist (mit und ohne Easteregg)
+			// Gorduan: Event 2 erst, wenn der Raid vorbei ist (mit und ohne Easteregg). Nur aus „wartend“ (Review 27.10.2026): ein
+			// abgelieferter Datensatz darf auf keinem Weg wieder in die Luft kommen
 			Store.SetState(record, raid ? CargoState.Locked : CargoState.Carried);
 		}
 		long peer = PeerOfPlayer(pickup.PlayerId);
@@ -947,6 +1024,13 @@ internal static class Transport
 					ServerPlugin.Log.LogInfo("Walküren-Transport: keine Wächter gemeldet (Spieler fort?), die Möwe kommt so.");
 					Finale(fight);
 				}
+				continue;
+			}
+			if (now > fight.ReportedAt + FightSeconds)
+			{
+				// Review 27.10.2026: ein verirrter oder unerreichbarer Wächter hielte die Fracht sonst bis zum Neustart „wartend“
+				ServerPlugin.Log.LogInfo($"Walküren-Transport: Wächter-Kampf für Spieler {fight.PlayerId} nach {FightSeconds / 60.0:0} Minuten beendet, die Möwe kommt so.");
+				Finale(fight);
 				continue;
 			}
 			if (now < fight.NextCheck)
@@ -1041,6 +1125,8 @@ internal static class Transport
 	internal static void ResetServer()
 	{
 		Reserved.Clear();
+		Late.Clear();
+		nextPurge = 0.0;
 		Delivering.Clear();
 		Queue.Clear();
 		Fights.Clear();

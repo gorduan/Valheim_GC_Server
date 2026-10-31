@@ -24,15 +24,23 @@ namespace GC.Server.Leash;
 /// 30 Minuten Zähmzeit. Hirsch, Hase und Robbe haben Valheims einfache Tier-KI: Sie fressen hier vom Boden (Graze), das
 /// Zähmen läuft über TamingUpdate. Gezähmt fliehen sie nicht mehr; an der Leine folgen sie (LeashAnimalAIPatch).
 ///
-/// Bär (Gorduan): Bären bekommen Junge, ein Drittel so groß, mit zwei Dritteln der Farbsättigung, einem Drittel Leben und
-/// Schaden; sie wachsen zum Bären heran. Frisst ein Bär (zahm oder wild) verrottetes Fleisch (das „Unbjørn-Fleisch“),
-/// verwandelt er sich 30 Minuten (Weltzeit) später in einen Unbjørn, mit Stufe, Sternen, Namen, Leine und Zahm-Status.
-/// Unbjørn lassen sich nicht zähmen und bekommen keine Jungen. Zahme Bären greifen wilde Bären nicht von selbst an (auf
-/// Befehl schon); Unbjørn aus zahmen Bären greifen alles Wilde von selbst an, keine Spieler und keine zahmen Tiere.
+/// Bär (Gorduan): Bären bekommen Junge, ein Drittel so groß, mit zwei Dritteln der Farbsättigung und einem Drittel Leben; ihren
+/// Schaden senkt seit 27.10.2026 „Jungtiere kämpfen“ (YoungFighters, Standard ein Viertel). Sie wachsen zum Bären heran.
+/// Frisst ein Bär (zahm oder wild) verrottetes Fleisch (das „Unbjørn-Fleisch“), verwandelt er sich 30 Minuten (Weltzeit)
+/// später in einen Unbjørn, mit Stufe, Sternen, Namen, Leine und Zahm-Status.
+/// Unbjørn lassen sich nicht zähmen und bekommen keine Jungen (Gorduan, 30.10.2026: den Aasbär gibt es nur durch Verwandlung
+/// eines Bären; auch eine Zucht-Komponente der Vorlage wird entfernt). Zahme Bären greifen wilde Bären nicht von selbst an
+/// (auf Befehl schon); Unbjørn aus zahmen Bären greifen alles Wilde von selbst an, keine Spieler und keine zahmen Tiere.
+///
+/// Junge für Hirsch, Hase, Robbe und Nixe (Gorduan, 30.10.2026: „gezähmte Hirsche lassen sich nicht paaren“): wie beim Bären ein
+/// Klon des Tiers, halb so groß, mit halbem Leben, zwei Dritteln der Farbsättigung, das zum Tier heranwächst; Zucht mit den
+/// Liebes- und Geburtseffekten des Wildschweins. Gezähmt suchen Hirsch, Hase und Robbe hungrig selbst Futter im Umkreis
+/// (Graze), wie Tiere mit Monster-KI; vorher fraßen sie nur bis zum Zähmen und wurden danach nie wieder satt.
 ///
 /// Beute (Gorduan): Jedes Tier mit Stufe hat beim Schlachten eine 1:1-Chance auf mehr Beute, fließend nach der Stufe: das
 /// Höchstmaß ist 1 + Stufe ÷ 50 (Stufe 25: 1,5-fach, 50: doppelt, 100: bis dreifach, 300: bis siebenfach), getroffen wird
 /// zufällig zwischen dem Doppelten (bzw. darunter dem Höchstmaß) und dem Höchstmaß. Valheims Sterne zählen wie immer dazu.
+/// Je Eintrag höchstens 100 Stück wie bei Valheim, und die Mehrbeute fällt in Stapeln (LootStacks, Review 27.10.2026).
 /// </summary>
 internal static class Species
 {
@@ -42,7 +50,7 @@ internal static class Species
 	internal const string UnbjornName = "$enemy_unbjorn";
 	internal const string RottenMeat = "RottenMeat";
 
-	/// <summary>Bärenjunges: Größe, Leben und Schaden ein Drittel, Farbsättigung zwei Drittel (Gorduan).</summary>
+	/// <summary>Bärenjunges: Größe und Leben ein Drittel, Farbsättigung zwei Drittel (Gorduan); den Schaden senkt YoungFighters.</summary>
 	internal const float CubScale = 1f / 3f;
 	internal const float CubSaturation = -1f / 3f;
 	internal const float CubGrowTime = 6000f; // wie Valheims Lox-Kalb (großes Tier)
@@ -65,6 +73,20 @@ internal static class Species
 		public readonly HashSet<string> FoodNames = new(); // m_shared.m_name des Futters (für die einfache Tier-KI)
 		public List<ItemDrop> VanillaFood = new();
 		public List<ItemDrop> AllFood = new();
+		public Offspring? Child; // eigenes Junges (Klon), steht auch in Prefabs
+	}
+
+	/// <summary>Eigenes Junges einer Art: Klon des Tiers in kleiner, wächst heran; Zucht-Werte für das Elterntier.</summary>
+	internal sealed class Offspring
+	{
+		public string Prefab = "";
+		public string Name = "";
+		public float Scale = 0.5f;
+		public float GrowTime = 3000f; // wie Valheims Wolfswelpe und Ferkel
+		public int MaxCreatures = 4;
+		public int LovePoints = 4;
+		public float SpawnOffset = 1.5f;
+		public string EffectsFrom = "Boar"; // Liebes- und Geburtseffekte
 	}
 
 	internal static readonly Kind Wolf = new() { Key = "Wolf", Prefabs = new[] { "Wolf", "Wolf_cub" }, DefaultMax = 200 };
@@ -74,11 +96,29 @@ internal static class Species
 	internal static readonly Kind Asksvin = new() { Key = "Asksvin", Prefabs = new[] { "Asksvin", "Asksvin_hatchling" } };
 	internal static readonly Kind Moose = new() { Key = "Moose", Prefabs = new[] { "Moose", "Moose_calf" } };
 	internal static readonly Kind Bear = new() { Key = "Bjorn", Prefabs = new[] { "Bjorn", CubPrefab }, DefaultMax = 200, Optional = true, Foods = new[] { "Honey", "Raspberry", "Blueberries", "Cloudberry", RottenMeat } };
+	// Unbjørn ohne eigenes Futter: Er frisst wie in Valheim Blaubeeren (MonsterAI.m_consumeItems der Vorlage, geprüft
+	// 27.10.2026); zahm wird er davon satt, bleibt also nicht dauerhaft hungrig
 	internal static readonly Kind Unbjorn = new() { Key = "Unbjorn", Prefabs = new[] { "Unbjorn" }, DefaultMax = 300 };
-	internal static readonly Kind Neck = new() { Key = "Neck", Prefabs = new[] { "Neck" }, Optional = true, Foods = new[] { "FishRaw" } };
-	internal static readonly Kind Deer = new() { Key = "Deer", Prefabs = new[] { "Deer" }, Optional = true, Foods = new[] { "Raspberry", "Blueberries", "Mushroom" } };
-	internal static readonly Kind Hare = new() { Key = "Hare", Prefabs = new[] { "Hare" }, Optional = true, Foods = new[] { "Mushroom", "MushroomYellow", "MushroomJotunPuffs" } };
-	internal static readonly Kind Seal = new() { Key = "Seal", Prefabs = new[] { "Seal" }, Optional = true, Foods = new[] { "FishRaw" } };
+	internal static readonly Kind Neck = new()
+	{
+		Key = "Neck", Prefabs = new[] { "Neck", "GC_Neck_Young" }, Optional = true, Foods = new[] { "FishRaw" },
+		Child = new Offspring { Prefab = "GC_Neck_Young", Name = "$gc_neck_young", SpawnOffset = 1f },
+	};
+	internal static readonly Kind Deer = new()
+	{
+		Key = "Deer", Prefabs = new[] { "Deer", "GC_Deer_Fawn" }, Optional = true, Foods = new[] { "Raspberry", "Blueberries", "Mushroom" },
+		Child = new Offspring { Prefab = "GC_Deer_Fawn", Name = "$gc_deer_fawn" },
+	};
+	internal static readonly Kind Hare = new()
+	{
+		Key = "Hare", Prefabs = new[] { "Hare", "GC_Hare_Kit" }, Optional = true, Foods = new[] { "Mushroom", "MushroomYellow", "MushroomJotunPuffs" },
+		Child = new Offspring { Prefab = "GC_Hare_Kit", Name = "$gc_hare_kit", GrowTime = 1500f, MaxCreatures = 6, LovePoints = 3, SpawnOffset = 0.8f }, // klein und schnell wie Hühner
+	};
+	internal static readonly Kind Seal = new()
+	{
+		Key = "Seal", Prefabs = new[] { "Seal", "GC_Seal_Pup" }, Optional = true, Foods = new[] { "FishRaw" },
+		Child = new Offspring { Prefab = "GC_Seal_Pup", Name = "$gc_seal_pup" },
+	};
 	internal static readonly Kind Other = new() { Key = "Other" };
 	internal static readonly Kind[] All = { Wolf, Lox, Boar, Hen, Asksvin, Moose, Bear, Unbjorn, Neck, Deer, Hare, Seal, Other };
 
@@ -87,6 +127,9 @@ internal static class Species
 	internal static ConfigEntry<float> StarChance2 = null!;
 
 	private static readonly Dictionary<int, Kind> ByHash = new();
+
+	/// <summary>m_name der eigenen Jungen → Größe (die Leiche wird so klein wie das Junge).</summary>
+	internal static readonly Dictionary<string, float> YoungScale = new() { [CubName] = CubScale };
 	private static readonly int BearHash = "Bjorn".GetStableHashCode();
 	private static readonly int UnbjornHash = "Unbjorn".GetStableHashCode();
 	internal static readonly int TransformHash = "gc_unbjorn_at".GetStableHashCode();
@@ -119,6 +162,8 @@ internal static class Species
 			}
 		}
 		PrefabManager.OnVanillaPrefabsAvailable += SetupPrefabs;
+		// GC_Tiere: Arten-Leine und Sättel des Bären nur, wenn Bären zähmbar sind (Gorduan, 27.10.2026: „falls aktiviert“)
+		LeashMagic.SpeciesEnabled = species => species != Bear.Key || (Bear.Tameable != null && Bear.Tameable.Value);
 	}
 
 	// ------------------------------------------------------------------ Abfragen
@@ -155,6 +200,12 @@ internal static class Species
 			return false;
 		}
 		Character.Faction faction = c.GetFaction();
+		if (faction == Character.Faction.Dverger)
+		{
+			// wie Valheim (BaseAI.IsEnemy): Zwerge sind für Zahme nur Feinde, wenn sie aufgebracht sind (Review 27.10.2026)
+			BaseAI? ai = c.GetBaseAI();
+			return ai != null && ai.IsAggravated();
+		}
 		return faction != Character.Faction.Players && faction != Character.Faction.PlayerSpawned && faction != Character.Faction.TrainingDummy;
 	}
 
@@ -187,12 +238,13 @@ internal static class Species
 					}
 					kind.FoodNames.Add(food.m_itemData.m_shared.m_name);
 					kind.AllFood.Add(food);
+					Care.AddFood(food.m_itemData.m_shared.m_name); // GC_Tiere merkt sich nur bei Futter, wer es hinwarf (Review 27.10.2026)
 				}
 				foreach (string name in kind.Prefabs)
 				{
-					if (name == CubPrefab)
+					if (name == CubPrefab || name == kind.Child?.Prefab)
 					{
-						continue;
+						continue; // eigene Junge entstehen unten als Klon des fertig vorbereiteten Tiers
 					}
 					GameObject? prefab = PrefabManager.Instance.GetPrefab(name);
 					if (prefab == null)
@@ -218,12 +270,27 @@ internal static class Species
 				}
 			}
 			GameObject? bear = PrefabManager.Instance.GetPrefab("Bjorn");
-			if (bear != null)
+			if (bear != null && CreateYoung(bear, CubPrefab, CubName, CubScale, CubGrowTime) is GameObject cub)
 			{
-				CreateCub(bear);
-				AddProcreation(bear);
+				AddProcreation(bear, cub, new Offspring { Prefab = CubPrefab, MaxCreatures = 4, LovePoints = 4, SpawnOffset = 2f, EffectsFrom = "Lox" });
 			}
-			ServerPlugin.Log.LogInfo("Tierarten: Nixe, Hirsch, Hase, Robbe und Bär vorbereitet (zähmbar nur, wenn im Menü an), Bärenjunges angelegt.");
+			int young = 0;
+			foreach (Kind kind in new[] { Neck, Deer, Hare, Seal })
+			{
+				GameObject? adult = kind.Child != null ? PrefabManager.Instance.GetPrefab(kind.Prefabs[0]) : null;
+				if (adult != null && CreateYoung(adult, kind.Child!.Prefab, kind.Child.Name, kind.Child.Scale, kind.Child.GrowTime) is GameObject child)
+				{
+					AddProcreation(adult, child, kind.Child);
+					young++;
+				}
+			}
+			// Gorduan, 30.10.2026: Der Aasbär (Unbjørn) entsteht nur aus einem Bären und paart sich nie
+			GameObject? vile = PrefabManager.Instance.GetPrefab("Unbjorn");
+			foreach (Procreation procreation in vile != null ? vile.GetComponents<Procreation>() : Array.Empty<Procreation>())
+			{
+				UnityEngine.Object.DestroyImmediate(procreation);
+			}
+			ServerPlugin.Log.LogInfo($"Tierarten: Nixe, Hirsch, Hase, Robbe und Bär vorbereitet (zähmbar nur, wenn im Menü an), Bärenjunges und {young} weitere Junge angelegt.");
 		}
 		catch (Exception e)
 		{
@@ -247,14 +314,17 @@ internal static class Species
 		}
 	}
 
-	/// <summary>Bärenjunges (Gorduan): Klon des Bären, ein Drittel so groß, zwei Drittel Farbsättigung, ein Drittel Leben, wächst heran.</summary>
-	private static void CreateCub(GameObject bear)
+	/// <summary>
+	/// Eigenes Junges (Gorduan): Klon des Tiers in kleiner (Bär: ein Drittel; Hirsch, Hase, Robbe, Nixe: halb), Leben im selben
+	/// Verhältnis, zwei Drittel Farbsättigung, ohne Beute und ohne eigene Zucht; wächst zum Tier heran und bleibt dabei zahm.
+	/// </summary>
+	private static GameObject? CreateYoung(GameObject adultPrefab, string prefabName, string displayName, float scale, float growTime)
 	{
-		GameObject? cub = PrefabManager.Instance.CreateClonedPrefab(CubPrefab, "Bjorn");
+		GameObject? cub = PrefabManager.Instance.CreateClonedPrefab(prefabName, adultPrefab.name);
 		if (cub == null)
 		{
-			ServerPlugin.Log.LogWarning("Tierarten: Bärenjunges nicht angelegt, Bären bekommen keine Jungen.");
-			return;
+			ServerPlugin.Log.LogWarning($"Tierarten: {prefabName} nicht angelegt, {adultPrefab.name} bekommt keine Jungen.");
+			return null;
 		}
 		foreach (Type type in new[] { typeof(Procreation), typeof(CharacterDrop), typeof(Growup) })
 		{
@@ -263,17 +333,18 @@ internal static class Species
 				UnityEngine.Object.DestroyImmediate(part);
 			}
 		}
-		cub.transform.localScale = bear.transform.localScale * CubScale;
+		cub.transform.localScale = adultPrefab.transform.localScale * scale;
 		Character? character = cub.GetComponent<Character>();
-		Character? adult = bear.GetComponent<Character>();
+		Character? adult = adultPrefab.GetComponent<Character>();
 		if (character != null)
 		{
-			character.m_name = CubName;
-			character.m_health = (adult != null ? adult.m_health : character.m_health) * CubScale;
+			character.m_name = displayName;
+			character.m_health = (adult != null ? adult.m_health : character.m_health) * scale;
 		}
+		YoungScale[displayName] = scale;
 		Growup grow = cub.AddComponent<Growup>();
-		grow.m_growTime = CubGrowTime;
-		grow.m_grownPrefab = bear;
+		grow.m_growTime = growTime;
+		grow.m_grownPrefab = adultPrefab;
 		grow.m_inheritTame = true;
 		foreach (Renderer renderer in cub.GetComponentsInChildren<Renderer>(true))
 		{
@@ -295,27 +366,30 @@ internal static class Species
 			}
 		}
 		PrefabManager.Instance.AddPrefab(new CustomPrefab(cub, true));
+		return cub;
 	}
 
-	/// <summary>Bären bekommen Junge (Gorduan): Zucht wie beim Lox (großes Tier), Junges ist das Bärenjunge.</summary>
-	private static void AddProcreation(GameObject bear)
+	/// <summary>
+	/// Zucht für ein Tier ohne Valheim-Zucht (Bär wie der Lox, die kleineren Tiere wie das Wildschwein): Valheims Procreation mit
+	/// dem eigenen Jungen. Höchstzahl, Liebespunkte und Abstand aus dem Jungen; Liebes- und Geburtseffekte der Vorlage.
+	/// </summary>
+	private static void AddProcreation(GameObject adult, GameObject young, Offspring spec)
 	{
-		GameObject? cub = PrefabManager.Instance.GetPrefab(CubPrefab);
-		Procreation? template = PrefabManager.Instance.GetPrefab("Lox")?.GetComponent<Procreation>();
-		if (cub == null || bear.GetComponent<Procreation>() != null)
+		if (adult.GetComponent<Procreation>() != null)
 		{
 			return;
 		}
-		Procreation procreation = bear.AddComponent<Procreation>();
-		procreation.m_offspring = cub;
+		Procreation? template = PrefabManager.Instance.GetPrefab(spec.EffectsFrom)?.GetComponent<Procreation>();
+		Procreation procreation = adult.AddComponent<Procreation>();
+		procreation.m_offspring = young;
 		procreation.m_updateInterval = 30f;
 		procreation.m_pregnancyChance = 0.33f;
 		procreation.m_pregnancyDuration = 120f;
-		procreation.m_requiredLovePoints = 4;
-		procreation.m_maxCreatures = 4;
+		procreation.m_requiredLovePoints = spec.LovePoints;
+		procreation.m_maxCreatures = spec.MaxCreatures;
 		procreation.m_totalCheckRange = 20f;
 		procreation.m_partnerCheckRange = 8f;
-		procreation.m_spawnOffset = 2f;
+		procreation.m_spawnOffset = spec.SpawnOffset;
 		if (template != null)
 		{
 			procreation.m_birthEffects = template.m_birthEffects;
@@ -418,11 +492,14 @@ internal static class Species
 	private static readonly Dictionary<AnimalAI, Graze> Grazing = new();
 	private static int itemMask;
 
-	/// <summary>Hirsch, Hase, Robbe beim Zähmen: hungrig und ohne Gefahr suchen sie Futter im Umkreis von 10 m und fressen es.</summary>
+	/// <summary>
+	/// Hirsch, Hase, Robbe (und ihre Jungen) beim Zähmen und gezähmt: hungrig und ohne Gefahr suchen sie Futter im Umkreis von
+	/// 10 m und fressen es. Bis 30.10.2026 nur beim Zähmen: Gezähmt wurden sie dann nie wieder satt und paarten sich nicht.
+	/// </summary>
 	internal static void GrazeUpdate(AnimalAI ai, float dt)
 	{
 		Character? character = ai.m_character;
-		if (character == null || character.IsTamed())
+		if (character == null)
 		{
 			return;
 		}
@@ -476,7 +553,7 @@ internal static class Species
 		}
 		ItemDrop? best = null;
 		float bestDistance = float.MaxValue;
-		foreach (Collider collider in Physics.OverlapSphere(ai.transform.position, 10f, itemMask))
+		foreach (Collider collider in Physics.OverlapSphere(ai.transform.position, 10f, itemMask, QueryTriggerInteraction.Ignore))
 		{
 			ItemDrop? item = collider.attachedRigidbody != null ? collider.attachedRigidbody.GetComponent<ItemDrop>() : null;
 			if (item == null || item.m_nview == null || !item.m_nview.IsValid() || !kind.FoodNames.Contains(item.m_itemData.m_shared.m_name))
@@ -538,7 +615,10 @@ internal static class Species
 		}
 	}
 
-	/// <summary>Alle 5 s beim Spieler: fällige Verwandlungen (nur eigene Bären), alte Fress-Ziele aufräumen.</summary>
+	/// <summary>
+	/// Alle 5 s beim Spieler und auf dem dedizierten Server (Review 27.10.2026: Er besitzt die Zonen um den Weltmittelpunkt
+	/// dauerhaft): fällige Verwandlungen (nur eigene Bären), alte Fress-Ziele aufräumen.
+	/// </summary>
 	internal static void Tick()
 	{
 		float now = Time.time;
@@ -614,6 +694,7 @@ internal static class Species
 		to.Set(Care.LevelHash, from.GetFloat(Care.LevelHash, 0f));
 		to.Set(AnimalExperience.XpHash, from.GetFloat(AnimalExperience.XpHash, 0f));
 		Young.CopyState(bear, unbjorn); // Name, Fütterer, Pfosten
+		Care.CopyFeederId(from, to); // Fütterer als Spieler-ID (Review 27.10.2026), CopyState kennt nur seine Sitzung
 		Young.Relink(bear, unbjorn, "gcls_transformed"); // eigene Leine
 		if (from.GetBool(ZDOVars.s_haveSaddleHash))
 		{
@@ -633,24 +714,52 @@ internal static class Species
 				}
 			}
 		}
-		foreach (string effect in new[] { "fx_unbjorn_hit", "vfx_spawn_large" })
+		if (!Gc.IsHeadless)
 		{
-			GameObject? fx = ZNetScene.instance.GetPrefab(effect);
-			if (fx != null)
+			foreach (string effect in new[] { "fx_unbjorn_hit", "vfx_spawn_large" })
 			{
-				UnityEngine.Object.Instantiate(fx, position, Quaternion.identity);
+				GameObject? fx = ZNetScene.instance.GetPrefab(effect);
+				if (fx != null)
+				{
+					UnityEngine.Object.Instantiate(fx, position, Quaternion.identity);
+				}
 			}
 		}
 		string name = bear.GetHoverName();
-		foreach (Player player in Player.GetAllPlayers())
+		foreach (long session in SessionsNear(position, 40f))
 		{
-			if (player != null && Vector3.Distance(player.transform.position, position) < 40f)
-			{
-				Tell(Links.Session(player), position, "gcs_unbjorn", name);
-			}
+			Tell(session, position, "gcs_unbjorn", name);
 		}
 		ZNetScene.instance.Destroy(bear.gameObject);
 		ServerPlugin.Log.LogInfo($"Tierarten: {name} hat sich in einen Unbjørn verwandelt (zahm: {tamed}).");
+	}
+
+	/// <summary>
+	/// Sitzungen der Spieler bis range um position: beim Spieler über die Spielfiguren, auf dem dedizierten Server über die
+	/// Verbindungen (er lädt nur die Zonen um den Weltmittelpunkt, Spielfiguren anderswo kennt er nicht).
+	/// </summary>
+	private static List<long> SessionsNear(Vector3 position, float range)
+	{
+		List<long> sessions = new();
+		if (Gc.IsHeadless && ZNet.instance != null)
+		{
+			foreach (ZNetPeer peer in ZNet.instance.GetPeers())
+			{
+				if (peer != null && !peer.m_characterID.IsNone() && Vector3.Distance(peer.m_refPos, position) < range)
+				{
+					sessions.Add(peer.m_characterID.UserID);
+				}
+			}
+			return sessions;
+		}
+		foreach (Player player in Player.GetAllPlayers())
+		{
+			if (player != null && Vector3.Distance(player.transform.position, position) < range)
+			{
+				sessions.Add(Links.Session(player));
+			}
+		}
+		return sessions;
 	}
 
 	// ------------------------------------------------------------------ Feindschaft
@@ -712,10 +821,12 @@ internal static class Species
 	/// Gorduan: mit 1:1-Chance mehr Beute beim Schlachten, fließend nach der Stufe. Höchstmaß 1 + Stufe ÷ 50; getroffen wird
 	/// zufällig zwischen dem Doppelten (darunter dem Höchstmaß selbst) und dem Höchstmaß. Ein Wurf je Tier für jede Beute;
 	/// gerundet wird zufällig nach dem Rest (1 Haut × 1,2 gibt in 20 % der Fälle 2), damit auch kleine Mengen fließend mehr
-	/// werden. Valheims Sterne zählen wie immer dazu.
+	/// werden. Valheims Sterne zählen wie immer dazu. Review 27.10.2026: je Eintrag höchstens Valheims 100 Stück (vorher bis
+	/// siebenmal so viel, und Valheim erzeugt je Stück ein Objekt); die Mehrbeute fällt in Stapeln (LootStacks).
 	/// </summary>
 	internal static void LevelLoot(CharacterDrop drop, List<KeyValuePair<GameObject, int>> loot)
 	{
+		LootStacks.Boosted = false;
 		Character? character = drop.m_character;
 		ZNetView? view = character != null ? character.m_nview : null;
 		if (loot == null || loot.Count == 0 || view == null || !view.IsValid())
@@ -737,7 +848,70 @@ internal static class Species
 			{
 				whole++;
 			}
-			loot[i] = new KeyValuePair<GameObject, int>(loot[i].Key, Mathf.Max(loot[i].Value, whole));
+			int vanilla = loot[i].Value;
+			loot[i] = new KeyValuePair<GameObject, int>(loot[i].Key, Mathf.Clamp(whole, vanilla, Mathf.Max(vanilla, MaxLootPerEntry)));
+		}
+		LootStacks.Boosted = true;
+	}
+
+	/// <summary>Valheims Obergrenze je Beute-Eintrag (CharacterDrop.GenerateDropList), auch mit Mehrbeute.</summary>
+	internal const int MaxLootPerEntry = 100;
+}
+
+/// <summary>
+/// Mehrbeute in Stapeln (Review 27.10.2026): Valheims CharacterDrop.DropItems erzeugt je Stück ein eigenes Objekt; mit der
+/// Mehrbeute hoher Stufen wären das Hunderte. Bekam eine Beuteliste Mehrbeute, fällt sie deshalb in Stapeln, so groß, wie das
+/// Item stapelt: sofort beim Sterben (CharacterDrop.OnDeath) wie später aus der Leiche (Ragdoll.SaveLootList merkt es sich im
+/// ZDO der Leiche, Ragdoll.SpawnLoot liest es). Menge und Erwartungswert bleiben, wie LevelLoot sie würfelt.
+/// </summary>
+internal static class LootStacks
+{
+	/// <summary>Die zuletzt erzeugte Beuteliste bekam Mehrbeute (Species.LevelLoot).</summary>
+	internal static bool Boosted;
+	/// <summary>CharacterDrop.OnDeath läuft gerade (dort folgt DropItems direkt auf GenerateDropList).</summary>
+	internal static bool InDeath;
+	/// <summary>Ragdoll.SpawnLoot einer Leiche mit Mehrbeute läuft gerade.</summary>
+	internal static bool Spawning;
+	/// <summary>Im ZDO der Leiche: Ihre gespeicherte Beute enthält Mehrbeute.</summary>
+	internal static readonly int StackHash = "gc_loot_stacks".GetStableHashCode();
+
+	internal static bool Active => (InDeath && Boosted) || Spawning;
+
+	/// <summary>Wie Valheims DropItems (Lage, Drehung, Schwung, Weltstufe, Schummel-Merker), aber ein Objekt je Stapel.</summary>
+	internal static void Drop(List<KeyValuePair<GameObject, int>> drops, Vector3 centerPos, float dropArea, bool cheated)
+	{
+		foreach (KeyValuePair<GameObject, int> drop in drops)
+		{
+			if (drop.Key == null)
+			{
+				continue;
+			}
+			ItemDrop? template = drop.Key.GetComponent<ItemDrop>();
+			int most = template != null ? Mathf.Max(1, template.m_itemData.m_shared.m_maxStackSize) : 1;
+			for (int left = drop.Value; left > 0; left -= most)
+			{
+				Quaternion rotation = Quaternion.Euler(0f, UnityEngine.Random.Range(0, 360), 0f);
+				Vector3 offset = UnityEngine.Random.insideUnitSphere * dropArea;
+				GameObject go = UnityEngine.Object.Instantiate(drop.Key, centerPos + offset, rotation);
+				ItemDrop? item = go.GetComponent<ItemDrop>();
+				if (item != null)
+				{
+					item.m_itemData.m_worldLevel = (byte)Game.m_worldLevel;
+					item.m_itemData.m_cheated = cheated;
+					item.m_itemData.m_stack = Mathf.Min(left, most);
+					item.Save();
+				}
+				Rigidbody? body = go.GetComponent<Rigidbody>();
+				if (body != null)
+				{
+					Vector3 push = UnityEngine.Random.insideUnitSphere;
+					if (push.y < 0f)
+					{
+						push.y = -push.y;
+					}
+					body.AddForce(push * 5f, ForceMode.VelocityChange);
+				}
+			}
 		}
 	}
 }
@@ -830,14 +1004,22 @@ internal static class SpeciesGrazePatch
 	}
 }
 
-/// <summary>Bären-Zucht nur, wenn Bären zähmbar sind; nach jeder Geburt vielleicht ein Stern mehr.</summary>
+/// <summary>
+/// Zucht der zuschaltbaren Arten nur, wenn sie zähmbar sind; der Unbjørn nie (Gorduan, 30.10.2026); nach jeder Geburt vielleicht ein
+/// Stern mehr.
+/// </summary>
 [HarmonyPatch(typeof(Procreation), "Procreate")]
 internal static class SpeciesProcreatePatch
 {
 	private static bool Prefix(Procreation __instance)
 	{
 		Character? character = __instance.m_character;
-		return character == null || Species.Of(character) != Species.Bear || Species.Enabled(Species.Bear);
+		if (character == null)
+		{
+			return true;
+		}
+		Species.Kind kind = Species.Of(character);
+		return kind != Species.Unbjorn && (!kind.Optional || Species.Enabled(kind));
 	}
 
 	private static void Postfix() => Species.Mutate(Care.Birth);
@@ -857,34 +1039,25 @@ internal static class SpeciesEnemyPatch
 	private static void Postfix(Character a, Character b, ref bool __result) => Species.EnemyRules(a, b, ref __result);
 }
 
-/// <summary>Bärenjunges: ein Drittel Schaden (Gorduan).</summary>
-[HarmonyPatch(typeof(Character), nameof(Character.Damage))]
-internal static class SpeciesCubDamagePatch
-{
-	private static void Prefix(HitData hit)
-	{
-		Character? attacker = hit?.GetAttacker();
-		if (attacker != null && attacker.m_name == Species.CubName)
-		{
-			hit!.ApplyModifier(Species.CubScale);
-		}
-	}
-}
+// Der Schaden des Bärenjungen (bis 27.10.2026 fest ein Drittel, SpeciesCubDamagePatch) kommt aus YoungFighters
+// (DamagePercent); zusammen gäbe es sonst ein Zwölftel (Review 27.10.2026).
 
-/// <summary>Leiche eines Bärenjungen: so klein wie das Junge (Größe im Ragdoll-ZDO, die anderen Spieler lesen sie beim Erscheinen).</summary>
-[HarmonyPatch(typeof(Humanoid), "OnRagdollCreated")]
-internal static class SpeciesCubRagdollPatch
+/// <summary>
+/// Leiche eines eigenen Jungen: so klein wie das Junge (Größe im Ragdoll-ZDO, die anderen Spieler lesen sie beim Erscheinen).
+/// Humanoid (Bär, Nixe) überschreibt Valheims OnRagdollCreated, die einfachen Tiere (Hirsch, Hase, Robbe) nutzen das von Character.
+/// </summary>
+internal static class SpeciesYoungRagdoll
 {
-	private static void Postfix(Humanoid __instance, Ragdoll ragdoll)
+	internal static void Shrink(Character character, Ragdoll? ragdoll)
 	{
-		if (ragdoll == null || __instance.m_name != Species.CubName)
+		if (ragdoll == null || !Species.YoungScale.TryGetValue(character.m_name, out float scale))
 		{
 			return;
 		}
 		Transform body = ragdoll.transform;
-		if (body.localScale.x > __instance.transform.localScale.x * 1.1f)
+		if (body.localScale.x > character.transform.localScale.x * 1.1f)
 		{
-			body.localScale *= Species.CubScale;
+			body.localScale *= scale;
 		}
 		ZNetView? nview = ragdoll.GetComponent<ZNetView>();
 		if (nview != null && nview.IsValid())
@@ -894,9 +1067,90 @@ internal static class SpeciesCubRagdollPatch
 	}
 }
 
+[HarmonyPatch(typeof(Humanoid), "OnRagdollCreated")]
+internal static class SpeciesCubRagdollPatch
+{
+	private static void Postfix(Humanoid __instance, Ragdoll ragdoll) => SpeciesYoungRagdoll.Shrink(__instance, ragdoll);
+}
+
+[HarmonyPatch(typeof(Character), "OnRagdollCreated")]
+internal static class SpeciesYoungRagdollPatch
+{
+	private static void Postfix(Character __instance, Ragdoll ragdoll)
+	{
+		if (__instance is not Humanoid)
+		{
+			SpeciesYoungRagdoll.Shrink(__instance, ragdoll);
+		}
+	}
+}
+
 /// <summary>Mehr Beute nach der Stufe (auch für die Beute, die eine Leiche später fallen lässt).</summary>
 [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.GenerateDropList))]
 internal static class SpeciesLootPatch
 {
 	private static void Postfix(CharacterDrop __instance, List<KeyValuePair<GameObject, int>> __result) => Species.LevelLoot(__instance, __result);
+}
+
+/// <summary>Mehrbeute in Stapeln: Sterben ohne Leiche (OnDeath ruft GenerateDropList und gleich danach DropItems).</summary>
+[HarmonyPatch(typeof(CharacterDrop), "OnDeath")]
+internal static class SpeciesLootDeathPatch
+{
+	private static void Prefix()
+	{
+		LootStacks.InDeath = true;
+		LootStacks.Boosted = false;
+	}
+
+	private static void Finalizer()
+	{
+		LootStacks.InDeath = false;
+		LootStacks.Boosted = false;
+	}
+}
+
+/// <summary>Mehrbeute in Stapeln: Die Leiche merkt sich, dass ihre Beute Mehrbeute enthält (Valheim speichert nur Prefab und Menge).</summary>
+[HarmonyPatch(typeof(Ragdoll), "SaveLootList")]
+internal static class SpeciesLootSavePatch
+{
+	private static void Prefix() => LootStacks.Boosted = false;
+
+	private static void Postfix(Ragdoll __instance)
+	{
+		ZNetView? view = __instance.m_nview;
+		if (LootStacks.Boosted && view != null && view.IsValid())
+		{
+			view.GetZDO().Set(LootStacks.StackHash, true);
+		}
+	}
+
+	private static void Finalizer() => LootStacks.Boosted = false;
+}
+
+/// <summary>Mehrbeute in Stapeln: Die Leiche lässt ihre Beute fallen.</summary>
+[HarmonyPatch(typeof(Ragdoll), "SpawnLoot")]
+internal static class SpeciesLootSpawnPatch
+{
+	private static void Prefix(Ragdoll __instance)
+	{
+		ZNetView? view = __instance.m_nview;
+		LootStacks.Spawning = view != null && view.IsValid() && view.GetZDO().GetBool(LootStacks.StackHash);
+	}
+
+	private static void Finalizer() => LootStacks.Spawning = false;
+}
+
+/// <summary>Mehrbeute in Stapeln statt je Stück ein Objekt; alle andere Beute wie in Valheim.</summary>
+[HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.DropItems))]
+internal static class SpeciesLootDropPatch
+{
+	private static bool Prefix(List<KeyValuePair<GameObject, int>> drops, Vector3 centerPos, float dropArea, bool cheated, bool __runOriginal)
+	{
+		if (!__runOriginal || !LootStacks.Active || drops == null)
+		{
+			return true; // ein anderer Prefix lässt schon selbst fallen, oder keine Mehrbeute
+		}
+		LootStacks.Drop(drops, centerPos, dropArea, cheated);
+		return false;
+	}
 }

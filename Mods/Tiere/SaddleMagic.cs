@@ -12,11 +12,13 @@ namespace GC.Server.Leash;
 
 /// <summary>
 /// Sättel als EpicLoot-Items (Gorduan, 20.10.2026): alle Sättel, Valheims Lox- und Asksvin-Sattel und die Sättel aus
-/// GC_Tierarten (melden sich mit AddName an). Sie würfeln die Effekte der Tierpfeifen und eigene Sattel-Effekte
-/// (Ausdauer). Die Verzauberung wirkt nur, solange geritten wird: Tempo, Leben, Schutz und Ausdauer am Reittier,
-/// Schaden, Elemente, Lebensraub und Wucht an den Treffern des Reiters. Beim Aufsatteln steht das ganze Sattel-Item
-/// (mit Verzauberung) im Tier; fällt der Sattel herunter, bekommt das neue Item die Daten zurück.
+/// GC_Tierarten (melden sich mit AddName an). Sie würfeln die Effekte der Tierpfeifen (seit 27.10.2026 ohne Leuchten und
+/// Angriffstempo, die am Sattel nicht wirken) und eigene Sattel-Effekte (Ausdauer). Die Verzauberung wirkt nur, solange
+/// geritten wird: Tempo, Leben, Schutz und Ausdauer am Reittier, Schaden, Elemente, Lebensraub und Wucht an den Treffern
+/// des Reiters. Beim Aufsatteln steht das ganze Sattel-Item (mit Verzauberung) im Tier; fällt der Sattel herunter, bekommt
+/// das neue Item die Daten zurück.
 /// Seit dem Kern Teil von GC_Tiere (EpicLoot-Teil); Modelle und Rezepte der Bärensättel stehen in GC_Tierarten.
+/// Die Sondereffekte der einzigartigen Sättel (Sprungkraft, Kriegsreittier, Funkenflug …) wirken in SaddleUniqueEffects.
 /// </summary>
 internal static class Saddles
 {
@@ -35,6 +37,7 @@ internal static class Saddles
 	internal static void Init(ConfigFile config)
 	{
 		PrefabManager.OnVanillaPrefabsAvailable += AddVanilla;
+		SaddleUniqueEffects.Init(config); // Sondereffekte einzigartiger Sättel (Gorduan, 27.10.2026), SaddleUniqueEffects.cs
 	}
 
 	/// <summary>Weiterer Sattel (GC_Tierarten): Item-Name wie m_shared.m_name.</summary>
@@ -258,26 +261,34 @@ internal static class SaddleUseStaminaPatch
 	}
 }
 
-/// <summary>Sattel-Effekt „Ausdauer-Erholung“: das Reittier erholt sich schneller.</summary>
+/// <summary>
+/// Sattel-Effekt „Ausdauer-Erholung“: das Reittier erholt sich schneller. Die Werte stehen nur während UpdateStamina höher;
+/// zurück setzt sie der Finalizer, der auch nach einem Fehler läuft (Review 27.10.2026: im Postfix wuchsen sie sonst mit jedem
+/// Fehler weiter).
+/// </summary>
 [HarmonyPatch(typeof(Sadle), "UpdateStamina")]
 internal static class SaddleRegenPatch
 {
-	private static void Prefix(Sadle __instance, out Vector2 __state)
+	private static void Prefix(Sadle __instance, out Vector2? __state)
 	{
-		__state = new Vector2(__instance.m_staminaRegen, __instance.m_staminaRegenHungry);
+		__state = null;
 		BondStats bond = Saddles.Bond(__instance.m_character);
 		if (bond.MountStaminaRegen > 0f)
 		{
+			__state = new Vector2(__instance.m_staminaRegen, __instance.m_staminaRegenHungry);
 			float factor = 1f + bond.MountStaminaRegen / 100f;
 			__instance.m_staminaRegen *= factor;
 			__instance.m_staminaRegenHungry *= factor;
 		}
 	}
 
-	private static void Postfix(Sadle __instance, Vector2 __state)
+	private static void Finalizer(Sadle __instance, Vector2? __state)
 	{
-		__instance.m_staminaRegen = __state.x;
-		__instance.m_staminaRegenHungry = __state.y;
+		if (__state is Vector2 saved)
+		{
+			__instance.m_staminaRegen = saved.x;
+			__instance.m_staminaRegenHungry = saved.y;
+		}
 	}
 }
 

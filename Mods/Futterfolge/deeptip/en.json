@@ -1,0 +1,26 @@
+{
+  "$locale": "en",
+  "gc.futterfolge": {
+    "title": "Feeding order (Mod)",
+    "short": "GC mod: tamed animals spot food further away, and the animal with the highest level eats first.",
+    "body": "The mod makes sure that when food is scarce the best animals get fed and mate ([[gc.futterfolge.enabled]]). With [[gc.tiere|GC_Tiere]] the [[gc.tiere.breedlevel|breeding level]] counts, otherwise Valheim's stars; with GC_Tiere the [[gc.futterfolge.partner|best mate]] also counts for breeding.\n\nAll values except the rank display are [[gc.serverrules|server rules]]. [[gc.kern.stufe|Level]] 4 “GC light”; while on, the mod adds 1 % per boss to the [[gc.kern.bossscale|boss progression]].",
+    "aliases": ["GC_Futterfolge"],
+    "see": ["gc.about", "valheim.tame.breeding"]
+  },
+  "gc.futterfolge.enabled": {
+    "title": "Feeding order",
+    "short": "Tamed animals spot food {gc_futterfolge_range} as far as in Valheim if a path leads there; the highest level eats first.",
+    "body": "Hungry tamed animals of the same kind queue up, by level and then by stars. Young animals are a kind of their own; fed animals and animals in combat or under a rider don't queue. In turn each animal takes one piece of the nearest food it can reach. An animal lets higher-ranked ones eat first for at most {gc_futterfolge_wait}, then it eats anyway.\n\n- Pregnant ones last: {gc_futterfolge_pregnant}\n- Wild animals being tamed spot food just as far, without an order: {gc_futterfolge_wild}\n- Animals on a leash or at a post only count for food they can reach there.\n\nCurrently {gc_futterfolge_enabled}. Off: as in Valheim.",
+    "aliases": ["feeding order", "feeding rank"]
+  },
+  "gc.futterfolge.partner": {
+    "title": "Best mate",
+    "short": "With GC_Tiere, the young's level uses the best fed mate at conception. Currently {gc_futterfolge_partner}.",
+    "body": "When an animal becomes pregnant, it remembers the highest [[gc.tiere.breedlevel|breeding level]] among the fed mates of its kind within mating range, instead of taking the nearest animal at birth. From that and its own level GC_Tiere rolls the young's level. The hint on the pregnant animal shows “Mate: Lvl X”. Without GC_Tiere there are no breeding levels, and the setting is not shown."
+  },
+  "gc.futterfolge.rank": {
+    "title": "Show feeding rank",
+    "short": "Shows on a hungry tamed animal where it stands in the feeding order; your own setting, currently {gc_futterfolge_rank}.",
+    "body": "The hint reads like “Feeding rank 2 of 5”, plus “Letting higher-ranked animals eat first” while the animal waits. This setting only applies to you, not to the server. The order itself: [[gc.futterfolge.enabled]]."
+  }
+}

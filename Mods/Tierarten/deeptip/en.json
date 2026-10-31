@@ -1,0 +1,136 @@
+{
+  "$locale": "en",
+  "gc.tierarten": {
+    "title": "Animal species and saddles",
+    "short": "GC mod: max level per species, stars at birth, more loot, more tameable animals, bear cubs, Vile and bear saddles.",
+    "body": "The mod extends [[gc.tiere|GC_Tiere]] and needs it. Every species gets its own [[gc.tierarten.maxlevel|maximum level]], young animals have a small chance of [[gc.tierarten.stars|one more star]], and animals with a level drop [[gc.tierarten.loot|more loot]]. Optionally you can tame the [[gc.tierarten.species_tame_bjorn|bear]], [[gc.tierarten.species_tame_neck|neck]], [[gc.tierarten.species_tame_deer|deer]], [[gc.tierarten.species_tame_hare|hare]] and [[gc.tierarten.species_tame_seal|seal]], each with its own young ([[gc.tierarten.bearcub|bear cub]] and [[gc.tierarten.young|more]]); bears add the [[gc.tierarten.unbjorn|Vile]] and [[gc.tierarten.bearsaddle|saddles]]. [[gc.tierarten.species_young_fight|Young animals]] can also fight.\n\nAll values are [[gc.serverrules|server rules]]. [[gc.kern.stufe|Level]] 5 “GC”; while leashes or Animal Care are on, the mod adds 5 % per boss to the [[gc.kern.bossscale|boss progression]].",
+    "aliases": ["GC_Tierarten"],
+    "see": ["gc.about", "gc.modswitch"]
+  },
+  "gc.tierarten.maxlevel": {
+    "title": "Maximum level per species",
+    "short": "Up to this level an animal rises through breeding and experience: lox and Vile 300, wolf and bear 200, others 150.",
+    "body": "The limit applies to the [[gc.tiere.breedlevel|breeding level]] at birth and in eggs, to levelling up through [[gc.tiere.animalxp|animal experience]] and to the test command `gc_tierstufe`; young animals count as their species. Higher levels make an animal stronger, but only slowly, see [[gc.tierarten.species_cap]]. Current values:\n\n- Wolf {gc_tierarten_species_max_wolf}, lox {gc_tierarten_species_max_lox}, boar {gc_tierarten_species_max_boar}, hen {gc_tierarten_species_max_hen}\n- Asksvin {gc_tierarten_species_max_asksvin}, moose {gc_tierarten_species_max_moose}, bear {gc_tierarten_species_max_bjorn}, Vile {gc_tierarten_species_max_unbjorn}\n- Neck {gc_tierarten_species_max_neck}, deer {gc_tierarten_species_max_deer}, hare {gc_tierarten_species_max_hare}, seal {gc_tierarten_species_max_seal}, other animals {gc_tierarten_species_max_other}",
+    "aliases": ["maximum level"]
+  },
+  "gc.tierarten.species_cap": {
+    "title": "Cap own level + caretaker",
+    "short": "For the bonuses, half the animal's level and the caretaker's Animal Care count together up to this; currently {gc_tierarten_species_cap}.",
+    "body": "The caretaker is the holder of a leashed animal, otherwise the player with the highest [[gc.tiere.care|Animal Care]] nearby. The higher the animal's own [[gc.tiere.breedlevel|breeding level]], the less the caretaker adds: with a cap of 150 and animal level 300 they add nothing. All level bonuses are scaled by 5/12 so that high levels don't become overpowered; the [[gc.tiere.leashbonus|leash bonus]] comes on top regardless."
+  },
+  "gc.tierarten.species_star1": {
+    "title": "Star chance 0 → 1",
+    "short": "Chance that a young animal or egg without a star gets one after all; currently {gc_tierarten_species_star1}.",
+    "body": "Rolled at every birth and when an egg is laid; there is never more than one extra star. The breeder gets a message. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star2": {
+    "title": "Star chance 1 → 2",
+    "short": "Chance that a young animal or egg with one star gets two; currently {gc_tierarten_species_star2}.",
+    "body": "Applies to young of mothers with one star, eggs included when they are laid. The breeder gets a message. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.stars": {
+    "title": "Stars at birth",
+    "short": "A young animal can be born with one star more than its mother, never with more than one extra.",
+    "body": "Valheim gives the young its mother's stars. If she has none, the young gets one with a {gc_tierarten_species_star1} chance; if she has one, it gets two with a {gc_tierarten_species_star2} chance. For eggs the roll happens when they are laid. The breeder gets a message, otherwise the nearest player within 30 m. What stars do: [[valheim.tame.breeding]]."
+  },
+  "gc.tierarten.loot": {
+    "title": "More loot by level",
+    "short": "An animal with a breeding level has a 50 % chance to drop more loot when it dies; the higher the level, the more.",
+    "body": "The maximum is 1 + level ÷ 50: at [[gc.tiere.breedlevel|breeding level]] 50 double, at 100 up to triple, at 300 up to seven times. The factor is rolled between double (for low levels the maximum) and the maximum, and remainders are rounded at random. Valheim's stars add as usual; at most 100 items drop per loot entry."
+  },
+  "gc.tierarten.species_young_fight": {
+    "title": "Young animals fight",
+    "short": "Tamed young animals attack enemies like tamed adults, also on leash and whistle orders. Currently {gc_tierarten_species_young_fight}.",
+    "body": "Applies to Piggy, Wolf Cub, Lox Calf, Asksvin Hatchling, Moose Calf and [[gc.tierarten.bearcub|bear cub]], not to chicks. They deal {gc_tierarten_species_young_damage} of the damage of an adult of the same level but keep the young animal's health and speed. They never attack players or tamed animals. Off: they look for no enemies and refuse attack orders.",
+    "see": ["gc.tiere.young"]
+  },
+  "gc.tierarten.species_max_wolf": {
+    "title": "Max level wolf",
+    "short": "Up to this level wolves and wolf cubs rise through breeding and experience; currently {gc_tierarten_species_max_wolf}.",
+    "body": "Default 200, more than most animals. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_lox": {
+    "title": "Max level lox",
+    "short": "Up to this level lox and lox calves rise through breeding and experience; currently {gc_tierarten_species_max_lox}.",
+    "body": "Default 300, the highest limit together with the Vile. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_boar": {
+    "title": "Max level boar",
+    "short": "Up to this level boars and piggies rise through breeding and experience; currently {gc_tierarten_species_max_boar}.",
+    "body": "Default 150. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_hen": {
+    "title": "Max level chicken",
+    "short": "Up to this level hens and chicks rise through breeding and experience; currently {gc_tierarten_species_max_hen}.",
+    "body": "Default 150. The level of an egg is already capped at this value when it is laid. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_asksvin": {
+    "title": "Max level asksvin",
+    "short": "Up to this level asksvin and their hatchlings rise through breeding and experience; currently {gc_tierarten_species_max_asksvin}.",
+    "body": "Default 150. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_moose": {
+    "title": "Max level moose",
+    "short": "Up to this level moose and moose calves rise through breeding and experience; currently {gc_tierarten_species_max_moose}.",
+    "body": "Default 150. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_unbjorn": {
+    "title": "Max level Vile",
+    "short": "Up to this level a Vile rises through experience; currently {gc_tierarten_species_max_unbjorn}.",
+    "body": "Default 300. A [[gc.tierarten.unbjorn|Vile]] only comes from a bear, keeps its level and keeps rising through fights; it has no young. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_max_other": {
+    "title": "Max level other animals",
+    "short": "Up to this level all other tamed animals rise, also those from other mods; currently {gc_tierarten_species_max_other}.",
+    "body": "Default 150. What a higher level brings: [[gc.tierarten.maxlevel]]."
+  },
+  "gc.tierarten.species_tame_bjorn": {
+    "title": "Bears tameable",
+    "short": "Bears can be tamed, leashed and ridden, have cubs and can turn into a Vile. Currently {gc_tierarten_species_tame_bjorn}.",
+    "body": "Bears eat Honey, Raspberries, Blueberries and Cloudberries; as with [[valheim.tame.taming|taming]] in Valheim they need 30 minutes fed and unafraid, less with [[gc.tiere.care|Animal Care]]. Tamed bears don't attack wild bears on their own, but they do on command. Max level {gc_tierarten_species_max_bjorn}.\n\n- [[gc.tierarten.bearcub|Bear cubs]] from breeding\n- Rotten Meat turns a bear into a [[gc.tierarten.unbjorn|Vile]]\n- [[gc.tierarten.bearsaddle|Bear and Vile saddles]] at the forge\n\nOff (default): bears behave as in Valheim, and the saddles can't be crafted."
+  },
+  "gc.tierarten.species_tame_neck": {
+    "title": "Necks tameable",
+    "short": "Necks eat Raw Fish and can be tamed in 30 minutes, leashed and bred. Currently {gc_tierarten_species_tame_neck}.",
+    "body": "Throw Raw Fish near a neck; fed and unafraid, it becomes tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]. Tamed necks have [[gc.tierarten.young|young]] (young necks) and can be leashed like any tamed animal. Max level {gc_tierarten_species_max_neck}. Off (default): as in Valheim."
+  },
+  "gc.tierarten.species_tame_deer": {
+    "title": "Deer tameable",
+    "short": "Deer eat berries and mushrooms from the ground and can be tamed, leashed and bred. Currently {gc_tierarten_species_tame_deer}.",
+    "body": "Food: Raspberries, Blueberries and Mushroom. Deer flee from you: put the food down and keep your distance, then they eat it within 10 m and become tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]. Tamed, they no longer flee, look for food themselves when hungry and have [[gc.tierarten.young|fawns]]. They can't attack and refuse attack orders. Max level {gc_tierarten_species_max_deer}. Off (default): as in Valheim."
+  },
+  "gc.tierarten.species_tame_hare": {
+    "title": "Hares tameable",
+    "short": "Hares of the Mistlands eat mushrooms from the ground and can be tamed, leashed and bred. Currently {gc_tierarten_species_tame_hare}.",
+    "body": "Food: Mushroom, Yellow Mushroom and Jotun Puffs. Hares live in the [[valheim.biome.mistlands|Mistlands]] and flee from you: put the food down and keep your distance, then they eat it within 10 m and become tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]. Tamed, they no longer flee and have [[gc.tierarten.young|leverets]]; they can't attack. Max level {gc_tierarten_species_max_hare}. Off (default): as in Valheim."
+  },
+  "gc.tierarten.species_tame_seal": {
+    "title": "Seals tameable",
+    "short": "Seals of the Deep North eat Raw Fish from the ground and can be tamed, leashed and bred. Currently {gc_tierarten_species_tame_seal}.",
+    "body": "Seals live in the [[valheim.biome.deepnorth|Deep North]] and flee from you: put the fish down and keep your distance, then they eat it within 10 m and become tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]. Tamed, they no longer flee and have [[gc.tierarten.young|seal pups]]; they can't attack. Max level {gc_tierarten_species_max_seal}. Off (default): as in Valheim."
+  },
+  "gc.tierarten.bearcub": {
+    "title": "Bear cub",
+    "short": "The young of tamed bears: a third of the size, with a third of the health; after 100 minutes it is a bear.",
+    "body": "Tamed, fed bears have young like the lox while [[gc.tierarten.species_tame_bjorn|bears are tameable]]. The cub inherits its [[gc.tiere.breedlevel|breeding level]] like any animal, can be leashed and, while [[gc.tierarten.species_young_fight|Young animals fight]] is on, fights with {gc_tierarten_species_young_damage} of a bear's damage. When it grows up, level, name and leash stay.",
+    "aliases": ["bear cub", "bear cubs"]
+  },
+  "gc.tierarten.unbjorn": {
+    "title": "Vile (Unbjørn)",
+    "short": "If a bear eats Rotten Meat, it turns into a Vile 30 minutes later, tamed or wild.",
+    "body": "This only happens while [[gc.tierarten.species_tame_bjorn|bears are tameable]]. Level, stars, name, leash, post and tamed state stay; a bear saddle drops off, and players within 40 m get a message. If no one is nearby, the bear changes as soon as its area is loaded again. A tamed Vile attacks everything wild on its own, but never players or tamed animals. Viles can't be tamed and have no young; their max level is {gc_tierarten_species_max_unbjorn}, and you ride them with the [[gc.tierarten.bearsaddle|Vile saddle]].",
+    "aliases": ["Unbjørn", "Unbjorn"]
+  },
+  "gc.tierarten.bearsaddle": {
+    "title": "Bear saddle",
+    "short": "Saddles for tamed bears and Viles, made at the forge only while bears are tameable; you ride them like a lox.",
+    "body": "- Bear saddle: 5 Bear Hide, 10 Bronze\n- Vile saddle: 5 Vile Ribcage, 5 Bear Hide, 20 Black Metal\n\nPut the saddle on a tamed bear or Vile; then E rides the animal even if you look at its body instead of the saddle. With a leash in hand, E stays with the leash. If a saddled bear turns into a Vile, the saddle drops off. With EpicLoot both can be enchanted like all [[gc.tiere.saddle|saddles]].",
+    "aliases": ["Bear saddle", "Vile saddle"]
+  },
+  "gc.tierarten.young": {
+    "title": "Young of the new species",
+    "short": "Tamed deer, hares, seals and necks have young: fawn, leveret, seal pup and young neck.",
+    "body": "The young are half the size with half the health and grow into the animal in 50 minutes, the leveret in 25; they are tame like their parents. They are only bred while the species is tameable, and they inherit the [[gc.tiere.breedlevel|breeding level]] like any animal. They can be leashed like all [[gc.tiere.young|young animals]].",
+    "aliases": ["Fawn", "Leveret", "Seal pup", "Young neck"]
+  }
+}

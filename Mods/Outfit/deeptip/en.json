@@ -1,0 +1,35 @@
+{
+  "$locale": "en",
+  "gc.outfit": {
+    "title": "Outfit",
+    "short": "Wear the look of other gear: your character shows the outfit, while stats and attacks stay those of the real pieces.",
+    "body": "At the [[gc.outfit.wardrobe|wardrobe]] you put armor and weapons into your outfit. If you wear a piece whose [[gc.outfit.slots|slot]] in the outfit is filled, your character shows the outfit piece; stats, attacks and effects stay those of the real piece. An empty slot shows the real piece, a slot without a worn piece shows nothing, and you can [[gc.outfit.hide|hide]] armor completely.\n\nItems in the outfit are not in your inventory: they add no [[valheim.stat.carryweight|weight]], stay with you when you die and can only be changed at the wardrobe. All other players see your outfit, even without the mod, because Valheim sends the look like normal equipment; the mod is part of GC Server ([[gc.kern.stufe|level]] 1 “Very vanilla”).",
+    "aliases": ["Outfit"],
+    "see": ["gc.outfit.wardrobe", "gc.outfit.enabled"]
+  },
+  "gc.outfit.enabled": {
+    "title": "Outfits and wardrobe",
+    "short": "Server rule for outfits. Off: everyone sees the real gear, and the wardrobe cannot be built.",
+    "body": "This [[gc.serverrules|server rule]] is {gc_outfit_enabled}. When it is off, everyone sees the real gear, the [[gc.outfit.wardrobe|wardrobe]] disappears from the hammer, and at an existing wardrobe you can only take items out; the window is then called “Outfit (off on this server)”. Your [[gc.outfit|outfit]] stays saved and shows again as soon as the rule is on.",
+    "see": ["gc.outfit"]
+  },
+  "gc.outfit.wardrobe": {
+    "title": "Wardrobe",
+    "short": "Furniture where you change your outfit; built with the hammer at the workbench from 10 finewood and 10 bronze nails.",
+    "body": "You build it with the hammer under Furniture at the [[valheim.station.workbench|workbench]]. E on the wardrobe opens its doors and your inventory; where a chest would be, you see the 18 [[gc.outfit.slots|slots]] of your outfit in three tables: armor, one-handed weapons, two-handed and ranged. Drag and drop works as with a chest, Shift-click moves a piece into its slot or back into the inventory, and a piece already in that slot swaps with it. The eye next to a slot or a right-click on it [[gc.outfit.hide|hides it]].\n\nThe wardrobe itself holds nothing, it does not open inside the area of someone else's ward, and if you walk more than 4 m away, the window closes.",
+    "aliases": ["Wardrobe"],
+    "see": ["gc.outfit"]
+  },
+  "gc.outfit.slots": {
+    "title": "Outfit slots",
+    "short": "18 slots: six for armor pieces from helmet to belt, twelve for weapon kinds. Tools do not go in.",
+    "body": "The six armor slots take only pieces of their kind. The twelve weapon slots stand for sword, axe, mace, knife, spear, polearm (atgeir), two-handed sword, two-handed axe, two-handed club, bow, crossbow and staff; any weapon fits into them, and it shows as soon as you hold a weapon of that kind. That way a sword in your hand can look like an axe.\n\nTools such as the pickaxe, cultivator or fishing rod have no slot, and the torch always stays real.",
+    "see": ["gc.outfit"]
+  },
+  "gc.outfit.hide": {
+    "title": "Hiding pieces",
+    "short": "The eye next to a slot at the wardrobe hides that piece: your character shows nothing there.",
+    "body": "This works for every slot: for armor your character shows nothing there, for weapons a weapon of that kind is invisible in your hand and on your back. A right-click on the slot does the same. While a piece is hidden, the eye is crossed out and the row is grey; a second click shows the piece again. The stats of the worn piece stay, only its look disappears.",
+    "see": ["gc.outfit.wardrobe"]
+  }
+}

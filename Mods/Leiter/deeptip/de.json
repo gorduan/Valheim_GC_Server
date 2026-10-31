@@ -1,0 +1,15 @@
+{
+  "$locale": "de",
+  "gc.leiter": {
+    "title": "Leiter",
+    "short": "Senkrechte Leiter zum Bauen: E bringt dich an ihr oberes oder unteres Ende, mehrere Stücke lassen sich stapeln.",
+    "body": "Du baust sie mit dem Hammer unter Verschiedenes an der [[valheim.station.workbench|Werkbank]]; jedes Stück ist 1 m hoch, und übereinander gesetzte Stücke zählen als eine lange Leiter. Geklettert wird ohne Animation: E an den unteren Stufen bringt dich ganz nach oben, an den oberen ganz nach unten, Umschalt+E immer nach unten. Oben landest du auf der Plattform hinter der Leiter, unten vor ihr auf der freien Seite, ohne Fallschaden und nie im Bereich eines fremden Wächtersteins.\n\nDie Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 4 „GC leicht“), Server und alle Spieler brauchen sie. Holzkosten und Abstand regeln ihre [[gc.leiter.ladder|Einstellungen]].",
+    "aliases": ["Senkrechte Leiter"],
+    "see": ["gc.leiter.ladder"]
+  },
+  "gc.leiter.ladder": {
+    "title": "Leiter",
+    "short": "Server-Regel: Die Leiter ist baubar und benutzbar. Aus: nicht mehr baubar, gebaute Leitern bleiben stehen.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_leiter_ladder}. Ist sie aus, verschwindet die [[gc.leiter|Leiter]] aus dem Hammer; gebaute Leitern bleiben stehen, bringen dich aber nirgendwohin.\n\n- Holz je 2 m Leiter: {gc_leiter_ladder_cost}; ein Stück von 1 m kostet die Hälfte, aufgerundet (Server-Regel)\n- Abstand beim Absteigen: {gc_leiter_ladder_exit}, so weit vor oder hinter der Leiter landest du (gilt nur für dich)"
+  }
+}

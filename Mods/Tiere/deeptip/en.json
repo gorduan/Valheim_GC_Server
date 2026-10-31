@@ -1,0 +1,147 @@
+{
+  "$locale": "en",
+  "gc.tiere": {
+    "title": "Animals: leashes, whistles, animal care",
+    "short": "GC mod for tamed animals: lead them on a leash, command them by click or whistle and make them stronger with Animal Care.",
+    "body": "You lead tamed animals on a [[gc.tiere.leash|leash]], give them [[gc.tiere.commands|orders]] with a click or an [[gc.tiere.whistle|animal whistle]] and make them stronger with the [[gc.tiere.care|Animal Care]] skill. Bred animals get a [[gc.tiere.breedlevel|breeding level]] that keeps rising through [[gc.tiere.animalxp|animal experience]]. Countdowns above animals and eggs (within 20 m) show when an animal will be tame, be born, grow up or hatch.\n\n- Leashes: {gc_tiere_leash}, Animal Care: {gc_tiere_care}\n- With EpicLoot: [[gc.tiere.magic|enchantments]] and [[gc.tiere.unique|unique pieces]]\n- Built on top of it: [[gc.tierarten]], [[gc.walkuerentransport|Valkyrie transport]], [[gc.futterfolge|Feeding order]], [[gc.zuchtgrenze|Breeding limit]]\n\nAll values are [[gc.serverrules|server rules]]. [[gc.kern.stufe|Level]] 5 “GC”; while leashes or Animal Care are on, the mod adds 5 % per boss to the [[gc.kern.bossscale|boss progression]].",
+    "aliases": ["GC_Tiere"],
+    "see": ["gc.about", "gc.modswitch"]
+  },
+  "gc.tiere.leash": {
+    "title": "Leashes",
+    "short": "Leash in hand, E on a tamed animal: it follows you on the leash, grows stronger and takes click orders.",
+    "body": "There is one leash per biome, made at the [[valheim.station.workbench|workbench]]: Deer Hide, Troll Hide, Wolf Pelt, Lox Pelt, Scale Hide, Asksvin Hide and Moose Hide, from Wolf Pelt on with metal bars. Put it into your hotbar or the [[gc.tiere.leashbar|leash bar]] and take it in hand with its key: E on a tamed animal attaches or removes it, left and right click give [[gc.tiere.commands|orders]]. Each leash holds one animal, and in the hotbar only one leash holds an animal.\n\n- Leashed animals get the [[gc.tiere.leashbonus|leash bonus]].\n- How far the animal may go and when the leash wears: [[gc.tiere.length|leash length]] and [[gc.tiere.leashload|leash load]].\n- [[gc.tiere.post|Tie]] animals to posts, fences and walls; [[gc.tiere.young|young animals]] can be leashed too.\n- The animal comes along through portals and into dungeons: {gc_tiere_leash_portal}.\n- If you ride your leashed animal, the leash stays on.\n\nCurrently {gc_tiere_leash}. Off: leashes and whistles can no longer be crafted and do nothing; existing ones are kept.",
+    "aliases": ["leash", "leashes"],
+    "see": ["gc.tiere.whistle", "gc.tiere.care"]
+  },
+  "gc.tiere.care": {
+    "title": "Animal Care",
+    "short": "New skill: tamed animals near you grow stronger, taming is faster and young animals inherit more. Currently {gc_tiere_care}.",
+    "body": "You gain experience for feeding with food you dropped or picked ({gc_tiere_care_feed}, every {gc_tiere_care_feed_cd} per animal), petting without a leash in hand ({gc_tiere_care_pet}, every {gc_tiere_care_pet_cd} per animal), taming ({gc_tiere_care_tame}), breeding ({gc_tiere_care_breed}) and when an animal on your leash kills something ({gc_tiere_care_kill} per level of the victim).\n\nTamed animals within {gc_tiere_care_radius} of you get more health, damage, speed and healing, and taming is faster; at level 100 that is +42 % health, +21 % damage, +10 % speed, 5 health + 0.42 % per second and three times the taming speed. The player with the highest level nearby counts, and a leashed animal gets its holder's level. The skill list shows your bonuses, Alt+E on a tamed animal shows its bonuses.\n\nAnimal Care also opens slots of the [[gc.tiere.leashbar|leash bar]], shortens the [[gc.tiere.leash_cmd_cooldown|command pause]] and the [[gc.tiere.care_delay|hesitation]] and raises the [[gc.tiere.breedlevel|breeding level]] of young animals. Off: no experience, no bonuses and no breeding levels.",
+    "aliases": ["Animal Care"],
+    "see": ["gc.tiere.animalxp", "valheim.skill.overview", "valheim.tame.taming"]
+  },
+  "gc.tiere.length": {
+    "title": "Leash length",
+    "short": "Every leash has a minimum and a maximum length; beyond that it stretches, wears and finally drags the animal along.",
+    "body": "While you walk, the animal keeps to the minimum length; while you stand, it roams freely up to 90 % of the maximum length. Up to the maximum length nothing costs [[valheim.item.durability|durability]], fighting included. Up to 15 % beyond it (the pull limit) the leash stretches and loses as much durability per {gc_tiere_leash_interval} as the animal has [[gc.tiere.leashload|leash load]]. Beyond that you drag the animal along but move at half speed; if the leash cannot pull it, for example over a deep ledge, it slips out of your hand {gc_tiere_leash_slip} past the pull limit.\n\n- Minimum and maximum length range from 2 and 5 m (Deer Hide) to 10 and 27.25 m (Moose Hide, [[valheim.item.quality|quality]] 4); the tooltip shows them as length.\n- Shift + mouse wheel shortens the leash in your hand down to 1 m, and all zones shrink with it. Shortened, it wears faster when the animal tugs and gives way up to its normal length for orders.\n- If the leash snaps, the animal has escaped: it obeys no one until you catch it again with another or a repaired leash.",
+    "aliases": ["leash length", "minimum length", "maximum length", "pull limit"],
+    "see": ["gc.tiere.care_delay"]
+  },
+  "gc.tiere.leashload": {
+    "title": "Leash load",
+    "short": "How hard an animal tugs at the leash: an overstretched leash loses this much durability per check.",
+    "body": "It depends on the animal's size, strength and weight: hen 0.5, boar 1, wolf 1.5, asksvin 2.5, moose 3, lox 3.5, young animals half. With [[gc.tierarten|GC_Tierarten]]: neck and hare 0.5, deer 1.5, seal 2, bear 3, Vile 3.5. It only costs durability while the leash is stretched beyond its maximum length ([[gc.tiere.length|leash length]]), then once per {gc_tiere_leash_interval}.\n\nAnimals from other mods are estimated from their game data; admins can set their own values in the config (`AnimalRules`). With EpicLoot the enchantment Leash load lowers the value in steps of 0.5, down to 0.5 at most.",
+    "aliases": ["leash load"]
+  },
+  "gc.tiere.leashbonus": {
+    "title": "Leash bonus",
+    "short": "Animals on a leash have more health and damage: from +10 % (Deer Hide) to +120 % (Moose Hide, quality 4).",
+    "body": "Each leash gives at least 1.25 times the previous one, and every [[valheim.item.quality|quality]] level a little more; the leash tooltip shows the value. The bonus applies while the animal hangs on a working leash or is [[gc.tiere.post|tied]] with it, and it adds to the bonuses from [[gc.tiere.care|Animal Care]]. Health rises as real maximum health and the share of current health stays the same, so leashing does not heal.",
+    "aliases": ["leash bonus"]
+  },
+  "gc.tiere.commands": {
+    "title": "Leash orders",
+    "short": "With the leash in hand, left click sends the animal to a spot and right click makes it attack an enemy.",
+    "body": "An animal only takes orders from level {gc_tiere_leash_cmd_level} on ([[gc.tiere.leash_cmd_level|minimum level]]); after every order there is a [[gc.tiere.leash_cmd_cooldown|command pause]] of up to {gc_tiere_leash_cmd_cooldown}. While you hold its leash, the hint on the animal shows whether it is ready.\n\n- Left click: the animal walks to the spot you aim at, at most as far as the leash lets it roam freely, and waits there. It ignores distractions on the way.\n- Right click: the animal attacks the target you look at if the target is an enemy (no players, no tamed animals), at most {gc_tiere_leash_chase} from the animal and within reach of the leash. It fights until the enemy is dead or farther away.\n\nWith an [[gc.tiere.whistle|animal whistle]] the orders apply to all animals on your leashes. Young animals only attack while [[gc.tierarten.species_young_fight|Young animals fight]] is on (GC_Tierarten).",
+    "see": ["gc.tiere.obedience"]
+  },
+  "gc.tiere.post": {
+    "title": "Tying up",
+    "short": "E on a post, fence or wall ties your leashed animal there; the leash then hangs on the building piece as a knot.",
+    "body": "With a leash in hand, E on the piece ties up its animal; without a leash in hand, all your leashed animals within reach. The animal stays within its leash's range and keeps the [[gc.tiere.leashbonus|leash bonus]]. The leash knot only loses durability from direct damage, a quarter of it, and can be repaired with the hammer; if it is destroyed, the animal is free and the broken leash lies on the ground.\n\nTake the leash back with E on the knot or, with a leash in hand, with E on the tied animal; if several animals hang on the piece, a selection appears. The leash goes into an open slot of the [[gc.tiere.leashbar|leash bar]], or into the hotbar if no leash there holds an animal yet.",
+    "aliases": ["leash knot"]
+  },
+  "gc.tiere.leashbar": {
+    "title": "Leash bar",
+    "short": "Five extra slots right of the hotbar for leashes and whistles; Alt+1 to Alt+5 takes them in hand.",
+    "body": "The slots open with [[gc.tiere.care|Animal Care]] at levels 1, 25, 50, 75 and 90; if Animal Care is off, all are open. Leashes and whistles fit into every slot but only work in open ones: there a leash holds its animal, and Alt+number takes the leash or whistle in hand. Together with the one leash in the hotbar you can lead up to six animals.\n\n- A leash holding an animal can't be put into a locked slot. If your Animal Care drops, the leash stays in its slot, but its animal is free.\n- Leashes taken from a post only go into open slots.\n- When you die, the bar goes into your grave. When you loot the grave, every piece returns to its old slot; whatever lies there now moves to your inventory.\n\nDrag leashes in and out in the inventory screen; the workbench repairs them there too.",
+    "aliases": ["leash bar", "leash slot"]
+  },
+  "gc.tiere.whistle": {
+    "title": "Animal whistle",
+    "short": "With a whistle in hand, left and right click apply to all animals on your leashes at once.",
+    "body": "There are four whistles: Finewood at the [[valheim.station.workbench|workbench]], Iron, the [[gc.walkuerentransport.whistle|valkyrie whistle]] (only with the valkyrie transport) and Flametal at the [[valheim.station.forge|forge]]. Left click sends all animals on your leashes to the target, spread in a circle around it; right click makes them all attack. The rules for [[gc.tiere.commands|orders]] apply to each animal; tied and ridden animals don't listen.\n\n- The [[gc.tiere.leash_cmd_cooldown|command pause]] gets shorter: Finewood −6 %, Iron −21 %, valkyrie whistle −35 %, Flametal −50 %.\n- Every animal that obeys is faster for 5 s (+3 % to +25 %), its leash takes no damage meanwhile, and the whistle's [[gc.tiere.magic|enchantments]] apply too.\n- After each whistle the whistle is locked for 5 s.\n\nWhistles work from the hotbar and from open slots of the [[gc.tiere.leashbar|leash bar]]. Animal whistles: {gc_tiere_leash_whistles}; they need leashes to be on.",
+    "aliases": ["animal whistle", "animal whistles", "whistle", "whistles"]
+  },
+  "gc.tiere.young": {
+    "title": "Young animals on the leash",
+    "short": "Piggy, Wolf Cub, Lox Calf, chick, Asksvin Hatchling and Moose Calf can be leashed, tied up and petted.",
+    "body": "Valheim doesn't allow that for young animals; with this mod they follow on the leash like the adults, with half the [[gc.tiere.leashload|leash load]]. If a young animal grows up on the leash or at a post, the adult stays on it, name included. They only attack with [[gc.tierarten.species_young_fight|Young animals fight]] from GC_Tierarten; otherwise they refuse attack orders.",
+    "aliases": ["young animal", "young animals"]
+  },
+  "gc.tiere.breedlevel": {
+    "title": "Breeding level",
+    "short": "A tamed animal's level (Lvl after its name) from breeding and combat experience; it makes the animal stronger for good.",
+    "body": "A young animal gets a random level between ¾ of its parents' average and the level of the higher parent, plus 0 to ¼ of its breeder's [[gc.tiere.care|Animal Care]]. The breeder is whoever's food the mother ate last, dropped or picked; they need not be there at the birth. For eggs the level is already stored in the egg, and eggs of different levels don't stack.\n\n- An animal with a level has more health, damage, speed and healing for good, even without players nearby. Half the animal's level and the caretaker's Animal Care count together up to 150 (adjustable with GC_Tierarten).\n- The level keeps rising through [[gc.tiere.animalxp|animal experience]], up to the maximum of 150 or, with [[gc.tierarten.maxlevel|GC_Tierarten]], that of its species.\n- The mate is the nearest tamed animal of the kind, with [[gc.futterfolge.partner|GC_Futterfolge]] the best fed mate.\n- For testing, `gc_tierstufe` (console, with devcommands) sets the level of the animal under the crosshair.",
+    "aliases": ["breeding level", "animal level"],
+    "see": ["valheim.tame.breeding"]
+  },
+  "gc.tiere.animalxp": {
+    "title": "Animal experience",
+    "short": "Tamed animals gain experience in combat and level up; it is the same level as from breeding.",
+    "body": "Every attack that hits an enemy gives 1 experience, a kill adds {gc_tiere_care_xp_kill} times the victim's level (no star 1, one star 2, two stars 3). Only monsters and wild animals count, no training dummies. A level costs as much as Valheim's weapon [[valheim.skill.overview|skills]] (1 at level 1, 178 at 50, 501 at 100, 920 at 150), and animals learn {gc_tiere_care_xp_factor} as fast as that; Valheim's world setting for skills applies too.\n\nOn a level-up “Lvl X!” appears above the animal, and Alt+E shows the progress. Loki's illusions pass their experience to their real animal, summons get none. Currently {gc_tiere_care_xp}; animal experience needs [[gc.tiere.care|Animal Care]].",
+    "aliases": ["animal experience"],
+    "see": ["gc.tiere.breedlevel", "gc.tierarten.maxlevel"]
+  },
+  "gc.tiere.saddle": {
+    "title": "Saddles",
+    "short": "Riding with a leash and, with EpicLoot, enchanted saddles whose effects work on mount and rider while riding.",
+    "body": "If you ride your leashed animal, the leash stays on and the [[gc.tiere.leashbonus|leash bonus]] keeps working; while you sit in the saddle the leash does not pull, wear or take orders. If someone else rides it, the leash is removed.\n\nWith EpicLoot the Lox and Asksvin saddles and the [[gc.tierarten.bearsaddle|bear saddles]] roll the whistles' combat effects (without glow and attack speed) plus their own effects for the mount's [[valheim.stat.stamina|stamina]]. While [[valheim.skill.ride|riding]], speed, health, protection and stamina work on the mount, damage, elements, life steal and stagger on your hits. When you saddle up, the saddle item with its enchantment moves into the animal and comes back when the saddle drops. Saddles also drop as loot (0.5 % per creature), and there are [[gc.tiere.unique|unique saddles]].",
+    "aliases": ["saddle", "saddles"]
+  },
+  "gc.tiere.magic": {
+    "title": "Enchanted leashes, whistles and saddles",
+    "short": "With EpicLoot, leashes, animal whistles and saddles can be enchanted; they roll their own animal effects instead of weapon effects.",
+    "body": "All EpicLoot ways apply: enchanting, augmenting, disenchanting, sacrificing, runes and sockets. As loot, a leash of the biome drops with 1 % per creature, in the Meadows and Black Forest at most epic.\n\n- Leashes: effects for the leash (reach, durability, [[gc.tiere.leashload|leash load]] …), for the animal (damage, health, speed, elemental bites, [[gc.tiere.obedience|Obedience]], [[gc.tiere.revive|Return]] …) and for you. They work while the leash works and an animal hangs on it; at a knot only Indestructible and durability.\n- [[gc.tiere.whistle|Whistles]]: only combat effects for animals, for 5 s on every animal that obeys the whistle.\n- [[gc.tiere.saddle|Saddles]]: only while riding.\n\nRare effects carry a fixed star scale of their own: ★ Fire bite, Frostbite, Venom bite, Spirit bite, Thunderclap, Life steal, Veil of deceit, Deterrence, Fenrir's Wrath and Golden Bristles; ★★ Steadfast; ★★★ Return and Indestructible. Without EpicLoot, enchantments stay stored but do nothing.",
+    "see": ["gc.tiere.unique", "gc.tiere.leash_loki"]
+  },
+  "gc.tiere.unique": {
+    "title": "Unique pieces",
+    "short": "Legendary, mythic and ancient leashes, whistles and saddles with fixed special effects, only with EpicLoot.",
+    "body": "Each piece bears a name from Norse myth, such as Gleipnir, Loki's Mirage or Gjallarhorn, and fixed effects, many of them found nowhere else. EpicLoot only picks it as loot or when enchanting once you have defeated its boss, and only on a leash or whistle at least as good as that boss requires, or on the matching saddle. Species leashes only work on their species, the bear one only while [[gc.tierarten.species_tame_bjorn|bears are tameable]].\n\nFor testing, the console command `gc_einzigartig` (with devcommands) puts a piece into your inventory, for example `gc_einzigartig gleipnir 4` for quality 4; without arguments it lists all pieces.",
+    "aliases": ["species leash"],
+    "see": ["gc.tiere.magic", "gc.tiere.leash_loki"]
+  },
+  "gc.tiere.obedience": {
+    "title": "Obedience",
+    "short": "EpicLoot effect of a leash: while you move, the animal walks with you and is less easily distracted.",
+    "body": "At 100 % the animal attacks no one on the way. Below that it is more likely to attack near enemies than far ones: the chance is (100 % − Obedience) × {gc_tiere_leash_chase} ÷ distance, rolled again every 2 s. While you walk, it also leaves food lying with the probability of its obedience. When you stand still it fights normally, and it always follows an attack order.",
+    "aliases": ["Obedience"]
+  },
+  "gc.tiere.revive": {
+    "title": "Return",
+    "short": "Rare EpicLoot effect of a leash: a fatal hit does not kill the animal, it only falls unconscious for a while.",
+    "body": "While unconscious, the animal is invisible, motionless, invulnerable and no target for enemies; it can't be ridden or leashed then. Afterwards it gets up with full health, but the leash is removed. Leash it again and Return works again. The effect only rolls from legendary on, and the better the rarity, the shorter the unconsciousness.",
+    "aliases": ["unconscious"]
+  },
+  "gc.tiere.leash_loki": {
+    "title": "Loki's illusions",
+    "short": "The mythic leash Loki's Mirage summons one or two illusions of the animal that fight along (only with EpicLoot).",
+    "body": "How many there are is rolled by EpicLoot once when the leash is created. An illusion is a copy of the animal with the same stars and the same name; it follows you and fights with the leash's animal values, drops nothing, neither eats nor breeds and can't be leashed or commanded. Its experience goes to the real animal.\n\nA killed illusion returns by itself after {gc_tiere_leash_loki} while the animal is on the leash. The time keeps running in the leash even if you leash again; Loki tells you how long it takes when you leash the animal and when an illusion dies. If the leash is removed, tied up or put away, the illusions vanish.",
+    "aliases": ["Loki's illusions", "Loki's illusion"],
+    "see": ["gc.tiere.unique"]
+  },
+  "gc.tiere.leash_cmd_level": {
+    "title": "Orders from animal level",
+    "short": "An animal only takes click orders from leashes and whistles from this level on; currently from {gc_tiere_leash_cmd_level}.",
+    "body": "This is the [[gc.tiere.breedlevel|breeding level]] shown as Lvl after the name. Bred animals inherit it; freshly tamed ones have 0 and only rise through [[gc.tiere.animalxp|animal experience]] in combat. The limit only applies while [[gc.tiere.care|Animal Care]] is on; refused orders start no pause."
+  },
+  "gc.tiere.leash_cmd_cooldown": {
+    "title": "Command pause",
+    "short": "After an order, an animal waits up to {gc_tiere_leash_cmd_cooldown} before it takes the next one.",
+    "body": "The pause is stored in the animal, so it also applies after leashing it again and for other players. It gets shorter by the average of the animal's level and half your [[gc.tiere.care|Animal Care]] in percent: animal level 20 and Animal Care 20 make it 15 % shorter, from 100 % there is no pause. An [[gc.tiere.whistle|animal whistle]] shortens it further, from −6 % (Finewood) to −50 % (Flametal).",
+    "aliases": ["command pause"]
+  },
+  "gc.tiere.leash_durability": {
+    "title": "Leash durability",
+    "short": "Base durability of the leashes: the Deer Hide leash has {gc_tiere_leash_durability}, every better one a multiple of it.",
+    "body": "Troll Hide ×2, Wolf Pelt ×3, Lox Pelt ×4, Scale Hide ×5, Asksvin Hide ×6⅓, Moose Hide ×8. Every [[valheim.item.quality|quality]] level adds half the base durability, so quality 4 has 2.5 times as much. Only an overstretched leash ([[gc.tiere.length|leash length]]) or a knot that is hit directly loses durability; the [[valheim.station.workbench|workbench]] repairs leashes, the hammer repairs knots."
+  },
+  "gc.tiere.care_delay": {
+    "title": "Hesitation when setting off",
+    "short": "When you start walking, a leashed animal hesitates briefly before following: up to {gc_tiere_care_delay}, depending on the mixed level.",
+    "body": "The delay is rolled anew each time; meanwhile the animal keeps roaming and the leash pulls as usual. It gets shorter with the mixed level = (animal level + 2 × half the holder's [[gc.tiere.care|Animal Care]]) ÷ 3; from mixed level {gc_tiere_care_delay_level} on, the animal follows at once. A new delay only comes after you have stood still for a moment. Without Animal Care no animal hesitates.",
+    "aliases": ["mixed level"]
+  }
+}

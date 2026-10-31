@@ -23,10 +23,13 @@ public partial class Plugin : BaseUnityPlugin
 		Harmony harmony = new(GcMod.Guid);
 		Leash.Care.Init(Config); // vor den Leinen-Items: sie bekommen den Skill Tierpflege
 		Leash.Saddles.Init(Config); // Sättel als EpicLoot-Items (Valheims und die aus GC_Tierarten)
+		// nur die Patches dieser Mod (alle Mods des Pakets in einer DLL). Vor Leash.Plugin.Init (Review 27.10.2026): Dort hängt
+		// sich LeashMagic an EpicLoot; ginge dabei etwas schief, fehlten sonst alle Patches. Geprüft: Keine Patch-Klasse hat
+		// Prepare oder TargetMethod, die Patches lesen ihre Einstellungen erst im Spiel.
+		GcMod.PatchAll(harmony);
 		Leash.Plugin.Init(Config, harmony);
 		Module.TakeOverOldSettings();
 		Module.IsOn = () => Leash.Plugin.On || Leash.Care.Enabled.Value; // Boss-Fortschritt: Tiere 5 %
-		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 		Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("leash", Leash.Plugin.Enabled)
 			.Sub("leash_slip", Leash.Plugin.SlipDistance, 1, " m")

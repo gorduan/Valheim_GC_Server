@@ -1,0 +1,45 @@
+{
+  "$locale": "en",
+  "gc.walkuerentransport": {
+    "title": "Valkyrie transport (Mod)",
+    "short": "GC mod: a valkyrie carries your loaded cart through the air, even cargo that can't pass through portals.",
+    "body": "Whistle with the [[gc.walkuerentransport.whistle|valkyrie whistle]] next to a cart: a valkyrie [[gc.walkuerentransport.pickup|picks it up]], and your next whistle [[gc.walkuerentransport.delivery|calls it]] to where you stand. In between there is a [[gc.walkuerentransport.courier_raid|raid]], and optionally an [[gc.walkuerentransport.courier_easter|easter egg]].\n\nThe mod needs [[gc.tiere|GC_Tiere]], since the valkyrie whistle is one of the animal whistles. All values are [[gc.serverrules|server rules]]; [[gc.kern.stufe|level]] 5 “GC”.",
+    "aliases": ["GC_WalkuerenTransport"],
+    "see": ["gc.about", "valheim.item.noteleport"]
+  },
+  "gc.walkuerentransport.courier": {
+    "title": "Valkyrie transport",
+    "short": "Valkyrie whistle at a loaded cart: a valkyrie picks it up, your next whistle calls it to you. Currently {gc_walkuerentransport_courier}.",
+    "body": "- [[gc.walkuerentransport.pickup|Pickup]]: the cart holds {gc_walkuerentransport_courier_meat} Lox Meat and {gc_walkuerentransport_courier_ymir} Ymir Flesh, and you whistle no more than 1 m away.\n- [[gc.walkuerentransport.courier_raid|Raid]] at the pickup spot: {gc_walkuerentransport_courier_raid}.\n- [[gc.walkuerentransport.delivery|Delivery]]: your next whistle drops the cart wherever you stand outdoors.\n\nThis way even cargo that can't pass through portals travels ([[valheim.item.noteleport]]). Each player can have one cart in the air, and only whoever sent it can call it. Off: no pickups, and the valkyrie whistle can no longer be crafted.",
+    "aliases": ["Valkyrie transport"]
+  },
+  "gc.walkuerentransport.whistle": {
+    "title": "Valkyrie whistle",
+    "short": "The third of the four animal whistles (Black Metal + Thunder Stone, forge); it also calls the valkyrie for your cart.",
+    "body": "For animals it works like an [[gc.tiere.whistle|animal whistle]] (command pause −35 %, +18 % speed when whistling); in addition, obeying animals deal 5 % extra [[valheim.damage.lightning|lightning damage]] and 5 % less normal damage for 5 s. No more than 1 m from a loaded cart, or with a cart in the air, it calls the valkyrie instead of the animals ([[gc.walkuerentransport.courier]]). It doesn't break doing so; it can only be crafted while the valkyrie transport is on.",
+    "aliases": ["valkyrie whistle", "valkyrie whistles"]
+  },
+  "gc.walkuerentransport.pickup": {
+    "title": "Pickup",
+    "short": "Whistle no more than 1 m from your cart with Lox Meat and Ymir Flesh in it: a valkyrie carries it away.",
+    "body": "The cart must hold {gc_walkuerentransport_courier_meat} Lox Meat and {gc_walkuerentransport_courier_ymir} Ymir Flesh; the valkyrie takes both as her fee, the rest of the cargo arrives later. The cart must not be pulled or open, nobody may sit on it, and it doesn't work in someone else's warded area. It turns dark with a thunderstorm, and after 3 s a lightning bolt strikes the cart and deals damage: step away after whistling. If the valkyrie is fetching another cart, yours waits in line.\n\nAfterwards a [[gc.walkuerentransport.courier_raid|raid]] starts at the pickup spot; only when it is over can you have the cart [[gc.walkuerentransport.delivery|delivered]].",
+    "see": ["gc.walkuerentransport.courier"]
+  },
+  "gc.walkuerentransport.delivery": {
+    "title": "Delivery",
+    "short": "Your next whistle with a valkyrie whistle calls your cart: it falls from the sky there and shatters, and the cargo lands on the ground.",
+    "body": "This works anywhere outdoors, not in dungeons, and only once the [[gc.walkuerentransport.courier_raid|raid]] after the pickup is over. After the whistle a sign marks the ground, after 3 s lightning strikes, then the cart falls exactly there: the impact deals [[valheim.damage.blunt|blunt damage]] equal to the cart's weight, reduced by armour, [[valheim.combat.block|blocking]] and dodging. So step out of the way after whistling. Tamed animals and buildings are spared; the valkyrie keeps the Lox Meat and Ymir Flesh.",
+    "see": ["gc.walkuerentransport.pickup"]
+  },
+  "gc.walkuerentransport.courier_raid": {
+    "title": "Raid after pickup",
+    "short": "After the pickup, a currently possible raid starts at the cart, even without buildings. Currently {gc_walkuerentransport_courier_raid}.",
+    "body": "Which raids are possible is decided by Valheim from defeated bosses and the biome. Valheim knows only one raid at a time: if one is running, this one waits up to 10 minutes; if nobody is left at the cart, it is dropped. The cart can only be [[gc.walkuerentransport.delivery|delivered]] once the raid is over. With the [[gc.walkuerentransport.courier_easter|easter egg]], battle hens come. Off: no raid, and the cargo is free at once."
+  },
+  "gc.walkuerentransport.courier_easter": {
+    "title": "Easter egg",
+    "short": "Over-the-top pickup: guardians, a seagull instead of the valkyrie and battle hens. Currently {gc_walkuerentransport_courier_easter}.",
+    "body": "Eight scenes of noise, lightning, quakes and fire in the sky; they look dangerous, but as usual only the one lightning bolt deals damage. Then three guardians with boss bars rise: Greydwarf, Greydwarf Brute and Greydwarf Shaman, with two stars and double health and damage. Only when all three have fallen does a seagull carry the cart away, and the raid afterwards consists of battle hens that strike like boars, attack only players and leave no loot. Delivery stays the same.",
+    "aliases": ["battle hen", "battle hens"]
+  }
+}

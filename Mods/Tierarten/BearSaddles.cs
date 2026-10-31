@@ -40,19 +40,21 @@ internal static class BearSaddles
 		public CustomItem? Custom;
 	}
 
+	// Gorduan, 30.10.2026: „etwas zu klein, so dass sie zu einem Teil im Bären verschwinden“ → ein Viertel größer und höher
+	// (vorher Bär 1,0 bei 2,26 m, Unbjørn 1,3 bei 2,90 m), Sitz entsprechend höher.
 	private static readonly Fit[] Fits =
 	{
 		new()
 		{
-			Creature = "Bjorn", Item = Saddles.BearSaddle, Name = "gc_saddle_bjorn", Origin = new Vector3(0f, 2.26f, -0.55f), Attach = new Vector3(0f, 2.46f, -0.62f),
-			Scale = 1f, Radius = 0.35f, Animation = "attach_asksvin",
+			Creature = "Bjorn", Item = Saddles.BearSaddle, Name = "gc_saddle_bjorn", Origin = new Vector3(0f, 2.34f, -0.55f), Attach = new Vector3(0f, 2.60f, -0.62f),
+			Scale = 1.25f, Radius = 0.45f, Animation = "attach_asksvin",
 			Leather = new Color(0.45f, 0.28f, 0.15f), Strap = new Color(0.22f, 0.13f, 0.07f), Metal = new Color(0.72f, 0.50f, 0.24f), Cloth = new Color(0.50f, 0.13f, 0.10f),
 			Recipe = new[] { ("BjornHide", 5), ("Bronze", 10) },
 		},
 		new()
 		{
-			Creature = "Unbjorn", Item = Saddles.UnbjornSaddle, Name = "gc_saddle_unbjorn", Origin = new Vector3(0f, 2.90f, -0.72f), Attach = new Vector3(0f, 3.16f, -0.80f),
-			Scale = 1.3f, Radius = 0.45f, Animation = "attach_lox",
+			Creature = "Unbjorn", Item = Saddles.UnbjornSaddle, Name = "gc_saddle_unbjorn", Origin = new Vector3(0f, 3.00f, -0.72f), Attach = new Vector3(0f, 3.33f, -0.80f),
+			Scale = 1.62f, Radius = 0.55f, Animation = "attach_lox",
 			Leather = new Color(0.20f, 0.17f, 0.15f), Strap = new Color(0.08f, 0.07f, 0.06f), Metal = new Color(0.36f, 0.38f, 0.42f), Cloth = new Color(0.62f, 0.60f, 0.55f),
 			Recipe = new[] { ("UndeadBjornRibcage", 5), ("BjornHide", 5), ("BlackMetal", 20) },
 		},
@@ -331,9 +333,19 @@ internal static class BearSaddles
 			saddle.AddComponent<MeshFilter>().sharedMesh = mesh;
 			saddle.AddComponent<MeshRenderer>().sharedMaterial = material;
 		}
-		SphereCollider collider = saddle.AddComponent<SphereCollider>();
-		collider.center = new Vector3(0f, 0.12f, 0f);
-		collider.radius = fit.Radius;
+		if (Model() is Mesh shape)
+		{
+			// Kollider in Modellgröße, oben etwas höher: Der Blick soll den Sattel vor dem Rücken des Tiers treffen
+			BoxCollider box = saddle.AddComponent<BoxCollider>();
+			box.center = shape.bounds.center + new Vector3(0f, 0.08f, 0f);
+			box.size = shape.bounds.size + new Vector3(0.1f, 0.2f, 0.1f);
+		}
+		else
+		{
+			SphereCollider collider = saddle.AddComponent<SphereCollider>();
+			collider.center = new Vector3(0f, 0.12f, 0f);
+			collider.radius = fit.Radius;
+		}
 		GameObject attach = new("GC_SaddleAttach") { layer = creature.layer };
 		attach.transform.SetParent(saddle.transform, false);
 		attach.transform.position = creature.transform.TransformPoint(fit.Attach);
@@ -360,5 +372,66 @@ internal static class BearSaddles
 		tame.m_dropSaddleOnDeath = true;
 		tame.m_dropSaddleOffset = new Vector3(0f, 1.5f * fit.Scale, 0f);
 		return true;
+	}
+
+	/// <summary>Liegt einer unserer Sättel (Bär, Unbjørn) auf diesem Tier?</summary>
+	internal static bool Saddled(Tameable tame) =>
+		tame.m_saddle != null && tame.m_saddle.m_hoverText.StartsWith("$gc_saddle_", StringComparison.Ordinal) && tame.m_nview != null && tame.m_nview.IsValid() && tame.HaveSaddle();
+
+	/// <summary>Reitet E gerade statt zu streicheln? Nicht mit einer Leine in der Hand (die gehört GC_Tiere), nicht bei Trugbildern und Ohnmacht.</summary>
+	internal static bool RidesOnUse(Tameable tame, Player player)
+	{
+		if (!Saddled(tame))
+		{
+			return false;
+		}
+		ItemDrop.ItemData? held = Control.Held(player);
+		if (held != null && Plugin.IsLeash(held, out _))
+		{
+			return false;
+		}
+		Character? animal = tame.m_character;
+		return animal == null || (!Illusions.IsIllusion(animal) && !(Bonds.AnyFainted && Bonds.IsFainted(animal)));
+	}
+}
+
+/// <summary>
+/// E auf einen gesattelten Bären oder Unbjørn reitet (Gorduan, 30.10.2026: „das E benutzen erscheint nicht“): Der Sattel liegt auf dem
+/// Rücken, der Blick trifft aber oft zuerst den Körper des Tiers, und Valheim nimmt nur das zuerst getroffene Objekt. Beim Lox ist
+/// der Sattel groß genug; hier reicht deshalb auch der Körper. Alt+E benennt weiter um, mit einer Leine in der Hand bleibt E bei der Leine.
+/// </summary>
+[HarmonyPatch(typeof(Tameable), nameof(Tameable.Interact))]
+internal static class BearSaddleInteractPatch
+{
+	[HarmonyPriority(Priority.High)]
+	private static bool Prefix(Tameable __instance, Humanoid user, bool hold, bool alt, ref bool __result)
+	{
+		if (hold || alt || user == null || user != Player.m_localPlayer || !BearSaddles.RidesOnUse(__instance, (Player)user))
+		{
+			return true;
+		}
+		__result = __instance.m_saddle.Interact(user, false, false);
+		return false;
+	}
+}
+
+/// <summary>Der Hinweis am gesattelten Bären oder Unbjørn zeigt Reiten statt Streicheln (nach dem Hinweis von GC_Tiere).</summary>
+[HarmonyPatch(typeof(Tameable), nameof(Tameable.GetHoverText))]
+internal static class BearSaddleHoverPatch
+{
+	private const string PetLine = "\n[<color=yellow><b>$KEY_Use</b></color>] $hud_pet";
+	private const string RideLine = "\n[<color=yellow><b>$KEY_Use</b></color>] $gc_ride";
+
+	[HarmonyPriority(Priority.Low)]
+	private static void Postfix(Tameable __instance, ref string __result)
+	{
+		Player? local = Player.m_localPlayer;
+		if (string.IsNullOrEmpty(__result) || local == null || !BearSaddles.RidesOnUse(__instance, local))
+		{
+			return;
+		}
+		string pet = Localization.instance.Localize(PetLine);
+		string ride = Localization.instance.Localize(RideLine);
+		__result = __result.Contains(pet) ? __result.Replace(pet, ride) : __result + ride;
 	}
 }

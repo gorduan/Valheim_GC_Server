@@ -1,0 +1,28 @@
+{
+  "$locale": "en",
+  "gc.blitzspule": {
+    "title": "Lightning coils",
+    "short": "Up to three coils next to the Obliterator divert its lightning and make obliterated items return crafting materials.",
+    "body": "The Obliterator destroys whatever lies inside it with a lightning strike. If you build lightning coils next to it with the hammer under Crafting at the [[valheim.station.forge|forge]], each step of the [[gc.blitzspule.chain|coil chain]] takes a third of the lightning damage, and with all three it hits nothing any more. At the same time the Obliterator [[gc.blitzspule.recycling|returns]] part of the crafting materials, the longer the chain the more, with EpicLoot sacrifice products too.\n\nCoil I needs a Dragon Tear from Moder ([[valheim.biome.mountain]]), coil II a Queen Drop ([[valheim.biome.mistlands]]) and coil III Sacrificial Blood from Kall Fimbulbringer ([[valheim.biome.deepnorth]]). The mod is part of GC Server ([[gc.kern.stufe|level]] 4 “GC light”), and the server and all players need it.",
+    "aliases": ["Lightning Coil", "Lightning coils"],
+    "see": ["gc.blitzspule.enabled", "gc.blitzspule.chain", "gc.blitzspule.recycling"]
+  },
+  "gc.blitzspule.enabled": {
+    "title": "Lightning coils",
+    "short": "Server rule: lightning coils can be built and work. Off: they can no longer be built, and built coils stay but do nothing.",
+    "body": "This [[gc.serverrules|server rule]] is {gc_blitzspule_enabled}; what the coils do is explained under [[gc.blitzspule]]. The server also sets the values below:\n\n- Range: {gc_blitzspule_range}, a coil must stand this close to the Obliterator\n- Return with coil I, with I and II and with all three: {gc_blitzspule_rate1}, {gc_blitzspule_rate2} and {gc_blitzspule_rate3} of the crafting materials\n- EpicLoot at least and at most: {gc_blitzspule_epicmin} and {gc_blitzspule_epicmax} of the sacrifice products; these rows appear only with EpicLoot",
+    "see": ["gc.blitzspule.recycling"]
+  },
+  "gc.blitzspule.chain": {
+    "title": "Coil chain",
+    "short": "Only the unbroken chain from coil I works: I, I+II or I+II+III; its highest step sets the effect.",
+    "body": "A coil belongs to an Obliterator when it stands no more than {gc_blitzspule_range} away from it. Coil II can only be built where coil I already stands, coil III only with I and II, and a second coil of the same step not at all. If you tear a coil down, the coils above it stop working until the gap is closed again.\n\nEach step of the chain takes a third of the lightning damage, and the highest one sets the [[gc.blitzspule.recycling|return]]. The coils themselves take no lightning or fire damage.",
+    "see": ["gc.blitzspule"]
+  },
+  "gc.blitzspule.recycling": {
+    "title": "Return at the Obliterator",
+    "short": "With lightning coils the Obliterator returns part of the crafting materials, with EpicLoot sacrifice products too.",
+    "body": "You get back the ingredients of the recipes, including those of upgrades up to the highest normal quality, proportionally for stacks: {gc_blitzspule_rate1} with coil I, {gc_blitzspule_rate2} with I and II, {gc_blitzspule_rate3} with all three, rounded down per kind over the whole load. EpicLoot items also return a random {gc_blitzspule_epicmin} to {gc_blitzspule_epicmax} of their sacrifice products; coil II raises the lower bound to the middle, the [[valheim.skill.crafting|Crafting]] skill of the player at the lever does so proportionally, and with all three coils or Crafting 100 the maximum always applies. The return lands in the Obliterator, whatever does not fit drops in front of it, and the player at the lever gets a message.\n\nNo crafting materials come back for recipes that take one of several ingredients (such as Raw Fish), for upgrades beyond normal quality, or in worlds without crafting costs.",
+    "see": ["gc.blitzspule.chain"]
+  }
+}

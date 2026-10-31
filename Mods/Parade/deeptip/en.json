@@ -1,0 +1,14 @@
+{
+  "$locale": "en",
+  "gc.parade": {
+    "title": "Deflecting parry",
+    "short": "A perfect parry hurls arrows, bolts and solid projectiles such as rocks back at the thrower.",
+    "body": "If you [[valheim.combat.parry|parry]] a projectile and the [[valheim.combat.block|block]] holds, a new projectile flies from you to where the thrower stood at that moment. It does not home in: whoever dodges is not hit. Arrows and bolts fly back, fire, poison and frost arrows too (adjustable), and so do solid projectiles that deal only physical damage, such as rocks and boulders; fireballs and other magic never do.\n\nThe mod is part of GC Server ([[gc.kern.stufe|level]] 4 “GC light”), and the server and all players need it. While it runs, it counts with 2 % per boss for the automatic mode of [[gc.kern.bossscale|boss progression]].",
+    "see": ["gc.parade.deflect"]
+  },
+  "gc.parade.deflect": {
+    "title": "Parry throws projectiles back",
+    "short": "Server rule: perfect parries throw projectiles back. Off: parries work as in Valheim.",
+    "body": "This [[gc.serverrules|server rule]] is {gc_parade_deflect}; how the deflection works is explained under [[gc.parade]]. The server also sets the values below:\n\n- Arrows and bolts too: {gc_parade_deflect_arrows}. On, they always fly back, fire, poison and frost arrows included; off, they count like any other projectile.\n- Factor on the projectile's original damage: {gc_parade_deflect_damage}"
+  }
+}
