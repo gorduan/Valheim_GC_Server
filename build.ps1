@@ -53,7 +53,7 @@ $freigabe = 'Gorduan Community (GC). Free to use, modify, re-upload (MIT).'
 $freigabeDe = 'Gorduan Community (GC). Frei nutzen, ändern, hochladen (MIT).'
 $pakete = [ordered]@{
     'GC_Server' = @{
-        version = '1.9.0'
+        version = '1.10.0'
         dll = 'GC_Server'
         titel = 'GC Server'
         website = 'https://github.com/gorduan/Valheim_GC_Server'
@@ -69,7 +69,7 @@ $pakete = [ordered]@{
         beschreibung = "Ausrüstungs-Vergleich (auch EpicLoot), Kompass, Sortieren, Traglimit, Vernichten, Auto-Türen, Umkreis-Ernte, Dungeonkarte. Menü GC Option für alle Mods, ersetzt Mod Menu. Mehr auf GitHub. $freigabeDe"
     }
     'ValheimPlusPlus' = @{
-        version = '1.6.0'
+        version = '1.7.0'
         dll = 'GC_ValheimPlusPlus'
         titel = 'ValheimPlusPlus'
         website = 'https://github.com/gorduan/Valheim_GC_ValheimPlusPlus'
@@ -352,6 +352,9 @@ foreach ($name in $pakete.Keys) {
 
     # Zip mit / in den Pfaden (ZIP-Norm). Compress-Archive in Windows PowerShell 5.1 schrieb „patchers\GC_ModSchalter_….dll“
     # (Prüfung 26.10.2026, auch in den Zips bis 1.8.1): Unter Linux wäre das eine Datei mit Backslash im Namen statt Ordner.
+    # DLLs im Zip unter plugins/ (31.10.2026): G-Portals Thunderstore-Installation nahm aus GC_Server 1.9.0 und
+    # ValheimPlusPlus 1.6.0 nur den Ordner patchers/, die DLLs im Hauptordner fehlten auf dem Server. EpicLoot liefert seine
+    # DLL in plugins/ und kam an. r2modman legt plugins/ wie bisher nach BepInEx/plugins/Gorduan-<Paket>.
     $zip = Join-Path $zips ("Gorduan-$name-$($p.version).zip")
     if (Test-Path $zip) { Remove-Item $zip }
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
@@ -359,6 +362,7 @@ foreach ($name in $pakete.Keys) {
     try {
         foreach ($file in Get-ChildItem $folder -File -Recurse | Sort-Object FullName) {
             $entry = $file.FullName.Substring($folder.Length + 1).Replace('\', '/')
+            if ($file.Extension -eq '.dll' -and -not $entry.Contains('/')) { $entry = 'plugins/' + $entry }
             [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $entry, [IO.Compression.CompressionLevel]::Optimal)
         }
     } finally { $archive.Dispose() }

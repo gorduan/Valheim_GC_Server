@@ -2,7 +2,7 @@
 
 Wardrobe outfits, leashes, whistles, saddles, Animal Care, more tameable animals, fields, ladders, Valkyrie carts. With EpicLoot (magic leashes), WAP, PlantEverything. More on GitHub. Gorduan Community (GC). Free to use, modify, re-upload (MIT).
 
-Version 1.9.0 · Author: Gorduan · License: MIT
+Version 1.10.0 · Author: Gorduan · License: MIT
 
 ## Included mods
 
@@ -13,7 +13,9 @@ All mods of this package are in GC_Server.dll, next to GC_Kern.dll (the shared c
 | GC_Kern | 0 Core | always, on server and clients | **GC core**: GC Option menu for all GC mods (pause and main menu), switch single mods off, server level, mod check on joining, optional boss progression. Explanations for every feature in DeepTip windows. |
 | GC_Outfit | 1 Very vanilla | server and all clients | **Outfit**: A wardrobe (workbench, 10 fine wood, 10 bronze nails) holds your outfit: put gear in and your character shows its look, while stats stay those of the worn pieces. The outfit is kept on death, armor pieces can be hidden. |
 | GC_Portalnamen | 1 Very vanilla | client, optional server part | **Portal names**: List of portal names when renaming a portal: your own list and, if the server has the mod, the server list. |
+| GC_Vorratsleiste | 1 Very vanilla | server and all clients | Vorratsleiste |
 | GC_Felder | 3 Vanilla+ | client, optional server part | **Fields for the cultivator**: Draw fields with the cultivator and plant them automatically. The server stores the fields and sets the rules. |
+| GC_Palisaden | 3 Vanilla+ | server and all clients | Große Palisaden |
 | GC_Blitzspule | 4 GC light | server and all clients | **Lightning coils**: Up to three lightning coils at the Obliterator divert its lightning and return 25, 55 or 85 % of the crafting materials, EpicLoot items also 50-80 % of their sacrifice products. |
 | GC_Futterfolge | 4 GC light | server and all clients | **Feeding order**: Tamed animals see food twice as far when a path leads there. The highest level eats first, pregnant animals last. |
 | GC_Leiter | 4 GC light | server and all clients | **Ladder**: Buildable ladder pieces (1 m) with a fixed front. Stack them to any height, E takes you to the top or bottom. |

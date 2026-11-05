@@ -452,7 +452,7 @@ internal static class SaddleUniqueEffects
 	}
 
 	/// <summary>Bestes Ziel vor dem Reiter: kleiner Winkel zur Blickrichtung und kurzer Abstand.</summary>
-	private static Character? AimTarget(Player rider, Humanoid animal)
+	internal static Character? AimTarget(Player rider, Humanoid animal)
 	{
 		float reach = 2f;
 		foreach (ItemDrop.ItemData item in animal.GetInventory().GetAllItems())
@@ -507,7 +507,7 @@ internal static class SaddleUniqueEffects
 	}
 
 	/// <summary>Zum Ziel drehen (Valheims Nahkampf trifft in Blickrichtung des Körpers, Attack.GetMeleeAttackDir).</summary>
-	private static void Face(Character animal, Vector3 point)
+	internal static void Face(Character animal, Vector3 point)
 	{
 		Vector3 dir = point - animal.transform.position;
 		dir.y = 0f;
@@ -520,6 +520,14 @@ internal static class SaddleUniqueEffects
 		animal.transform.rotation = rotation;
 		animal.m_body.rotation = rotation;
 		animal.SetLookDir(dir);
+	}
+
+	/// <summary>Nach einem Angriff beim Reiten (RideCombat): das Tier schaut kurz zum Ziel, auch wenn der Reiter weiterlenkt.</summary>
+	internal static void HoldFacing(Character animal, Character? target)
+	{
+		facing = target;
+		facingMount = animal;
+		facingUntil = Time.time + FacingTime;
 	}
 
 	/// <summary>Sadle.UpdateRiding lenkt das Tier in Blickrichtung des Reiters: kurz nach dem Angriff bleibt der Blick beim Ziel.</summary>
@@ -1080,6 +1088,10 @@ internal static class SaddleUniqueEffects
 	///  * während gewürfelt wird, stehen die Bärensättel auf der Sperrliste (falls sie über Item-Sets oder fremde Tabellen kommen).
 	///    Nur während des Würfelns: EpicLoot räumt beim Laden gesperrte Einträge aus seiner Beute-Config (AutoAddEnchantableItems).
 	/// API.AddLootGeneratedListener kann nichts verwerfen: Es meldet das Item erst, wenn es schon in der Welt liegt.
+	/// Leinen und Pfeifen (Gorduan, 31.10.2026: „rausnehmen“) stehen umgekehrt nur außerhalb des Würfelns auf der Sperrliste:
+	/// EpicLoots Auto-Add trug sie als „Axes“ in die Waffen-Sets Tier1–7 (seit 0.15.5 die Elchleder-Leine auch in Tier8) und in
+	/// Haldors Glücksspiel ein; so räumt EpicLoot sie beim Laden aus seiner Beute-Config und den Freischalt-Listen. Unsere
+	/// eigenen Tabellen (Leinen-Beute je Biom, Unikate) würfeln weiter, beim Würfeln gilt die Sperre nicht.
 	/// </summary>
 	private static void PatchLoot()
 	{
@@ -1119,6 +1131,7 @@ internal static class SaddleUniqueEffects
 			if (denied && rolled)
 			{
 				ServerPlugin.Log.LogInfo("Sättel: Bär- und Unbjørn-Sättel fallen nur, wenn Bären zähmbar sind (EpicLoot-Beute).");
+				ServerPlugin.Log.LogInfo("Tierleinen: Leinen und Pfeifen stehen nicht in EpicLoots Waffenbeute und Glücksspiel, nur in den eigenen Tabellen.");
 			}
 			else
 			{
@@ -1173,10 +1186,33 @@ internal static class SaddleUniqueEffects
 
 	private static void DeniedPostfix(string prefabName, ref bool __result)
 	{
-		if (!__result && rolling > 0 && IsBearSaddle(prefabName) && !BearsTameable())
+		if (!__result && (rolling > 0 ? IsBearSaddle(prefabName) && !BearsTameable() : IsLeashOrWhistle(prefabName)))
 		{
 			__result = true;
 		}
+	}
+
+	private static HashSet<string>? tools;
+
+	private static bool IsLeashOrWhistle(string? prefab)
+	{
+		if (prefab == null)
+		{
+			return false;
+		}
+		if (tools == null)
+		{
+			tools = new HashSet<string>(StringComparer.Ordinal);
+			foreach (Tier tier in Plugin.Tiers)
+			{
+				tools.Add(tier.PrefabName);
+			}
+			foreach (WhistleTier tier in Whistles.Tiers)
+			{
+				tools.Add(tier.PrefabName);
+			}
+		}
+		return tools.Contains(prefab);
 	}
 
 	/// <summary>Enthält die Tabelle nur Bärensättel (je Tabellen-Objekt einmal geprüft; EpicLoot legt beim Neuladen neue an)?</summary>
@@ -1247,16 +1283,25 @@ internal static class SaddleUniqueTickPatch
 	}
 }
 
-/// <summary>Sprungkraft und Kriegsreittier: Sprung- und Angriffstaste beim Reiten lassen das Reittier springen bzw. angreifen.</summary>
+/// <summary>
+/// Tasten beim Reiten: Links- und Rechtsklick greifen mit dem Reittier an (RideCombat, Gorduan 02.11.2026), Sprungkraft lässt es
+/// springen. Das Kriegsreittier griff bis dahin als einziges auf Linksklick an; ist RideCombat aus, gilt das weiter.
+/// </summary>
 [HarmonyPatch(typeof(Player), nameof(Player.SetControls))]
 internal static class SaddleUniqueControlsPatch
 {
-	private static void Prefix(Player __instance, ref bool attack, ref bool attackHold, ref bool jump)
+	private static void Prefix(Player __instance, ref bool attack, ref bool attackHold, ref bool secondaryAttack, ref bool secondaryAttackHold, ref bool block, ref bool blockHold, ref bool jump, ref bool dodge)
 	{
-		if ((jump || attack || attackHold) && __instance == Player.m_localPlayer)
+		if (__instance != Player.m_localPlayer)
+		{
+			return;
+		}
+		RideCombat.OnControls(__instance, ref attack, ref attackHold, ref secondaryAttack, ref secondaryAttackHold, ref block, ref blockHold);
+		if (jump || attack || attackHold)
 		{
 			SaddleUniqueEffects.OnControls(__instance, ref attack, ref attackHold, ref jump);
 		}
+		RideCombat.KeepSeat(__instance, ref jump, ref dodge); // nach der Sprungkraft: übrige Sprünge und Ausweichen steigen nicht ab
 	}
 }
 

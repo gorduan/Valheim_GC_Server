@@ -65,6 +65,9 @@ internal static class Care
 	internal static readonly int SkillHash = "gc_care_skill".GetStableHashCode();
 	/// <summary>Im Tier: Stufe eines gezüchteten Tiers (0–150).</summary>
 	internal static readonly int LevelHash = "gc_care_level".GetStableHashCode();
+
+	/// <summary>Im Tier: Zähmbonus des zuletzt gefressenen Futters (GC_Tierarten, Gorduan 02.11.2026: Honig 2, Lox-Fleisch 1,5).</summary>
+	internal static readonly int TameFoodHash = "gc_tame_food".GetStableHashCode();
 	/// <summary>Im Tier: Sitzung des Spielers, dessen Futter es zuletzt gefressen hat (Zähmer, Züchter).</summary>
 	internal static readonly int FeederHash = "gc_care_feeder".GetStableHashCode();
 	/// <summary>Im fallengelassenen oder gepflückten Item: Sitzung des Spielers, der es fallen ließ oder pflückte.</summary>
@@ -930,6 +933,16 @@ internal static class Care
 		float inherited = UnityEngine.Random.Range(0.75f * (own + partner) * 0.5f, Mathf.Max(own, partner));
 		float care = UnityEngine.Random.Range(0f, BreederSkill(zdo, out breeder) / 4f);
 		return Mathf.Clamp(inherited + care, 0f, SpeciesLink.MaxLevel(mother)); // Höchststufe der Art (Gorduan, 20.10.2026)
+	}
+
+	/// <summary>Tierpflege-Stufe des Züchters einer Mutter (für GC_Tierarten: Stern-Chancen der Zucht), 0 ohne Tierpflege.</summary>
+	internal static float BreederSkillOf(Procreation parent)
+	{
+		if (!Enabled.Value || parent.m_nview == null || !parent.m_nview.IsValid())
+		{
+			return 0f;
+		}
+		return BreederSkill(parent.m_nview.GetZDO(), out _);
 	}
 
 	/// <summary>
@@ -1867,6 +1880,7 @@ internal static class Countdown
 	{
 		float speed = Care.Enabled.Value ? 1f + 2f * Care.NearbyLevel(position) / 100f : 1f;
 		speed *= BondTamingPatch.Factor(position);
+		speed *= SpeciesLink.FoodTaming(tame); // Zähmbonus des Futters (GC_Tierarten)
 		InRange.Clear();
 		Player.GetPlayersInRange(position, tame.m_tamingSpeedMultiplierRange, InRange);
 		foreach (Player player in InRange)

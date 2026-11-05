@@ -1,0 +1,12 @@
+# GC_Palisaden - English. Keys with their own prefix (gcpa_).
+gck_mod_palisaden: "Large palisades"
+gcpa_wall: "Large core wood stakewall"
+gcpa_wall_desc: "Twice as high and wide as the stakewall and four times as sturdy."
+gcpa_gate: "Large core wood gate"
+gcpa_gate_desc: "Twice as high and wide as the wood gate and four times as sturdy. On its own or as a pair."
+gcpa_t_enabled_name: "Core wood stakewalls and gates"
+gcpa_t_enabled_desc: "Large core wood stakewall (12 core wood, 4000 durability, 4 m wide, almost 7 m high), large core wood gate (36 core wood, 1600), half core wood stakewall (6 core wood, 2000) and core wood gate (18 core wood, 800) can be built with the hammer at the workbench. Off: no longer buildable, built pieces stay."
+gcpa_wall_half: "Half core wood stakewall"
+gcpa_wall_half_desc: "Half as high and wide as the large stakewall, just as dark. Fits on top of the core wood gate."
+gcpa_gate_dark: "Core wood gate"
+gcpa_gate_dark_desc: "As wide as the wood gate, as high as the half stakewall. With a half stakewall on top as high as the large wall."

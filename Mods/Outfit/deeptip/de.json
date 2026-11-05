@@ -16,7 +16,7 @@
   "gc.outfit.wardrobe": {
     "title": "Kleiderschrank",
     "short": "Möbelstück, an dem du dein Outfit änderst; gebaut mit dem Hammer an der Werkbank aus 10 Edelholz und 10 Bronzenägeln.",
-    "body": "Du baust ihn mit dem Hammer unter Möbel an der [[valheim.station.workbench|Werkbank]]. E am Schrank öffnet seine Türen und dein Inventar; wo sonst eine Truhe steht, siehst du die 18 [[gc.outfit.slots|Plätze]] deines Outfits in drei Tabellen: Rüstung, Einhandwaffen, Zweihand und Fernkampf. Ziehen und Ablegen geht wie bei einer Truhe, Umschalt-Klick legt ein Teil in seinen Platz oder zurück ins Inventar, und ein Teil, das dort schon lag, tauscht mit ihm. Das Auge neben einem Platz oder ein Rechtsklick darauf [[gc.outfit.hide|blendet ihn aus]].\n\nDer Schrank selbst hat keinen Inhalt, im Bereich eines fremden Wächtersteins öffnet er sich nicht, und gehst du mehr als 4 m weg, schließt sich das Fenster.",
+    "body": "Du baust ihn mit dem Hammer unter Möbel an der [[valheim.station.workbench|Werkbank]]. E am Schrank öffnet seine Türen und dein Inventar; wo sonst eine Truhe steht, siehst du die 18 [[gc.outfit.slots|Plätze]] deines Outfits in drei Tabellen: Rüstung, Einhandwaffen, Zweihand und Fernkampf. Ziehen und Ablegen geht wie bei einer Truhe, Umschalt-Klick legt ein Teil in seinen Platz oder zurück ins Inventar, und ein Teil, das dort schon lag, tauscht mit ihm. Das Auge neben einem Platz oder ein Rechtsklick darauf [[gc.outfit.hide|blendet ihn aus]].\n\nDer Schrank selbst hat keinen Inhalt, im Bereich eines fremden Wächtersteins öffnet er sich nicht, und gehst du mehr als 4 m weg, schließt sich das Fenster. Das Schrankfeld lässt sich am Rand ziehen und bleibt dort; ein Doppelklick auf den Rand legt es wieder neben das Inventar.",
     "aliases": ["Kleiderschrank"],
     "see": ["gc.outfit"]
   },
@@ -31,5 +31,19 @@
     "short": "Das Auge neben einem Platz am Kleiderschrank blendet das Teil aus: Dein Charakter zeigt dort nichts.",
     "body": "Das geht für jeden Platz: Bei Rüstung zeigt dein Charakter dort nichts, bei Waffen ist eine Waffe dieser Art in der Hand und auf dem Rücken unsichtbar. Ein Rechtsklick auf den Platz wirkt genauso. Ist ein Teil ausgeblendet, ist das Auge durchgestrichen und die Zeile grau; ein zweiter Klick zeigt das Teil wieder. Die Werte des getragenen Teils bleiben, nur sein Aussehen verschwindet.",
     "see": ["gc.outfit.wardrobe"]
+  },
+  "gc.outfit.sets": {
+    "title": "Ausrüstungs-Sätze",
+    "short": "Vier Sätze am Kleiderschrank: Rüstung, Schnellleiste, acht Vorräte und Leinenleiste, mit einem Klick gewechselt. Jetzt {gc_outfit_sets}.",
+    "body": "Am [[gc.outfit.wardrobe|Kleiderschrank]] stehen oben die Reiter **Stil** (dein [[gc.outfit|Outfit]], nur fürs Aussehen) und vier **Sätze**. Einen davon trägst du: Sein Reiter (grün) zeigt live, was du gerade hast, und was du dort hineinlegst, landet direkt bei dir, Rüstung und Waffen ziehst du sofort an. Die anderen liegen im Schrank. Der erste heißt anfangs „Alltag“, die anderen „Satz 2“ bis „Satz 4“. Jeder Satz zeigt seine **Ausrüstung** in zwei Tabellen (Rüstung: Kopf, Brust, Beine, Umhang; Hände und Zubehör: rechte und linke Hand, Gürtel, Schmuckstück), darunter die **Schnellleiste** für Waffen, Werkzeuge und Vorräte und die **Vorräte** (Essen, Tränke und Mets, Munition; so viele Plätze wie deine Vorratsleiste, acht je Reihe). Die Schnellleiste ist Valheims erste Inventarreihe, die Vorräte sind deine [[gc.vorratsleiste|Vorratsleiste]]. Leere Plätze zeigen ein blasses Bild ihres Platzes.\n\n**Anlegen** tauscht: Was in deiner Schnellleiste und deiner Vorratsleiste liegt und was du trägst, wandert in deinen bisherigen Satz, der gewählte kommt an dieselben Plätze und wird angezogen. Was weiter unten liegt, bleibt bei dir, ebenso alles, was an seiner Stelle nicht in den Satz darf. Mit der [[gc.tiere.leashbar|Leinenleiste]] hat jeder Satz eine dritte Tabelle mit deren fünf Plätzen, nur für Leinen und Pfeifen; Anlegen tauscht sie mit der Leiste. Eine Leine, die gerade ein Tier hält, kommt in keinen Satz und bleibt bei dir. Reicht der Platz nicht, passiert nichts. Mit **Umbenennen** gibst du einem Satz einen Namen, etwa „Nahkampf“ oder „Magier“.\n\nSätze gehören zu deinem Charakter wie das Outfit: Jeder Schrank zeigt sie, sie wiegen nichts und bleiben beim Tod. Material, Erz und Trophäen kommen nie hinein, sonst wäre jeder Schrank ein Lager ohne Gewicht, das an jedem anderen Schrank bereitsteht. Ist die [[gc.serverrules|Server-Regel]] aus, kannst du Sätze nur noch leeren.",
+    "aliases": [
+      "Satz",
+      "Sätze",
+      "Ausrüstungs-Satz"
+    ],
+    "see": [
+      "gc.outfit.wardrobe",
+      "gc.outfit"
+    ]
   }
 }

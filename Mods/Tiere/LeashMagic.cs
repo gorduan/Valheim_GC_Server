@@ -331,8 +331,27 @@ internal static partial class LeashMagic
 	/// dem GC-Server) leitet WAP diese Abfrage auf die Schlüssel des eigenen Spielers um (Patch auf
 	/// ZoneSystem.GetGlobalKey), sonst gilt der Weltschlüssel. Keine eigene Abfrage der Spieler-Schlüssel: die kämen auch
 	/// aus anderen Welten mit (Review).
+	/// Seit EpicLoot 0.15.5 zählt auch der Boss, dessen Beute gerade gewürfelt wird (GatedItemTypeHelper.RollingDefeatKey,
+	/// gesetzt während CharacterDrop.OnDeath), so wie in EpicLoots eigener Abfrage HasBossKey: bossgebundene Unikate können
+	/// schon beim ersten Todesstoß fallen (Gorduan, 31.10.2026).
 	/// </summary>
-	internal static bool BossDefeated(string key) => ZoneSystem.instance != null && ZoneSystem.instance.GetGlobalKey(key);
+	internal static bool BossDefeated(string key) =>
+		(ZoneSystem.instance != null && ZoneSystem.instance.GetGlobalKey(key)) || string.Equals(key, RollingDefeatKey(), StringComparison.OrdinalIgnoreCase);
+
+	private static FieldInfo? rollingDefeatKey;
+	private static bool rollingDefeatKeyResolved;
+
+	/// <summary>Besiegt-Schlüssel des Bosses, dessen Beute EpicLoot gerade würfelt; null außerhalb davon oder vor EpicLoot 0.15.5.</summary>
+	private static string? RollingDefeatKey()
+	{
+		if (!rollingDefeatKeyResolved)
+		{
+			rollingDefeatKeyResolved = true;
+			Type? helper = Chainloader.PluginInfos.ContainsKey(EpicLootGuid) ? AccessTools.TypeByName("EpicLoot.GatedItemType.GatedItemTypeHelper") : null;
+			rollingDefeatKey = helper != null ? AccessTools.Field(helper, "RollingDefeatKey") : null;
+		}
+		return rollingDefeatKey?.GetValue(null) as string;
+	}
 
 	/// <summary>
 	/// Beute: Tier-Tabellen von EpicLoot → passende Leine (1 % pro Kreatur, eigene unabhängige Tabelle). Seit 19.10.2026 eine
@@ -380,6 +399,31 @@ internal static partial class LeashMagic
 	/// Tier3EliteMob, dazu der Hirsch): Leinen fallen dort höchstens episch (Gorduan, 24.10.2026: legendär erst ab dem Sumpf).
 	/// </summary>
 	private static readonly HashSet<string> NoLegendaryLoot = new() { "Tier0Mob", "Tier1Mob", "Tier2Mob", "Tier3EliteMob", "Deer" };
+
+	/// <summary>Tabellen aus Aschlande und Tiefem Norden: Leinen und Pfeifen dort auch mythisch (Gorduan, 31.10.2026).</summary>
+	private static readonly HashSet<string> MythicLoot = new() { "Tier7Mob", "Tier8Mob", "Tier8EliteMob", "Tier9Mob", "Tier9EliteMob", "Seal" };
+
+	/// <summary>
+	/// Seltenheiten der eigenen Leinen- und Pfeifen-Beute (Magie, Selten, Episch, Legendär, Mythisch, Uralt): Wiesen und
+	/// Schwarzwald höchstens episch, ab dem Sumpf 1 % legendär, in Aschlande und Tiefem Norden zusätzlich 1 % mythisch. Bis
+	/// 1.9.1 kamen mythische Leinen nur über EpicLoots Waffen-Sets, die sie seit 1.9.2 nicht mehr enthalten.
+	/// </summary>
+	internal static string LootRarity(string table) =>
+		NoLegendaryLoot.Contains(table) ? "[70,22,8,0,0,0]" : MythicLoot.Contains(table) ? "[70,22,6,1,1,0]" : "[70,22,7,1,0,0]";
+
+	/// <summary>
+	/// Pfeifen-Beute (Gorduan, 31.10.2026: „eigene Tabellen“): 0,5 % je Kreatur wie die Sättel, je zwei Biome eine Pfeife. Bis 1.9.1
+	/// kamen verzauberte Pfeifen nur über EpicLoots Waffen-Sets („Axes“) und Haldors Glücksspiel, die seit 1.9.2 keine Leinen
+	/// und Pfeifen mehr enthalten (SaddleUniqueEffects.DeniedPostfix). Wird eine legendäre oder mythische Pfeife gewürfelt,
+	/// kann daraus wieder eine Unikat-Pfeife werden. Hirsch und Robbe (eigene Leinen-Tabellen) lassen keine Pfeifen fallen.
+	/// </summary>
+	private static readonly (string Whistle, string[] Tables)[] WhistleLoot =
+	{
+		("GC_Whistle_FineWood", new[] { "Tier0Mob", "Tier1Mob", "Tier2Mob", "Tier3EliteMob" }),
+		("GC_Whistle_Iron", new[] { "Tier3Mob", "Tier4EliteMob", "Tier4Mob", "Tier5EliteMob" }),
+		("GC_Whistle_Valkyrie", new[] { "Tier5Mob", "Tier6EliteMob", "Tier6Mob", "Tier7EliteMob" }),
+		("GC_Whistle_Flametal", new[] { "Tier7Mob", "Tier8Mob", "Tier8EliteMob", "Tier9Mob", "Tier9EliteMob" }),
+	};
 
 	/// <summary>Alle Text-Schlüssel, die Valheim übersetzen muss (Effekt- und Leinen-Namen).</summary>
 	internal static IEnumerable<string> LocalizationKeys()
@@ -684,7 +728,7 @@ internal static partial class LeashMagic
 		{
 			string json = LootJson();
 			bool loot = json.Length > 2 && Call("AddLootTables", json) != null;
-			Plugin.Log.LogInfo(loot ? "Tierleinen: EpicLoot-Beute angelegt." : "Tierleinen: keine EpicLoot-Beute angelegt.");
+			Plugin.Log.LogInfo(loot ? "Tierleinen: EpicLoot-Beute angelegt (Leinen 1 %, Pfeifen und Sättel 0,5 % je Kreatur)." : "Tierleinen: keine EpicLoot-Beute angelegt.");
 		}
 		catch (Exception e)
 		{
@@ -785,7 +829,7 @@ internal static partial class LeashMagic
 			}
 			sb.Append(tables++ > 0 ? "," : "").Append("{\"Object\":\"").Append(table).Append("\",\"LeveledLoot\":[{\"Level\":1,\"Drops\":[[0,99],[1,1]],\"Loot\":[");
 			// Wiesen und Schwarzwald (Gorduan, 24.10.2026): höchstens episch, legendär erst ab dem Sumpf
-			string rarity = NoLegendaryLoot.Contains(table) ? "[70,22,8,0,0,0]" : "[70,22,7,1,0,0]";
+			string rarity = LootRarity(table);
 			for (int i = 0; i < present.Count; i++)
 			{
 				sb.Append(i > 0 ? "," : "").Append("{\"Item\":\"").Append(present[i]).Append("\",\"Weight\":1,\"Rarity\":").Append(rarity).Append('}');
@@ -793,6 +837,19 @@ internal static partial class LeashMagic
 			// EpicLoot steigert seit 0.15.0 (auch 0.15.2) Beute je Stern (DefaultStarScaling: +14,9 % Chance, bessere
 			// Seltenheit); die Leinen bleiben bei 1 % für jede Kreatur, wie vorher
 			sb.Append("]}],\"StarScaling\":{\"DropChance\":0,\"BonusDrops\":0,\"RarityShift\":0}}");
+		}
+		foreach ((string whistle, string[] whistleTables) in WhistleLoot)
+		{
+			if (!Exists(whistle))
+			{
+				continue;
+			}
+			foreach (string table in whistleTables)
+			{
+				sb.Append(tables++ > 0 ? "," : "").Append("{\"Object\":\"").Append(table)
+					.Append("\",\"LeveledLoot\":[{\"Level\":1,\"Drops\":[[0,199],[1,1]],\"Loot\":[{\"Item\":\"").Append(whistle)
+					.Append("\",\"Weight\":1,\"Rarity\":").Append(LootRarity(table)).Append("}]}],\"StarScaling\":{\"DropChance\":0,\"BonusDrops\":0,\"RarityShift\":0}}");
+			}
 		}
 		AppendSaddleLoot(sb, ref tables); // Sättel (0,5 % je Kreatur, LeashUniques.cs)
 		sb.Append(']');

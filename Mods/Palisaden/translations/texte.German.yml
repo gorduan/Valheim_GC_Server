@@ -1,0 +1,12 @@
+# GC_Palisaden - Deutsch. Schlüssel mit eigenem Präfix (gcpa_).
+gck_mod_palisaden: "Große Palisaden"
+gcpa_wall: "Große Kernholz-Palisade"
+gcpa_wall_desc: "Doppelt so hoch und breit wie der Palisadenwall und viermal so haltbar."
+gcpa_gate: "Großes Kernholztor"
+gcpa_gate_desc: "Doppelt so hoch und breit wie das Holztor und viermal so haltbar. Allein oder als Paar."
+gcpa_t_enabled_name: "Kernholz-Palisaden und -Tore"
+gcpa_t_enabled_desc: "Große Kernholz-Palisade (12 Kernholz, 4000 Haltbarkeit, 4 m breit, knapp 7 m hoch), großes Kernholztor (36 Kernholz, 1600), halbe Kernholz-Palisade (6 Kernholz, 2000) und Kernholztor (18 Kernholz, 800) lassen sich mit dem Hammer an der Werkbank bauen. Aus: nicht mehr baubar, Gebautes bleibt."
+gcpa_wall_half: "Halbe Kernholz-Palisade"
+gcpa_wall_half_desc: "Halb so hoch und breit wie die große Palisade, gleich dunkel. Passt über das Kernholztor."
+gcpa_gate_dark: "Kernholztor"
+gcpa_gate_dark_desc: "So breit wie das Holztor, so hoch wie die halbe Palisade. Mit einer halben Palisade darüber so hoch wie die große Wand."

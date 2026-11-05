@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using BepInEx.Configuration;
 using GC.Shared;
 using HarmonyLib;
 using TMPro;
@@ -37,6 +38,40 @@ internal static class LeashBar
 
 	private const string DataKey = "gc_leashbar";
 	private const float Gap = 18f;
+
+	/// <summary>
+	/// Verschiebung der Leiste (Gorduan, 04.11.2026, Idee aus EpicLoot 0.15.6): im Inventar-Bildschirm am Rahmen ziehen, Doppelklick
+	/// zurück. Gilt auch für die Anzeige im Spiel. Nur auf diesem Rechner (keine Server-Regel).
+	/// </summary>
+	internal static ConfigEntry<float> OffsetX = null!;
+	internal static ConfigEntry<float> OffsetY = null!;
+	private static Vector2 offset;
+	private static bool offsetRead;
+
+	internal static void Init(ConfigFile config)
+	{
+		OffsetX = Gc.Bind(config, "7 - Leash", "BarOffsetX", 0f, "Leinenleiste: so weit nach rechts verschoben (Einheiten der Oberfläche). Im Inventar am Rahmen der Leiste ziehen, Doppelklick setzt zurück.");
+		OffsetY = Gc.Bind(config, "7 - Leash", "BarOffsetY", 0f, "Leinenleiste: so weit nach oben verschoben (Einheiten der Oberfläche).");
+	}
+
+	private static Vector2 Offset
+	{
+		get
+		{
+			if (!offsetRead && OffsetX != null)
+			{
+				offsetRead = true;
+				offset = new Vector2(OffsetX.Value, OffsetY.Value);
+			}
+			return offset;
+		}
+	}
+
+	private static void SaveOffset()
+	{
+		OffsetX.Value = offset.x;
+		OffsetY.Value = offset.y;
+	}
 
 	private static Player? owner;
 	private static Inventory? bar;
@@ -564,7 +599,7 @@ internal static class LeashBar
 	private static Vector2 Position(HotkeyBar hotkeys)
 	{
 		RectTransform rect = (RectTransform)hotkeys.transform;
-		return rect.anchoredPosition + new Vector2(8f * hotkeys.m_elementSpace + Gap, 0f);
+		return rect.anchoredPosition + new Vector2(8f * hotkeys.m_elementSpace + Gap, 0f) + Offset;
 	}
 
 	private static bool EnsureHud()
@@ -716,6 +751,9 @@ internal static class LeashBar
 	private static InventoryGrid? grid;
 	private static int gridElements;
 
+	/// <summary>Das Raster (für GC_Outfit: Klicks auf die Leinenleiste des angelegten Satzes landen hier).</summary>
+	internal static InventoryGrid? Grid => grid;
+
 	/// <summary>Jedes Bild, solange das Inventar offen ist (nach Valheims UpdateInventory): das Raster der Leiste.</summary>
 	internal static void UpdateGrid(InventoryGui gui, Player player)
 	{
@@ -810,6 +848,21 @@ internal static class LeashBar
 		copy.OnMoveToUpperInventoryGrid = pos => { };
 		copy.OnSetTouchSelection = g => { };
 		copy.CanDropDragOntoItem = gui.CanDropDragOntoItem;
+		// am Rahmen ziehen verschiebt die Leiste, Doppelklick legt sie zurück (Gorduan, 04.11.2026)
+		PanelDrag.Frame(go.transform, 14f);
+		PanelDrag drag = go.AddComponent<PanelDrag>();
+		drag.Moved = delta =>
+		{
+			_ = Offset;
+			offset += delta;
+		};
+		drag.Done = SaveOffset;
+		drag.Reset = () =>
+		{
+			offset = Vector2.zero;
+			offsetRead = true;
+			SaveOffset();
+		};
 		grid = copy;
 		gridElements = -1;
 		return true;

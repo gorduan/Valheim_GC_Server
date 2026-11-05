@@ -1,0 +1,21 @@
+{
+  "$locale": "de",
+  "gc.vorratsleiste": {
+    "title": "Vorratsleiste",
+    "short": "Unter dem Inventar {gc_vorratsleiste_slots} Plätze nur für Essen, Tränke, Mets und Munition.",
+    "body": "Im Inventar-Bildschirm steht unter deinen Rucksackplätzen die Zeile **Vorräte:** mit {gc_vorratsleiste_slots} Plätzen (der Server stellt 1 bis 64 ein, je acht eine Reihe, für Rucksack und Kleiderschrank gleichermaßen). Hinein dürfen nur Essen, Tränke und Mets, Pfeile, Bolzen und Köder; Material, Rüstung und Waffen nicht. Ein Rechtsklick isst oder trinkt wie im Inventar, Bogen und Armbrust nehmen Munition auch von hier, wenn im Inventar keine passende liegt. Eigene Tasten hat die Leiste nicht: Was im Kampf schnell gehen muss, gehört in die Schnellleiste.\n\nDie Leiste zählt zu deinem Tragegewicht und kommt beim Tod mit ins Grab; beim Einsammeln kehrt alles an seinen alten Platz zurück. Rezepte nehmen nichts aus der Leiste, zum Herstellen legst du Zutaten ins Inventar. Am [[gc.outfit.wardrobe|Kleiderschrank]] tauschen die [[gc.outfit.sets|Ausrüstungs-Sätze]] ihre Vorräte mit dieser Leiste. Die Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 1), Server und alle Spieler brauchen sie.\n\nUnter den Plätzen stehen zwei Knöpfe. **Auffüllen** füllt die Stapel der Leiste auf, erst aus der offenen Kiste, dann aus Kisten in Reichweite, die nächste zuerst; leere Plätze füllt nur die offene Kiste. **Einlagern** legt die Vorräte auf gleiche Stapel der offenen Kiste, dann in Kisten in Reichweite, die das Stück schon haben, den Rest in die offene Kiste. Reichweite und Ward-Prüfung kommen von ValheimPlus (Auffüllen wie *Craft from Chest*, Einlagern wie *Auto Stack*, siehe [[gc.stackfix|Auto-Stack-Fix]]); ohne ValheimPlus zählt nur die offene Kiste. Eine Kiste, die gerade jemand offen hat, bleibt außen vor. [[gc.schloesser.itemlock|Fixierte Items]] bleiben, wo sie sind, auf rot fixierte Stapel kommt nichts dazu, und [[gc.schloesser.chestlock|gesperrte Kisten]] fasst niemand an.",
+    "aliases": ["Vorräte", "Vorratsleiste"],
+    "see": ["gc.vorratsleiste.enabled", "gc.outfit.sets"]
+  },
+  "gc.vorratsleiste.enabled": {
+    "title": "Vorratsleiste",
+    "short": "Server-Regel: Die Vorratsleiste nimmt Vorräte an. Aus: nur noch leeren.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_vorratsleiste_enabled}. Ist sie aus, nimmt die [[gc.vorratsleiste|Vorratsleiste]] nichts mehr an und gibt keine Munition ab; was darin liegt, lässt sich herausnehmen.",
+    "see": ["gc.vorratsleiste"]
+  },
+  "gc.vorratsleiste.keepone": {
+    "title": "Auffüllen lässt eins in der Kiste",
+    "short": "Server-Regel: Auffüllen nimmt von jeder Sorte höchstens alles bis auf ein Stück aus jeder Kiste.",
+    "body": "Zurzeit {gc_vorratsleiste_keepone}. Beim Auffüllen der [[gc.vorratsleiste|Vorratsleiste]] bleibt von jeder Sorte ein Stück in jeder Kiste, auch in der offenen. So weiß die Kiste weiter, was in sie gehört, und Einlagern und Sortieren legen die Sorte wieder dorthin. Fixierte Items zählen als dieses Stück. Die Einstellung ist eine [[gc.serverrules|Server-Regel]]."
+  }
+}

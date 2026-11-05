@@ -141,7 +141,7 @@ internal static class Outfits
 		{
 			ZPackage pkg = new(Convert.FromBase64String(data));
 			pkg.ReadInt();
-			return pkg.ReadInt();
+			return pkg.ReadUShort(); // Valheims Inventory.Save schreibt die Anzahl als ushort (vorher als int gelesen: Fehlalarm)
 		}
 		catch
 		{

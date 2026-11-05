@@ -588,7 +588,7 @@ internal static class LeashControlPatch
 	{
 		if (__instance != Player.m_localPlayer || __instance.GetDoodadController() is Sadle)
 		{
-			return; // beim Reiten gehören die Tasten Valheim: rechte Maustaste wendet das Tier (Sadle.ApplyControlls, Gorduan 18.10.2026)
+			return; // beim Reiten gehören die Maustasten dem Reittier (RideCombat, Gorduan 02.11.2026; vorher wendete Valheim mit rechts)
 		}
 		ItemDrop.ItemData? held = Control.Held(__instance);
 		ItemDrop.ItemData? whistle = held == null ? Whistles.Held(__instance) : null; // Tierpfeife: dieselben Tasten für alle Tiere

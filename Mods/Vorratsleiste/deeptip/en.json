@@ -1,0 +1,21 @@
+{
+  "$locale": "en",
+  "gc.vorratsleiste": {
+    "title": "Supply bar",
+    "short": "Below the inventory, {gc_vorratsleiste_slots} slots for food, potions, meads and ammo only.",
+    "body": "In the inventory screen, below your backpack slots, is the row **Supplies:** with {gc_vorratsleiste_slots} slots (the server sets 1 to 64, eight per row, for backpack and wardrobe alike). Only food, potions and meads, arrows, bolts and bait go in; no materials, armour or weapons. A right click eats or drinks as in the inventory, and bows and crossbows take ammo from here too when there is none that fits in the inventory. The bar has no keys of its own: what must be quick in a fight belongs in the hotbar.\n\nThe bar counts towards your carry weight and goes into the grave when you die; when you collect it, everything returns to its old slot. Recipes take nothing from the bar, put ingredients into the inventory to craft. At the [[gc.outfit.wardrobe|wardrobe]] the [[gc.outfit.sets|gear sets]] swap their supplies with this bar. The mod is part of GC Server ([[gc.kern.stufe|tier]] 1), the server and all players need it.\n\nBelow the slots are two buttons. **Fill** tops up the stacks of the bar, first from the open chest, then from chests within reach, nearest first; empty slots are filled from the open chest only. **Store** puts the supplies onto matching stacks of the open chest, then into chests within reach that already hold the item, the rest into the open chest. Reach and ward check come from ValheimPlus (Fill like *Craft from Chest*, Store like *Auto Stack*, see [[gc.stackfix|auto stack fix]]); without ValheimPlus only the open chest counts. A chest someone else has open is left out. [[gc.schloesser.itemlock|Locked items]] stay where they are, red locked stacks take nothing more, and [[gc.schloesser.chestlock|locked chests]] are never touched.",
+    "aliases": ["supplies", "supply bar"],
+    "see": ["gc.vorratsleiste.enabled", "gc.outfit.sets"]
+  },
+  "gc.vorratsleiste.enabled": {
+    "title": "Supply bar",
+    "short": "Server rule: the supply bar takes supplies. Off: can only be emptied.",
+    "body": "This [[gc.serverrules|server rule]] is set to {gc_vorratsleiste_enabled}. When it is off, the [[gc.vorratsleiste|supply bar]] takes nothing more and gives no ammo; whatever is in it can be taken out.",
+    "see": ["gc.vorratsleiste"]
+  },
+  "gc.vorratsleiste.keepone": {
+    "title": "Fill leaves one in the chest",
+    "short": "Server rule: Fill takes at most all but one of each kind from every chest.",
+    "body": "Currently {gc_vorratsleiste_keepone}. When filling the [[gc.vorratsleiste|supply bar]], one of each kind stays in every chest, the open one too. That way the chest still knows what belongs in it, and Store and sorting put the kind back there. Locked items count as that one. The setting is a [[gc.serverrules|server rule]]."
+  }
+}

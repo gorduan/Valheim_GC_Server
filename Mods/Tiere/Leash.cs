@@ -294,6 +294,7 @@ internal static class Plugin
 	{
 		Log = ServerPlugin.Log;
 		const string section = "7 - Leash";
+		LeashBar.Init(Config); // Verschiebung der Leiste, nur auf diesem Rechner (Gorduan, 04.11.2026)
 		Enabled = Gc.BindSynced(Config, section, "Enabled", true, "Tierleinen: Leine mit 1–8 in die Hand nehmen, E am gezähmten Tier leint an oder löst, E am Pfosten bindet an; Linksklick schickt das Tier hin, Rechtsklick lässt es angreifen (wird vom Server vorgegeben, auch im Menü GC Option).");
 		SlipDistance = Gc.BindSynced(Config, section, "SlipDistance", 12f, "Sicherung: So viele Meter hinter der Zuggrenze (Höchstlänge + 15 %) rutscht die Leine aus der Hand, das Tier ist frei (wie in Minecraft). Das passiert nur, wenn die Leine das Tier nicht nachziehen kann, etwa über eine tiefe Kante.", new AcceptableValueRange<float>(5f, 50f));
 		CheckInterval = Gc.BindSynced(Config, section, "CheckInterval", 1f, "Je so viele Sekunden, die die Leine über ihre Höchstlänge gedehnt ist, verliert sie so viel Haltbarkeit, wie das Tier Leinenlast hat (gezählt wird die Zeit, nicht einzelne Stichproben). Kämpfen in Reichweite kostet nichts.", new AcceptableValueRange<float>(0.25f, 10f));

@@ -1,4 +1,5 @@
 using System;
+using BepInEx.Configuration;
 using GC.Shared;
 using HarmonyLib;
 using TMPro;
@@ -17,6 +18,11 @@ namespace GC.Server.Outfit;
 /// würfe Valheim es sonst auf den Boden), Rechtsklick auf einen Platz blendet das Teil aus oder wieder ein. Beim
 /// Schließen bekommt das Kistenfeld Größe und Anordnung zurück (auch der Laderaum des Langschiffs ist 6 × 3).
 /// Gorduan: Wechseln nur am Schrank. Entfernt sich der Spieler, schließt sich das Fenster; die Türen gehen dann wieder zu.
+///
+/// Gorduan, 02.11.2026: Reiter oben im Feld, „Stil“ (das Outfit, nur fürs Aussehen) und vier Ausrüstungs-Sätze (Sets), dazu die
+/// Knöpfe „Anlegen“ und „Umbenennen“ (Valheims Texteingabe). Seit 03.11.2026 (Gorduan: „hübscheres und besseres Design“) zeigt
+/// ein Satz Tabellen wie der Stil-Reiter (Rüstung, Hände und Zubehör, Leinenleiste), darunter Schnellleiste und Vorräte als
+/// Leisten; leere Plätze in beiden Reitern zeigen ein blasses Bild ihres Platzes.
 /// </summary>
 internal static class WardrobeWindow
 {
@@ -27,10 +33,156 @@ internal static class WardrobeWindow
 	private const float HeaderHeight = 30f;
 	private const float TableGap = 12f;
 	private const float Margin = 12f;
+	private const float TabsHeight = 36f;
+	private const float TabGap = 6f;
+	private const float SetHeaderHeight = 38f;
+	private const float SectionHeight = 26f;
+	private const float BarGap = 10f;
+	private const float SetButtonWidth = 160f;
+
+	/// <summary>
+	/// Satz als Tabellen wie der Stil-Reiter (Gorduan, 03.11.2026: „hübscheres und besseres Design“): Tabelle und Zeile je Platz der
+	/// Ausrüstungsreihe. Rüstung: Kopf, Brust, Beine, Umhang; Hände und Zubehör: rechte und linke Hand, Gürtel, Schmuckstück.
+	/// Mit GC_Tiere als dritte Tabelle die Leinenleiste; darunter Schnellleiste und Vorräte als Leisten.
+	/// </summary>
+	private static readonly int[] GearTable = { 0, 0, 0, 0, 1, 1, 1, 1 };
+	private static readonly int[] GearLine = { 0, 1, 2, 3, 2, 3, 0, 1 };
+
+	private static int SetTables => LeashLink.Loaded ? 3 : 2;
+
+	private static int SetTableRows => LeashLink.Loaded ? LeashLink.Slots : 4;
+
+	/// <summary>Tooltip eines leeren Platzes je Reihe des Satzes (Ausrüstung: der Name des Platzes).</summary>
+	private static readonly string[] RowTopics = { "", "gcof_set_hotbar", "gcof_set_inventory", "gcof_set_leashes" }; // je Sets.Kind
+	private static readonly string[] RowHelps = { "gcof_set_help_gear", "gcof_set_help_hotbar", "gcof_set_help_supplies", "gcof_set_help_leashes" };
+	private static readonly string[] LiveHelps = { "gcof_set_live_gear", "gcof_set_live_row", "gcof_set_live_supplies", "gcof_set_live_leashes" };
+
+	/// <summary>Leisten unter den Tabellen: Schnellleiste, mit GC_Vorratsleiste dazu die Vorräte.</summary>
+	private static int SetBars => SupplyLink.Loaded ? 2 : 1;
+
+	/// <summary>
+	/// Reihen der Vorräte (Gorduan, 04.11.2026: bis 64 Plätze, acht je Reihe): so viele, wie Plätze gelten, und belegte dahinter, über
+	/// alle Sätze und die Leiste, damit das Feld beim Umschalten nicht springt. 0 ohne GC_Vorratsleiste.
+	/// </summary>
+	private static int SupplyRows(Player? player)
+	{
+		if (!SupplyLink.Loaded || player == null)
+		{
+			return SupplyLink.Loaded ? 1 : 0;
+		}
+		int shown = SupplyLink.Slots;
+		if (Sets.Of(player) is Inventory[] sets)
+		{
+			foreach (Inventory set in sets)
+			{
+				foreach (ItemDrop.ItemData item in set.GetAllItems())
+				{
+					if (Sets.IsSupplyRow(item.m_gridPos.y))
+					{
+						shown = Math.Max(shown, Sets.SupplyIndex(item.m_gridPos) + 1);
+					}
+				}
+			}
+		}
+		if (SupplyLink.Bar(player) is Inventory bar)
+		{
+			shown = Math.Max(shown, SupplyLink.Shown(bar));
+		}
+		return Mathf.Clamp((shown + Sets.Width - 1) / Sets.Width, 1, Sets.SupplyRows);
+	}
+
+	/// <summary>Blasse Bilder leerer Plätze (Gorduan, 03.11.2026): Valheims eigene Items, je Platz der Ausrüstung bzw. des Outfits.</summary>
+	private static readonly string[] SetGhostItems = { "HelmetLeather", "ArmorLeatherChest", "ArmorLeatherLegs", "CapeDeerHide", "BeltStrength", "", "SwordBronze", "ShieldWood" };
+	private static readonly string[] OutfitGhostItems =
+	{
+		"HelmetLeather", "ArmorLeatherChest", "ArmorLeatherLegs", "CapeDeerHide", "ShieldWood", "BeltStrength",
+		"SwordBronze", "AxeBronze", "Club", "KnifeFlint", "SpearFlint", "AtgeirBronze",
+		"THSwordKrom", "Battleaxe", "SledgeStagbreaker", "Bow", "CrossbowArbalest", "StaffFireball",
+	};
+	private const string LeashGhostItem = "GC_Leash_DeerHide";
+	private static readonly Color GhostColor = new(0.6f, 0.56f, 0.5f, 0.3f);
+	private static readonly System.Collections.Generic.Dictionary<string, Sprite?> ghosts = new();
+
+	/// <summary>Offener Reiter: −1 Stil (Outfit), 0 bis 3 die Sätze. Bleibt zwischen zwei Besuchen am Schrank.</summary>
+	internal static int Tab = -1;
+
+	/// <summary>
+	/// Verschiebung des Schrankfelds (Gorduan, 04.11.2026, Idee aus EpicLoot 0.15.6, dessen Splitterfeld sich ziehen lässt): am Rahmen
+	/// ziehen, Doppelklick legt es wieder rechts neben das Inventar. Nur auf diesem Rechner (keine Server-Regel).
+	/// </summary>
+	internal static ConfigEntry<float> OffsetX = null!;
+	internal static ConfigEntry<float> OffsetY = null!;
+	private static Vector2 offset;
+	private static bool offsetRead;
+	private static Leash.PanelDrag? drag;
+
+	internal static void Init(ConfigFile config)
+	{
+		OffsetX = Gc.Bind(config, "1 - Outfit", "WindowOffsetX", 0f, "Kleiderschrank-Feld: so weit nach rechts verschoben (Einheiten der Oberfläche). Am Rahmen des Felds ziehen, Doppelklick setzt zurück.");
+		OffsetY = Gc.Bind(config, "1 - Outfit", "WindowOffsetY", 0f, "Kleiderschrank-Feld: so weit nach oben verschoben (Einheiten der Oberfläche).");
+	}
+
+	private static Vector2 Offset
+	{
+		get
+		{
+			if (!offsetRead && OffsetX != null)
+			{
+				offsetRead = true;
+				offset = new Vector2(OffsetX.Value, OffsetY.Value);
+			}
+			return offset;
+		}
+	}
+
+	/// <summary>Einmal am Kistenfeld: Rahmen und Ziehen (wirkt nur, solange das Schrankfenster offen ist).</summary>
+	private static void EnsureDrag(InventoryGui gui)
+	{
+		if (drag != null || gui.m_container == null)
+		{
+			return;
+		}
+		Leash.PanelDrag.Frame(gui.m_container, 0f);
+		drag = gui.m_container.gameObject.AddComponent<Leash.PanelDrag>();
+		drag.Allowed = () => Active;
+		drag.Moved = delta =>
+		{
+			_ = Offset;
+			offset += delta;
+		};
+		drag.Done = () =>
+		{
+			OffsetX.Value = offset.x;
+			OffsetY.Value = offset.y;
+		};
+		drag.Reset = () =>
+		{
+			offset = Vector2.zero;
+			offsetRead = true;
+			OffsetX.Value = 0f;
+			OffsetY.Value = 0f;
+		};
+	}
+
+	private static GameObject? tabBar;
+	private static Button[]? tabButtons;
+	private static TMP_Text[]? tabTexts;
+	private static GameObject? setOverlay;
+	private static TMP_Text? setHint;
+	private static TMP_Text[]? setHeaders;
+	private static TMP_Text[]? setNames; // 8 Plätze der Ausrüstung, dann 5 der Leinenleiste
+	private static TMP_Text[]? setItems;
+	private static TMP_Text[]? barHeaders;
+	private static Button? wearButton;
+	private static TMP_Text? wearText;
+	private static Button? renameButton;
+	private static TMP_Text? renameText;
+	private static readonly Color Selected = new(1f, 0.82f, 0.45f);
 
 	private static readonly Color NameColor = new(0.93f, 0.89f, 0.80f);
 	private static readonly Color ItemColor = new(0.68f, 0.64f, 0.58f);
 	private static readonly Color Dim = new(0.48f, 0.46f, 0.43f);
+	private static readonly Color WornColor = new(0.56f, 0.82f, 0.56f);
 
 	internal static Wardrobe? Open { get; private set; }
 
@@ -172,18 +324,25 @@ internal static class WardrobeWindow
 		gui.m_container.gameObject.SetActive(true);
 		gui.m_takeAllButton.gameObject.SetActive(false);
 		gui.m_stackAllButton.gameObject.SetActive(false);
-		gui.m_containerGrid.UpdateInventory(outfit, null, gui.m_dragItem);
-		gui.m_containerName.text = GcLoc.Get(Outfits.On ? "gcof_title" : "gcof_title_off");
+		Inventory[]? sets = Sets.Of(player);
+		if (Tab >= Sets.Count || (Tab >= 0 && sets == null))
+		{
+			Tab = -1;
+		}
+		Inventory shown = Tab < 0 ? outfit : Tab == Sets.Worn ? LiveSet.Of(player) : sets![Tab];
+		gui.m_containerGrid.UpdateInventory(shown, null, gui.m_dragItem);
+		gui.m_containerName.text = Tab < 0 ? GcLoc.Get(Outfits.On ? "gcof_title" : "gcof_title_off") : Sets.Name(Tab);
 		gui.m_containerWeight.text = "";
-		Layout(gui, outfit);
+		Layout(gui, outfit, shown);
 		return false;
 	}
 
 	/// <summary>
-	/// Plätze als drei Tabellen anordnen, Zeilentexte und Augen setzen; jedes Bild, denn Valheim setzt die Lage der Plätze nur
-	/// beim Anlegen. Die Texte liegen im selben Bezugssystem wie die Plätze (Anker der Plätze in Valheims Rasterwurzel).
+	/// Reiter oben, darunter das Outfit als drei Tabellen oder ein Satz als Raster mit Abschnitten; jedes Bild, denn Valheim setzt
+	/// die Lage der Plätze nur beim Anlegen. Die Texte liegen im selben Bezugssystem wie die Plätze (Anker der Plätze in Valheims
+	/// Rasterwurzel). Das Feld ist für beide Ansichten gleich groß, damit es beim Umschalten nicht springt.
 	/// </summary>
-	private static void Layout(InventoryGui gui, Inventory outfit)
+	private static void Layout(InventoryGui gui, Inventory outfit, Inventory shown)
 	{
 		InventoryGrid grid = gui.m_containerGrid;
 		if (grid.m_elements.Count == 0)
@@ -192,21 +351,52 @@ internal static class WardrobeWindow
 		}
 		float row = grid.m_elementSpace * RowScale;
 		float tableWidth = LabelWidth + row + EyeWidth;
-		float contentWidth = 3 * tableWidth + 2 * TableGap;
-		float contentHeight = HeaderHeight + Outfits.Width * row;
+		float outfitWidth = 3 * tableWidth + 2 * TableGap;
+		float outfitHeight = HeaderHeight + Outfits.Width * row;
+		float setWidth = outfitWidth;
+		int supplyRows = SupplyRows(Player.m_localPlayer);
+		float setHeight = SetHeaderHeight + HeaderHeight + SetTableRows * row + BarGap + SetBars * (SectionHeight + row) + Mathf.Max(0, supplyRows - 1) * row;
+		float contentWidth = Mathf.Max(outfitWidth, setWidth);
+		float contentHeight = TabsHeight + Mathf.Max(outfitHeight, setHeight);
 		Arrange(gui, contentWidth + 2 * Margin, contentHeight + Margin);
+		RectTransform anchor = (RectTransform)grid.m_elements[0].transform;
 		if (overlay == null)
 		{
-			BuildOverlay(grid, (RectTransform)grid.m_elements[0].transform, gui.m_containerName);
+			BuildOverlay(grid, anchor, gui.m_containerName);
 		}
+		if (tabBar == null)
+		{
+			BuildTabs(gui, grid, anchor);
+		}
+		float originX = ((RectTransform)grid.transform).rect.width / 2f - contentWidth / 2f;
+		LayoutTabs(originX, contentWidth);
+		if (!tabBar!.activeSelf)
+		{
+			tabBar.SetActive(true);
+		}
+		if (Tab >= 0)
+		{
+			overlay!.SetActive(false);
+			LayoutSet(grid, shown, originX + (contentWidth - setWidth) / 2f, setWidth, tableWidth, row);
+		}
+		else
+		{
+			setOverlay!.SetActive(false);
+			LayoutOutfit(grid, outfit, originX + (contentWidth - outfitWidth) / 2f, tableWidth, row);
+		}
+		grid.m_gridRoot.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, contentHeight);
+	}
+
+	/// <summary>Das Outfit als drei Tabellen unter den Reitern.</summary>
+	private static void LayoutOutfit(InventoryGrid grid, Inventory outfit, float originX, float tableWidth, float row)
+	{
 		if (!overlay!.activeSelf)
 		{
 			overlay.SetActive(true);
 		}
-		float originX = ((RectTransform)grid.transform).rect.width / 2f - contentWidth / 2f;
 		for (int t = 0; t < 3; t++)
 		{
-			Place(headers![t].rectTransform, originX + t * (tableWidth + TableGap), 0f, tableWidth, HeaderHeight - 4f);
+			Place(headers![t].rectTransform, originX + t * (tableWidth + TableGap), -TabsHeight, tableWidth, HeaderHeight - 4f);
 		}
 		foreach (InventoryElement element in grid.m_elements)
 		{
@@ -216,7 +406,7 @@ internal static class WardrobeWindow
 				continue;
 			}
 			float x = originX + element.Position.y * (tableWidth + TableGap);
-			float y = -(HeaderHeight + element.Position.x * row);
+			float y = -(TabsHeight + HeaderHeight + element.Position.x * row);
 			RectTransform rt = (RectTransform)element.transform;
 			rt.localScale = new Vector3(RowScale, RowScale, 1f);
 			Vector2 size = rt.rect.size * RowScale;
@@ -241,13 +431,367 @@ internal static class WardrobeWindow
 			{
 				element.m_button.image.color = hidden ? Dim : Color.white;
 			}
+			Ghost(element, OutfitGhost(slot));
 			if (!element.m_used)
 			{
 				element.m_tooltip.m_topic = names[slot];
 				element.m_tooltip.m_text = helps![slot];
 			}
 		}
-		grid.m_gridRoot.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, contentHeight);
+	}
+
+	// ------------------------------------------------------------------ Reiter und Sätze
+
+	/// <summary>Reiter „Stil“ und die vier Sätze, einmal angelegt in Valheims Rasterwurzel (wie die Tabellen).</summary>
+	private static void BuildTabs(InventoryGui gui, InventoryGrid grid, RectTransform anchor)
+	{
+		TMP_Text font = gui.m_containerName;
+		Button template = gui.m_takeAllButton;
+		tabBar = Root("GC_WardrobeTabs", grid, anchor);
+		tabButtons = new Button[Sets.Count + 1];
+		tabTexts = new TMP_Text[Sets.Count + 1];
+		for (int i = 0; i <= Sets.Count; i++)
+		{
+			int tab = i - 1;
+			tabButtons[i] = MakeButton(tabBar.transform, template, font, () => SelectTab(tab), out tabTexts[i]);
+		}
+		setOverlay = Root("GC_WardrobeSet", grid, anchor);
+		Transform root = setOverlay.transform;
+		string[] tableKeys = { "gcof_table_armor", "gcof_set_table_hands", "gcof_set_leashes" };
+		setHeaders = new TMP_Text[tableKeys.Length];
+		for (int t = 0; t < tableKeys.Length; t++)
+		{
+			setHeaders[t] = Text(root, font, 19f, TextAlignmentOptions.BottomLeft);
+			setHeaders[t].text = GcLoc.Get(tableKeys[t]);
+			setHeaders[t].color = font.color;
+		}
+		setNames = new TMP_Text[Sets.GearSlots + LeashLink.Slots];
+		setItems = new TMP_Text[setNames.Length];
+		for (int i = 0; i < setNames.Length; i++)
+		{
+			setNames[i] = Text(root, font, 17f, TextAlignmentOptions.BottomLeft);
+			setItems[i] = Text(root, font, 13f, TextAlignmentOptions.TopLeft);
+			setNames[i].text = i < Sets.GearSlots ? Sets.SlotName(i) : "Alt+" + (i - Sets.GearSlots + 1);
+		}
+		// Überschrift der Leiste, dahinter klein, was hinein darf
+		string caption = "#" + ColorUtility.ToHtmlStringRGB(ItemColor);
+		string[,] barKeys = { { "gcof_set_hotbar", "gcof_set_help_hotbar" }, { "gcof_set_inventory", "gcof_set_help_supplies" } };
+		barHeaders = new TMP_Text[2];
+		for (int b = 0; b < 2; b++)
+		{
+			barHeaders[b] = Text(root, font, 19f, TextAlignmentOptions.BottomLeft);
+			barHeaders[b].text = GcLoc.Get(barKeys[b, 0]) + "   <size=70%><color=" + caption + ">" + GcLoc.Get(barKeys[b, 1]).TrimEnd('.') + "</color></size>";
+			barHeaders[b].color = font.color;
+		}
+		setHint = Text(root, font, 15f, TextAlignmentOptions.Left);
+		setHint.color = ItemColor;
+		renameButton = MakeButton(root, template, font, Rename, out renameText);
+		renameText.text = GcLoc.Get("gcof_set_rename");
+		wearButton = MakeButton(root, template, font, Wear, out wearText);
+	}
+
+	private static GameObject Root(string name, InventoryGrid grid, RectTransform anchor)
+	{
+		GameObject go = new(name, typeof(RectTransform));
+		go.transform.SetParent(grid.m_gridRoot, false);
+		RectTransform root = (RectTransform)go.transform;
+		root.anchorMin = anchor.anchorMin;
+		root.anchorMax = anchor.anchorMin;
+		root.pivot = new Vector2(0f, 1f);
+		root.sizeDelta = Vector2.zero;
+		root.anchoredPosition = Vector2.zero;
+		return go;
+	}
+
+	/// <summary>Knopf im Stil von Valheims „Alles nehmen“ (Bild und Farben übernommen, ohne dessen Klick-Aufruf).</summary>
+	private static Button MakeButton(Transform parent, Button template, TMP_Text font, Action onClick, out TMP_Text label)
+	{
+		GameObject go = new("GC_Button", typeof(RectTransform));
+		go.transform.SetParent(parent, false);
+		Image image = go.AddComponent<Image>();
+		if (template.targetGraphic is Image source)
+		{
+			image.sprite = source.sprite;
+			image.type = source.type;
+			image.color = source.color;
+			image.pixelsPerUnitMultiplier = source.pixelsPerUnitMultiplier;
+		}
+		Button button = go.AddComponent<Button>();
+		button.targetGraphic = image;
+		button.transition = template.transition;
+		button.colors = template.colors;
+		button.spriteState = template.spriteState;
+		button.navigation = new Navigation { mode = Navigation.Mode.None };
+		button.onClick.AddListener(() => onClick());
+		RectTransform rt = (RectTransform)go.transform;
+		rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
+		rt.pivot = new Vector2(0f, 1f);
+		label = Text(go.transform, font, 16f, TextAlignmentOptions.Center);
+		RectTransform lt = label.rectTransform;
+		lt.anchorMin = Vector2.zero;
+		lt.anchorMax = Vector2.one;
+		lt.pivot = new Vector2(0.5f, 0.5f);
+		lt.offsetMin = new Vector2(4f, 2f);
+		lt.offsetMax = new Vector2(-4f, -2f);
+		return button;
+	}
+
+	private static void LayoutTabs(float originX, float contentWidth)
+	{
+		int count = Sets.Count + 1;
+		float width = (contentWidth - (count - 1) * TabGap) / count;
+		for (int i = 0; i < count; i++)
+		{
+			int tab = i - 1;
+			Place((RectTransform)tabButtons![i].transform, originX + i * (width + TabGap), 0f, width, TabsHeight - TabGap);
+			string text = tab < 0 ? GcLoc.Get("gcof_tab_style") : Sets.Name(tab);
+			SetText(tabTexts![i], text, tab == Tab ? Selected : tab >= 0 && tab == Sets.Worn ? WornColor : ItemColor);
+		}
+	}
+
+	/// <summary>
+	/// Ein Satz (Gorduan, 03.11.2026, Entwurf „wie der Stil-Reiter“): Kopfzeile mit Hinweis und Knöpfen, darunter die Tabellen
+	/// Rüstung, Hände und Zubehör, mit GC_Tiere die Leinenleiste (Platzname ausgeschrieben, darunter das Teil, dahinter der
+	/// Platz), darunter Schnellleiste und Vorräte als Leisten, acht Plätze je Reihe (Vorräte bis acht Reihen). Leere Plätze zeigen ein
+	/// blasses Bild.
+	/// </summary>
+	private static void LayoutSet(InventoryGrid grid, Inventory set, float originX, float width, float tableWidth, float row)
+	{
+		if (!setOverlay!.activeSelf)
+		{
+			setOverlay.SetActive(true);
+		}
+		bool worn = Tab == Sets.Worn;
+		float top = -TabsHeight;
+		Place((RectTransform)wearButton!.transform, originX + width - SetButtonWidth, top - 2f, SetButtonWidth, SetHeaderHeight - 8f);
+		Place((RectTransform)renameButton!.transform, originX + width - 2 * SetButtonWidth - TabGap, top - 2f, SetButtonWidth, SetHeaderHeight - 8f);
+		Place(setHint!.rectTransform, originX, top - 2f, width - 2 * SetButtonWidth - 2 * TabGap, SetHeaderHeight - 8f);
+		SetText(wearText!, GcLoc.Get(worn ? "gcof_set_worn" : "gcof_set_wear"), worn ? Dim : NameColor);
+		wearButton.interactable = !worn && Sets.On;
+		string hint = worn ? GcLoc.Get("gcof_set_hint_worn") : Sets.On ? GcLoc.Get("gcof_set_hint", Sets.Name(Sets.Worn)) : GcLoc.Get("gcof_sets_off");
+		SetText(setHint, hint, ItemColor);
+
+		// Tabellen (ohne GC_Tiere zwei, mittig), darunter die zwei Leisten, linksbündig mit der ersten Tabelle
+		int tables = SetTables;
+		float tablesLeft = originX + (width - (tables * tableWidth + (tables - 1) * TableGap)) / 2f;
+		float tablesTop = top - SetHeaderHeight;
+		for (int t = 0; t < setHeaders!.Length; t++)
+		{
+			bool shown = t < tables;
+			if (setHeaders[t].gameObject.activeSelf != shown)
+			{
+				setHeaders[t].gameObject.SetActive(shown);
+			}
+			Place(setHeaders[t].rectTransform, tablesLeft + t * (tableWidth + TableGap), tablesTop, tableWidth, HeaderHeight - 4f);
+		}
+		float[] barTop = { tablesTop - HeaderHeight - SetTableRows * row - BarGap, 0f };
+		barTop[1] = barTop[0] - SectionHeight - row;
+		for (int b = 0; b < barHeaders!.Length; b++)
+		{
+			bool shown = b < SetBars; // Vorräte nur mit GC_Vorratsleiste
+			if (barHeaders[b].gameObject.activeSelf != shown)
+			{
+				barHeaders[b].gameObject.SetActive(shown);
+			}
+			Place(barHeaders[b].rectTransform, tablesLeft, barTop[b], width - (tablesLeft - originX), SectionHeight - 2f);
+		}
+		for (int i = 0; i < setNames!.Length; i++)
+		{
+			bool leash = i >= Sets.GearSlots;
+			bool shown = !leash || LeashLink.Loaded;
+			if (setNames[i].gameObject.activeSelf != shown)
+			{
+				setNames[i].gameObject.SetActive(shown);
+				setItems![i].gameObject.SetActive(shown);
+			}
+		}
+
+		foreach (InventoryElement element in grid.m_elements)
+		{
+			Vector2i pos = element.Position;
+			// die Leinenleiste hat nur fünf Plätze; Vorräte gibt es nur mit GC_Vorratsleiste
+			bool slot = (pos.y != Sets.LeashRow || (LeashLink.Loaded && pos.x < LeashLink.Slots))
+				&& (!Sets.IsSupplyRow(pos.y) || (SupplyLink.Loaded && (Sets.SupplyIndex(pos) < SupplyLink.Slots || set.GetItemAt(pos.x, pos.y) != null)));
+			if (element.gameObject.activeSelf != slot)
+			{
+				element.gameObject.SetActive(slot);
+			}
+			if (!slot)
+			{
+				continue;
+			}
+			float x;
+			float y;
+			int line = pos.y == Sets.GearRow ? pos.x : pos.y == Sets.LeashRow ? Sets.GearSlots + pos.x : -1; // Zeile mit Text
+			if (line >= 0)
+			{
+				int table = pos.y == Sets.GearRow ? GearTable[pos.x] : 2;
+				int index = pos.y == Sets.GearRow ? GearLine[pos.x] : pos.x;
+				float left = tablesLeft + table * (tableWidth + TableGap);
+				float rowTop = tablesTop - HeaderHeight - index * row;
+				x = left + LabelWidth;
+				y = rowTop;
+				ItemDrop.ItemData? item = set.GetItemAt(pos.x, pos.y);
+				SetText(setNames[line], setNames[line].text, NameColor);
+				SetText(setItems![line], item != null ? Localization.instance.Localize(item.m_shared.m_name) : empty, ItemColor);
+				Place(setNames[line].rectTransform, left, rowTop - 3f, LabelWidth - 8f, row * 0.5f);
+				Place(setItems[line].rectTransform, left, rowTop - row * 0.5f, LabelWidth - 8f, row * 0.38f);
+			}
+			else
+			{
+				x = tablesLeft + pos.x * row;
+				y = pos.y == Sets.HotbarRow ? barTop[0] - SectionHeight : barTop[1] - SectionHeight - (pos.y - Sets.SupplyRow) * row;
+			}
+			RectTransform rt = (RectTransform)element.transform;
+			rt.localScale = new Vector3(RowScale, RowScale, 1f);
+			Vector2 size = rt.rect.size * RowScale;
+			rt.anchoredPosition = new Vector2(x + rt.pivot.x * size.x, y - (1f - rt.pivot.y) * size.y);
+			string label = pos.y == Sets.HotbarRow ? (pos.x + 1).ToString() : ""; // Zahlentaste wie in Valheims Schnellleiste
+			if (element.transform.Find("binding")?.GetComponent<TMP_Text>() is TMP_Text binding)
+			{
+				binding.enabled = label.Length > 0;
+				if (binding.text != label)
+				{
+					binding.text = label;
+				}
+			}
+			if (element.m_button != null && element.m_button.image != null)
+			{
+				element.m_button.image.color = Color.white;
+			}
+			Ghost(element, pos.y == Sets.GearRow ? SetGhost(pos.x) : pos.y == Sets.LeashRow ? ItemGhost(LeashGhostItem, LeashGhostItem, null) : null);
+			if (!element.m_used)
+			{
+				int kind = Sets.Kind(pos.y);
+				element.m_tooltip.m_topic = pos.y == Sets.GearRow ? Sets.SlotName(pos.x) : GcLoc.Get(RowTopics[kind]);
+				element.m_tooltip.m_text = GcLoc.Get(worn ? LiveHelps[kind] : RowHelps[kind]);
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------ Blasse Bilder leerer Plätze
+
+	private static readonly string[] SetGhostKeys = { "set0", "set1", "set2", "set3", "set4", "set5", "set6", "set7" };
+
+	private static Sprite? SetGhost(int gearSlot) => ghosts.TryGetValue(SetGhostKeys[gearSlot], out Sprite? known) ? known
+		: ItemGhost(SetGhostKeys[gearSlot], SetGhostItems[gearSlot], item => Sets.GearSlot(item) == gearSlot);
+
+	internal static Sprite? OutfitGhost(int slot) => slot >= 0 && slot < OutfitGhostItems.Length ? ItemGhost(OutfitGhostItems[slot], OutfitGhostItems[slot], null) : null;
+
+	/// <summary>
+	/// Bild eines Valheim-Items (einmal gesucht, unter key gemerkt): das genannte, sonst das erste, das passt (Schmuckstück:
+	/// Valheim hat mehrere, welches es gibt, hängt von der Version ab). Ohne ObjectDB noch keins.
+	/// </summary>
+	private static Sprite? ItemGhost(string key, string prefab, Func<ItemDrop.ItemData, bool>? fits)
+	{
+		if (ghosts.TryGetValue(key, out Sprite? known))
+		{
+			return known;
+		}
+		ObjectDB? db = ObjectDB.instance;
+		if (db == null || db.m_items.Count == 0)
+		{
+			return null;
+		}
+		ItemDrop? found = prefab.Length > 0 && db.GetItemPrefab(prefab) is GameObject go ? go.GetComponent<ItemDrop>() : null;
+		if (found == null && fits != null)
+		{
+			foreach (GameObject candidate in db.m_items)
+			{
+				if (candidate != null && candidate.TryGetComponent(out ItemDrop drop) && drop.m_itemData?.m_shared != null && fits(drop.m_itemData))
+				{
+					found = drop;
+					break;
+				}
+			}
+		}
+		Sprite? sprite = found != null && found.m_itemData.m_shared.m_icons != null && found.m_itemData.m_shared.m_icons.Length > 0 ? found.m_itemData.GetIcon() : null;
+		ghosts[key] = sprite;
+		return sprite;
+	}
+
+	/// <summary>Blasses Bild hinter Valheims Symbol des Platzes, nur solange der Platz leer ist; null = keins.</summary>
+	internal static void Ghost(InventoryElement element, Sprite? sprite)
+	{
+		bool show = sprite != null && !element.m_used;
+		Transform? existing = element.transform.Find("GC_Ghost");
+		Image? ghost = existing != null ? existing.GetComponent<Image>() : null;
+		if (ghost == null)
+		{
+			if (!show || element.m_icon == null)
+			{
+				return;
+			}
+			GameObject go = new("GC_Ghost", typeof(RectTransform));
+			go.transform.SetParent(element.transform, false);
+			go.transform.SetSiblingIndex(element.m_icon.transform.GetSiblingIndex());
+			ghost = go.AddComponent<Image>();
+			ghost.raycastTarget = false;
+			ghost.preserveAspect = true;
+			ghost.color = GhostColor;
+			RectTransform rt = ghost.rectTransform;
+			RectTransform icon = element.m_icon.rectTransform;
+			rt.anchorMin = icon.anchorMin;
+			rt.anchorMax = icon.anchorMax;
+			rt.pivot = icon.pivot;
+			rt.sizeDelta = icon.sizeDelta;
+			rt.anchoredPosition = icon.anchoredPosition;
+		}
+		if (ghost.enabled != show)
+		{
+			ghost.enabled = show;
+		}
+		if (show && ghost.sprite != sprite)
+		{
+			ghost.sprite = sprite;
+		}
+	}
+
+	private static void SelectTab(int tab)
+	{
+		Tab = tab;
+		InventoryGui.instance?.m_moveItemEffects.Create(InventoryGui.instance.transform.position, Quaternion.identity);
+	}
+
+	private static void Wear()
+	{
+		Player? player = Player.m_localPlayer;
+		if (player == null || Tab < 0)
+		{
+			return;
+		}
+		string message = Sets.Wear(player, Tab);
+		if (message.Length > 0)
+		{
+			player.Message(MessageHud.MessageType.Center, message);
+		}
+	}
+
+	private static void Rename()
+	{
+		if (Tab < 0 || TextInput.instance == null)
+		{
+			return;
+		}
+		TextInput.instance.RequestText(new SetName(Tab), GcLoc.Get("gcof_set_rename_topic", Sets.Name(Tab)), 24);
+	}
+
+	/// <summary>Valheims Texteingabe für den Namen eines Satzes.</summary>
+	private sealed class SetName : TextReceiver
+	{
+		private readonly int set;
+
+		internal SetName(int set) => this.set = set;
+
+		public string GetText() => Sets.Name(set);
+
+		public void SetText(string text)
+		{
+			if (Player.m_localPlayer is Player player)
+			{
+				Sets.Rename(player, set, text);
+			}
+		}
 	}
 
 	private static void SetText(TMP_Text text, string value, Color color)
@@ -394,7 +938,9 @@ internal static class WardrobeWindow
 		}
 		panel.sizeDelta = targetSize;
 		panel.GetWorldCorners(corners);
-		Vector3 target = RightOfInventory(gui, panel);
+		EnsureDrag(gui);
+		Vector2 moved = Offset * panel.lossyScale.x;
+		Vector3 target = RightOfInventory(gui, panel) + new Vector3(moved.x, moved.y, 0f);
 		Vector3 shift = target - corners[1];
 		shift.z = 0f;
 		Canvas? canvas = panel.GetComponentInParent<Canvas>();
@@ -498,9 +1044,12 @@ internal static class WardrobeWindow
 			((RectTransform)grid.transform).sizeDelta = gridSize;
 			((RectTransform)grid.transform).anchoredPosition = gridPos;
 		}
-		if (overlay != null)
+		foreach (GameObject? go in new[] { overlay, tabBar, setOverlay })
 		{
-			overlay.SetActive(false);
+			if (go != null)
+			{
+				go.SetActive(false);
+			}
 		}
 		int width = 0;
 		foreach (InventoryElement element in grid.m_elements)
@@ -511,6 +1060,14 @@ internal static class WardrobeWindow
 		Vector2 origin = new(((RectTransform)grid.transform).rect.width / 2f - width * space / 2f, 0f);
 		foreach (InventoryElement element in grid.m_elements)
 		{
+			if (!element.gameObject.activeSelf)
+			{
+				element.gameObject.SetActive(true); // im Satz ausgeblendete Felder neben der Leinenleiste: eine Kiste gleicher Größe nutzt sie
+			}
+			if (element.transform.Find("GC_Ghost") is Transform ghost)
+			{
+				UnityEngine.Object.Destroy(ghost.gameObject); // blasse Bilder leerer Plätze gehören nur zum Schrank
+			}
 			RectTransform rt = (RectTransform)element.transform;
 			rt.localScale = Vector3.one;
 			rt.anchoredPosition = origin + new Vector2(element.Position.x * space, -element.Position.y * space);
@@ -530,12 +1087,34 @@ internal static class WardrobeWindow
 	/// <summary>Ablegen prüfen (null = erlaubt): ins Outfit nur Passendes, und ein Tausch darf nichts Unpassendes hineinlegen.</summary>
 	internal static string? Refusal(Inventory target, Inventory from, ItemDrop.ItemData item, Vector2i pos)
 	{
-		bool into = Outfits.IsOutfit(target);
+		if (LiveSet.IsLive(target) || LiveSet.IsLive(from))
+		{
+			return GcLoc.Get("gcof_set_hint_worn"); // der Spiegel nimmt nie etwas an (Klicks gehen ans echte Raster)
+		}
+		int intoSet = Sets.IndexOf(target);
+		int outOfSet = Sets.IndexOf(from);
+		if (intoSet >= 0 || outOfSet >= 0)
+		{
+			ItemDrop.ItemData? other = target.GetItemAt(pos.x, pos.y);
+			bool lockedSupply = Sets.IsSupplyRow(pos.y) && Sets.SupplyIndex(pos) >= SupplyLink.Slots;
+			if (other == item || (target == from && intoSet >= 0 && pos.y != Sets.GearRow && !lockedSupply && Sets.SameArea(pos.y, item.m_gridPos.y)))
+			{
+				return null; // innerhalb der Schnellleiste oder der Vorräte eines Satzes frei verschieben
+			}
+			if (intoSet >= 0 && Sets.Refuse(intoSet, item, pos) is string refused)
+			{
+				return refused;
+			}
+			// ein Tausch legt das verdrängte Teil an die alte Stelle des gezogenen
+			return outOfSet >= 0 && other != null ? Sets.Refuse(outOfSet, other, item.m_gridPos) : null;
+		}
+		bool intoOutfit = Outfits.IsOutfit(target);
 		bool outOf = Outfits.IsOutfit(from);
-		if (!into && !outOf)
+		if (!intoOutfit && !outOf)
 		{
 			return null;
 		}
+		bool into = intoOutfit;
 		ItemDrop.ItemData? swapped = target.GetItemAt(pos.x, pos.y);
 		if (swapped == item)
 		{
@@ -578,6 +1157,21 @@ internal static class WardrobeWindow
 		}
 		Inventory main = player.GetInventory();
 		Inventory source = grid.GetInventory();
+		if (Tab >= 0 && Tab == Sets.Worn)
+		{
+			// angelegter Satz (live): Umschalt-Klick zieht an oder aus, liegt ja schon bei dir
+			if (source == main && item.IsEquipable())
+			{
+				player.ToggleEquipped(item);
+				gui.m_moveItemEffects.Create(gui.transform.position, Quaternion.identity);
+			}
+			return;
+		}
+		if (Tab >= 0 && Sets.Of(player) is Inventory[] sets)
+		{
+			QuickMoveSet(gui, player, main, sets[Tab], source, item);
+			return;
+		}
 		if (source == outfit)
 		{
 			if (!main.HaveEmptySlot())
@@ -622,6 +1216,99 @@ internal static class WardrobeWindow
 		}
 		outfit.AddItem(item, to);
 		gui.m_moveItemEffects.Create(gui.transform.position, Quaternion.identity);
+	}
+
+	/// <summary>
+	/// Umschalt-Klick im Satz: aus dem Satz ins Inventar; aus dem Inventar in den Satz (Ausrüstung in ihren Platz, wenn er frei
+	/// ist, Waffen, Werkzeuge und Vorräte in den ersten freien Platz, an den sie dürfen).
+	/// </summary>
+	private static void QuickMoveSet(InventoryGui gui, Player player, Inventory main, Inventory set, Inventory source, ItemDrop.ItemData item)
+	{
+		if (source == set)
+		{
+			if (!main.HaveEmptySlot())
+			{
+				player.Message(MessageHud.MessageType.Center, GcLoc.Get("gcof_no_room"));
+				return;
+			}
+			set.RemoveItem(item);
+			if (!main.AddItem(item))
+			{
+				set.AddItem(item, item.m_gridPos);
+				return;
+			}
+			gui.m_moveItemEffects.Create(gui.transform.position, Quaternion.identity);
+			return;
+		}
+		if (source != main)
+		{
+			return;
+		}
+		// Leinen und Pfeifen zuerst in die Leinenleiste des Satzes, Ausrüstung in ihren Platz, sonst der erste freie Platz, an den es darf
+		Vector2i? to = null;
+		int gear = Sets.GearSlot(item);
+		bool armour = gear >= 0 && gear < Sets.RightHand;
+		bool leash = Sets.Allows(item, Sets.LeashRow);
+		if (leash)
+		{
+			to = FreeIn(set, Sets.LeashRow, LeashLink.Slots);
+		}
+		else if (gear >= 0 && set.GetItemAt(gear, Sets.GearRow) == null)
+		{
+			to = new Vector2i(gear, Sets.GearRow);
+		}
+		// Vorräte zuerst in die Vorräte, die Schnellleiste bleibt frei für Waffen und Werkzeuge
+		int[] rows = Sets.IsSupply(item) ? new[] { Sets.SupplyRow, Sets.HotbarRow } : new[] { Sets.HotbarRow, Sets.LeashRow };
+		foreach (int y in rows)
+		{
+			if (to == null && !armour && y < Sets.Height && Sets.Allows(item, y))
+			{
+				to = y == Sets.SupplyRow ? FreeSupply(set) : FreeIn(set, y, y == Sets.LeashRow ? LeashLink.Slots : Sets.Width);
+			}
+		}
+		if (to is not Vector2i pos)
+		{
+			// kein freier Platz, an den es darf: erst der Grund (Material, Regel aus …), sonst belegt oder voll
+			string? why = Sets.Refuse(Tab, item, armour ? new Vector2i(gear, Sets.GearRow) : new Vector2i(0, Sets.HotbarRow));
+			player.Message(MessageHud.MessageType.Center, why ?? (armour ? GcLoc.Get("gcof_set_slot_taken", Sets.SlotName(gear)) : GcLoc.Get("gcof_set_full")));
+			return;
+		}
+		if (Sets.Refuse(Tab, item, pos) is string refusal)
+		{
+			player.Message(MessageHud.MessageType.Center, refusal);
+			return;
+		}
+		player.RemoveEquipAction(item);
+		player.UnequipItem(item, false);
+		main.RemoveItem(item);
+		set.AddItem(item, pos);
+		gui.m_moveItemEffects.Create(gui.transform.position, Quaternion.identity);
+	}
+
+	/// <summary>Erster freier geltender Vorratsplatz eines Satzes (Reihe für Reihe, wie in der Vorratsleiste).</summary>
+	private static Vector2i? FreeSupply(Inventory set)
+	{
+		for (int index = 0; index < SupplyLink.Slots; index++)
+		{
+			Vector2i pos = new(index % Sets.Width, Sets.SupplyRow + index / Sets.Width);
+			if (pos.y < set.GetHeight() && set.GetItemAt(pos.x, pos.y) == null)
+			{
+				return pos;
+			}
+		}
+		return null;
+	}
+
+	private static Vector2i? FreeIn(Inventory set, int y, int count)
+	{
+		for (int x = 0; x < count; x++)
+		{
+			if (set.GetItemAt(x, y) == null)
+			{
+				return new Vector2i(x, y);
+			}
+		}
+		return null;
 	}
 
 	/// <summary>Rechtsklick auf einen Platz oder Klick aufs Auge: ausblenden oder wieder zeigen.</summary>
@@ -702,6 +1389,11 @@ internal static class WardrobeSelectPatch
 		{
 			return true;
 		}
+		if (LiveSet.IsLive(grid.GetInventory()))
+		{
+			LiveSet.Click(__instance, pos, mod); // angelegter Satz: an Valheims echtes Raster weiterreichen
+			return false;
+		}
 		if (__instance.m_dragGo != null)
 		{
 			if (__instance.m_dragItem == null || __instance.m_dragInventory == null)
@@ -716,7 +1408,7 @@ internal static class WardrobeSelectPatch
 			Player.m_localPlayer?.Message(MessageHud.MessageType.Center, refusal);
 			return false;
 		}
-		if (mod == InventoryGrid.Modifier.Move && item != null && (Outfits.IsOutfit(grid.GetInventory()) || grid == __instance.m_playerGrid))
+		if (mod == InventoryGrid.Modifier.Move && item != null && (Outfits.IsOutfit(grid.GetInventory()) || Sets.IsSet(grid.GetInventory()) || grid == __instance.m_playerGrid))
 		{
 			WardrobeWindow.QuickMove(__instance, grid, item);
 			return false;
@@ -750,7 +1442,20 @@ internal static class WardrobeRightClickPatch
 {
 	private static bool Prefix(InventoryGrid grid, Vector2i pos)
 	{
-		if (!WardrobeWindow.Active || grid == null || !Outfits.IsOutfit(grid.GetInventory()))
+		if (!WardrobeWindow.Active || grid == null)
+		{
+			return true;
+		}
+		if (LiveSet.IsLive(grid.GetInventory()))
+		{
+			LiveSet.Use(pos); // das echte Item benutzen, nie die Kopie
+			return false;
+		}
+		if (Sets.IsSet(grid.GetInventory()))
+		{
+			return false; // im Satz nichts benutzen oder anziehen; angezogen wird beim Anlegen
+		}
+		if (!Outfits.IsOutfit(grid.GetInventory()))
 		{
 			return true;
 		}

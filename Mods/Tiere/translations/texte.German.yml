@@ -1,0 +1,12 @@
+# GC_Tiere - Deutsch. Neue Texte seit 02.11.2026 (Kampf beim Reiten); die älteren stehen im Kern (server.menu, server.features).
+gcsv_t_ride_name: "Kampf beim Reiten"
+gcsv_t_ride_desc: "Auf Lox, Asksvin, Bär und Aasbär: Linksklick leichter, Rechtsklick schwerer, mittlere Maustaste dritter Angriff des Reittiers (Bär Biss, Sprung mit Aufschlag und Prankenhiebe; Lox Biss und Stampfen; Asksvin Biss, Ansprung und Kopfstoß), auf den Gegner in Blickrichtung. A/D dreht im Stand auf der Stelle und lenkt in der Fahrt. Absteigen nur mit E. Bär und Aasbär sind geritten schneller und wendiger. Aus: wie Valheim (Linksklick, mittlere Maustaste, Sprung und Ausweichen steigen ab, rechte Maustaste wendet)."
+gcsv_t_ride_stamina_name: "Ausdauer leichter Angriff"
+gcsv_t_ride_stamina_desc: "So viel Ausdauer des Reittiers kostet ein Angriff mit Linksklick oder mittlerer Maustaste. Ein Sattel hat 240 Ausdauer und erholt 0,2 je Sekunde. Mit dem Sattel Hildisvíni (Kriegsreittier) kosten Angriffe nichts."
+gcsv_t_ride_stamina_heavy_name: "Ausdauer schwerer Angriff"
+gcsv_t_ride_stamina_heavy_desc: "So viel Ausdauer des Reittiers kostet ein Rechtsklick-Angriff."
+gcsv_t_ride_bear_speed_name: "Bär geritten schneller"
+gcsv_t_ride_bear_speed_desc: "Bär und Aasbär laufen geritten so viel Prozent schneller (Gorduan: 25 %)."
+gcsv_t_ride_bear_turn_name: "Bär geritten wendiger"
+gcsv_t_ride_bear_turn_desc: "Bär und Aasbär wenden geritten so viel mal schneller (Gorduan: dreimal). Der Lox bleibt, wie er ist."
+gcs_ride_tired: "Dein Reittier ist zu erschöpft."

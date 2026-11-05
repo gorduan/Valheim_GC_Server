@@ -3,7 +3,7 @@
   "gc.tierarten": {
     "title": "Tierarten und Sättel",
     "short": "GC-Mod: Höchststufe je Art, Sterne bei der Geburt, mehr Beute, weitere zähmbare Tiere, Bärenjunge, Aasbär und Bärensättel.",
-    "body": "Die Mod erweitert [[gc.tiere|GC_Tiere]] und braucht sie. Jede Tierart bekommt eine eigene [[gc.tierarten.maxlevel|Höchststufe]], Junge haben eine kleine Chance auf [[gc.tierarten.stars|einen Stern mehr]], und Tiere mit Stufe lassen [[gc.tierarten.loot|mehr Beute]] fallen. Zuschaltbar zähmen lassen sich [[gc.tierarten.species_tame_bjorn|Bär]], [[gc.tierarten.species_tame_neck|Nixe]], [[gc.tierarten.species_tame_deer|Hirsch]], [[gc.tierarten.species_tame_hare|Hase]] und [[gc.tierarten.species_tame_seal|Robbe]], jeweils mit eigenen Jungen ([[gc.tierarten.bearcub|Bärenjunges]] und [[gc.tierarten.young|weitere]]); beim Bären kommen [[gc.tierarten.unbjorn|Aasbär]] und [[gc.tierarten.bearsaddle|Sättel]] dazu. Außerdem können [[gc.tierarten.species_young_fight|Jungtiere kämpfen]].\n\nAlle Werte sind [[gc.serverrules|Server-Regeln]]. [[gc.kern.stufe|Stufe]] 5 „GC“; solange Leinen oder Tierpflege an sind, zählt die Mod mit 5 % je Boss zum [[gc.kern.bossscale|Boss-Fortschritt]].",
+    "body": "Die Mod erweitert [[gc.tiere|GC_Tiere]] und braucht sie. Jede Tierart bekommt eine eigene [[gc.tierarten.maxlevel|Höchststufe]], Junge haben eine kleine Chance auf [[gc.tierarten.stars|einen Stern mehr]], und Tiere mit Stufe lassen [[gc.tierarten.loot|mehr Beute]] fallen. Zuschaltbar zähmen lassen sich [[gc.tierarten.species_tame_bjorn|Bär]], [[gc.tierarten.species_tame_neck|Nixe]], [[gc.tierarten.species_tame_deer|Hirsch]], [[gc.tierarten.species_tame_hare|Hase]] und [[gc.tierarten.species_tame_seal|Robbe]], jeweils mit eigenen Jungen ([[gc.tierarten.bearcub|Bärenjunges]] und [[gc.tierarten.young|weitere]]); beim Bären kommen [[gc.tierarten.unbjorn|Aasbär]] und [[gc.tierarten.bearsaddle|Sättel]] dazu. Außerdem können [[gc.tierarten.species_young_fight|Jungtiere kämpfen]], und zahme Tiere halten [[gc.tierarten.peace|Frieden mit der eigenen Art]].\n\nAlle Werte sind [[gc.serverrules|Server-Regeln]]. [[gc.kern.stufe|Stufe]] 5 „GC“; solange Leinen oder Tierpflege an sind, zählt die Mod mit 5 % je Boss zum [[gc.kern.bossscale|Boss-Fortschritt]].",
     "aliases": ["GC_Tierarten"],
     "see": ["gc.about", "gc.modswitch"]
   },
@@ -21,7 +21,7 @@
   "gc.tierarten.species_star1": {
     "title": "Stern-Chance 0 → 1",
     "short": "Chance, dass ein Junges oder Ei ohne Stern doch einen bekommt; jetzt {gc_tierarten_species_star1}.",
-    "body": "Gewürfelt wird bei jeder Geburt und beim Legen eines Eis; mehr als einen Stern zusätzlich gibt es nie. Der Züchter erfährt es per Meldung. Mehr: [[gc.tierarten.stars]]."
+    "body": "Gewürfelt wird bei jeder Geburt und beim Legen eines Eis. Der Züchter erfährt es per Meldung. Mehr: [[gc.tierarten.stars]]."
   },
   "gc.tierarten.species_star2": {
     "title": "Stern-Chance 1 → 2",
@@ -30,8 +30,8 @@
   },
   "gc.tierarten.stars": {
     "title": "Sterne bei der Geburt",
-    "short": "Ein Junges kann mit einem Stern mehr zur Welt kommen als seine Mutter, nie mit mehr als einem zusätzlich.",
-    "body": "Valheim gibt dem Jungen die Sterne der Mutter. Hat sie keinen, bekommt das Junge mit {gc_tierarten_species_star1} Chance einen; hat sie einen, mit {gc_tierarten_species_star2} Chance zwei. Bei Eiern wird beim Legen gewürfelt. Der Züchter bekommt eine Meldung, sonst der nächste Spieler bis 30 m. Was Sterne bringen: [[valheim.tame.breeding]]."
+    "short": "Junge erben bis zu zwei Sterne der Mutter; drei bis fünf Sterne gibt es nur mit viel Glück und starken Eltern.",
+    "body": "Valheim gibt dem Jungen die Sterne der Mutter, sicher vererbt werden aber höchstens zwei. Hat die Mutter keinen, bekommt das Junge mit {gc_tierarten_species_star1} Chance einen; hat sie einen, mit {gc_tierarten_species_star2} Chance zwei.\n\n**Drei bis fünf Sterne** sind sehr selten, und dafür zählen beide Eltern: die Mutter und der Partner mit den meisten Sternen, der beim Trächtigwerden in der Nähe war. Haben beide drei Sterne, kommt ein Junges mit {gc_tierarten_species_star3} Chance mit drei Sternen zur Welt; sonst mit zwei. Jedes Elternteil mit einem Stern weniger nimmt die Chance mal 0,22, mit zwei weniger mal 0,02: Zwei Eltern mit zwei Sternen haben 0,25 %, drei und zwei Sterne 1,1 %, drei und ein Stern nur 0,1 %. Vier Sterne gibt es bei zwei Eltern mit vier mit {gc_tierarten_species_star4} Chance, bei zwei mit drei nur 0,05 %; fünf Sterne bei zwei Eltern mit fünf mit {gc_tierarten_species_star5}, bei zwei mit vier 0,01 %.\n\nAlle diese Chancen vervielfacht die [[gc.tiere.care|Tierpflege]] des Züchters (wessen Futter die Mutter zuletzt gefressen hat): bis {gc_tierarten_species_star_skill}-fach bei Stufe 100, erst langsam und gegen 100 steil (Stufe 50: 1,8-fach, 75: 4,3-fach, 90: 7,2-fach). Dazu zählt die GC-Stufe des Jungen bei der Geburt ([[gc.tiere.breedlevel|Zucht-Stufe]]): Lvl 50 1,33-fach, 100 doppelt, 150 dreifach, 200 4,33-fach, 300 achtfach (1 + Lvl/300 + Lvl²/15000). Beides wird malgenommen, keine Chance steigt über 100 %. Bei Eiern wird beim Legen gewürfelt. Kommt ein Junges mit mehr Sternen als erwartet, bekommt der Züchter eine Meldung, sonst der nächste Spieler bis 30 m. Auch in der Welt sind drei bis fünf Sterne möglich: [[gc.tierarten.species_wild_stars]]. Was Sterne bringen: [[valheim.tame.breeding]].\n\nSterne machen ein Tier dieser Arten größer, gemessen an seiner eigenen Größe, wild wie zahm und auch als Junges: ein Stern 5 %, zwei 15 %, drei 30 %, vier 50 %, fünf 75 %; die Farbe ändert sich mit. Die Farbe geht mit den Sternen einen festen Weg: Jeder Stern macht das Fell kräftiger, ab zwei Sternen wird es immer röter, mit fünf ist es ganz rot und bedrohlich. Bei allen anderen Kreaturen bleiben ein und zwei Sterne wie in Valheim, ab drei gilt derselbe Weg zu Rot. Per Befehl gibt es bis 15 Sterne: Ab sechs zeigt ein großer Balken oben das Leben wie bei einem Boss, die Farbe läuft von Gelb über Grün, Türkis und Blau bis Pink, und mit 15 ist das Tier doppelt so groß wie mit fünf. Leben und Schaden steigen mit jeder Stufe weiter. Über dem Lebensbalken stehen alle Sterne."
   },
   "gc.tierarten.loot": {
     "title": "Mehr Beute nach Stufe",
@@ -87,12 +87,12 @@
   "gc.tierarten.species_tame_bjorn": {
     "title": "Bären zähmbar",
     "short": "Bären lassen sich zähmen, anleinen und reiten, bekommen Junge und können zum Aasbären werden. Jetzt {gc_tierarten_species_tame_bjorn}.",
-    "body": "Bären fressen Honig, Himbeeren, Blaubeeren und Moltebeeren; wie beim [[valheim.tame.taming|Zähmen]] in Valheim brauchen sie 30 Minuten satt und ohne Angst, mit [[gc.tiere.care|Tierpflege]] weniger. Zahme Bären greifen wilde Bären nicht von selbst an, auf Befehl schon. Höchststufe {gc_tierarten_species_max_bjorn}.\n\n- [[gc.tierarten.bearcub|Bärenjunge]] aus der Zucht\n- Verdorbenes Fleisch verwandelt einen Bären in einen [[gc.tierarten.unbjorn|Aasbären]]\n- [[gc.tierarten.bearsaddle|Bärensattel und Aasbär-Sattel]] an der Schmiede\n\nAus (Standard): Bären verhalten sich wie in Valheim, und die Sättel lassen sich nicht herstellen."
+    "body": "Bären fressen Honig und alle rohen Fleischsorten, keine Beeren. Wie beim [[valheim.tame.taming|Zähmen]] in Valheim brauchen sie 30 Minuten satt und ohne Angst, mit [[gc.tiere.care|Tierpflege]] weniger. Dazu zählt das zuletzt gefressene Futter: Honig zähmt doppelt so schnell (15 Minuten), Lox-Fleisch anderthalbmal so schnell (20 Minuten); Lox-Fleisch hilft so bei allen Fleischfressern, auch beim Wolf. Mit wilden Bären halten zahme [[gc.tierarten.peace|Frieden]], bis die angreifen oder du es befiehlst. Höchststufe {gc_tierarten_species_max_bjorn}.\n\n- [[gc.tierarten.bearcub|Bärenjunge]] aus der Zucht\n- Verdorbenes Fleisch verwandelt einen Bären in einen [[gc.tierarten.unbjorn|Aasbären]]\n- [[gc.tierarten.bearsaddle|Bärensattel und Aasbär-Sattel]] an der Schmiede\n\nAus (Standard): Bären verhalten sich wie in Valheim, und die Sättel lassen sich nicht herstellen."
   },
   "gc.tierarten.species_tame_neck": {
     "title": "Nixen zähmbar",
     "short": "Nixen fressen rohen Fisch und lassen sich in 30 Minuten zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_neck}.",
-    "body": "Wirf rohen Fisch in ihre Nähe; satt und ohne Angst wird die Nixe in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller. Zahme Nixen bekommen [[gc.tierarten.young|Junge]] (Junge Nixe) und lassen sich wie jedes zahme Tier anleinen. Höchststufe {gc_tierarten_species_max_neck}. Aus (Standard): wie in Valheim."
+    "body": "Wirf rohen Fisch in ihre Nähe (höchstens 10 m): Solange sie hungrig ist und Fisch dort liegt, flieht sie nicht vor dir und fürchtet kein Feuer, sie geht fressen. Danach ist sie wieder scheu, das Zähmen läuft aber auch, während sie flieht. Komm ihr nicht näher als 6 m, sonst greift sie an und das Zähmen ruht. Satt wird sie in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller; zahm flieht sie nie mehr. Zahme Nixen bekommen [[gc.tierarten.young|Junge]] (Junge Nixe) und lassen sich wie jedes zahme Tier anleinen. Höchststufe {gc_tierarten_species_max_neck}. Aus (Standard): wie in Valheim."
   },
   "gc.tierarten.species_tame_deer": {
     "title": "Hirsche zähmbar",
@@ -101,8 +101,8 @@
   },
   "gc.tierarten.species_tame_hare": {
     "title": "Hasen zähmbar",
-    "short": "Hasen der Nebellande fressen Pilze vom Boden und lassen sich zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_hare}.",
-    "body": "Futter: Pilz, Gelber Pilz und Jotun-Bläschen. Hasen leben in den [[valheim.biome.mistlands|Nebellanden]] und fliehen vor dir: Leg das Futter hin und halte Abstand, dann fressen sie es im Umkreis von 10 m und werden in 30 Minuten zahm, mit [[gc.tiere.care|Tierpflege]] schneller. Gezähmt fliehen sie nicht mehr und bekommen [[gc.tierarten.young|Junghasen]]; angreifen können sie nicht. Höchststufe {gc_tierarten_species_max_hare}. Aus (Standard): wie in Valheim."
+    "short": "Hasen fressen Jotun-Bläschen und Karotten vom Boden und lassen sich zähmen, anleinen und züchten. Jetzt {gc_tierarten_species_tame_hare}.",
+    "body": "Futter: Jotun-Bläschen und Karotten, zum Zähmen wie zum Züchten. Hasen leben in den [[valheim.biome.mistlands|Nebellanden]] und fliehen vor dir: Leg das Futter hin und halte Abstand, dann fressen sie es im Umkreis von 10 m und werden zahm, mit Jotun-Bläschen in 30 Minuten, mit Karotten halb so schnell in 60, mit [[gc.tiere.care|Tierpflege]] schneller. Gezähmt fliehen sie nicht mehr und bekommen [[gc.tierarten.young|Junghasen]]; angreifen können sie nicht. Höchststufe {gc_tierarten_species_max_hare}. Aus (Standard): wie in Valheim."
   },
   "gc.tierarten.species_tame_seal": {
     "title": "Robben zähmbar",
@@ -117,8 +117,8 @@
   },
   "gc.tierarten.unbjorn": {
     "title": "Aasbär",
-    "short": "Frisst ein Bär verdorbenes Fleisch, wird er 30 Minuten später zum Aasbären, ob zahm oder wild.",
-    "body": "Das geht nur, solange [[gc.tierarten.species_tame_bjorn|Bären zähmbar]] sind. Stufe, Sterne, Name, Leine, Pfosten und Zahm-Status bleiben; ein Bärensattel fällt dabei herunter, und Spieler bis 40 m bekommen eine Meldung. Ist niemand in der Nähe, verwandelt sich der Bär, sobald seine Gegend wieder geladen ist. Ein zahmer Aasbär greift alles Wilde von selbst an, aber nie Spieler oder zahme Tiere. Aasbären lassen sich nicht zähmen und bekommen keine Jungen; ihre Höchststufe ist {gc_tierarten_species_max_unbjorn}, geritten werden sie mit dem [[gc.tierarten.bearsaddle|Aasbär-Sattel]].",
+    "short": "Frisst ein Bär verdorbenes Fleisch, stirbt er 30 Minuten später meist daran; nur sonst wird er zum Aasbären, ob zahm oder wild.",
+    "body": "Das geht nur, solange [[gc.tierarten.species_tame_bjorn|Bären zähmbar]] sind. Mit {gc_tierarten_species_unbjorn_death} Chance überlebt der Bär das Fleisch nicht: Er stirbt wie im Kampf und lässt seine Beute fallen. Sonst verwandelt er sich: Stufe, Sterne, Name, Leine, Pfosten und Zahm-Status bleiben; ein Bärensattel fällt dabei herunter, und Spieler bis 40 m bekommen eine Meldung. Ist niemand in der Nähe, verwandelt sich der Bär, sobald seine Gegend wieder geladen ist. Ein zahmer Aasbär greift alles Wilde von selbst an, aber nie Spieler oder zahme Tiere. Aasbären fressen wie Bären Honig und Fleisch, lassen sich nicht zähmen und bekommen keine Jungen; ihre Höchststufe ist {gc_tierarten_species_max_unbjorn}, geritten werden sie mit dem [[gc.tierarten.bearsaddle|Aasbär-Sattel]].",
     "aliases": ["Aasbär", "Aasbären", "Aasbär"]
   },
   "gc.tierarten.bearsaddle": {
@@ -132,5 +132,36 @@
     "short": "Zahme Hirsche, Hasen, Robben und Nixen bekommen Junge: Hirschkalb, Junghase, Robbenjunges und Junge Nixe.",
     "body": "Die Jungen sind halb so groß, haben halbes Leben und wachsen in 50 Minuten zum Tier heran, der Junghase in 25; zahm sind sie wie ihre Eltern. Gezüchtet wird nur, solange die Art zähmbar ist, und die [[gc.tiere.breedlevel|Zucht-Stufe]] erben sie wie jedes Tier. Anleinen lassen sie sich wie alle [[gc.tiere.young|Jungtiere]].",
     "aliases": ["Hirschkalb", "Junghase", "Robbenjunges", "Junge Nixe"]
+  },
+  "gc.tierarten.species_star3": {
+    "title": "Drei Sterne aus der Zucht",
+    "short": "Chance auf ein Junges mit drei Sternen, wenn beide Eltern drei haben; jetzt {gc_tierarten_species_star3}.",
+    "body": "Je Elternteil mit einem Stern weniger mal 0,22, mit zwei weniger mal 0,02. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star4": {
+    "title": "Vier Sterne aus der Zucht",
+    "short": "Chance auf ein Junges mit vier Sternen, wenn beide Eltern vier haben; jetzt {gc_tierarten_species_star4}.",
+    "body": "Zwei Eltern mit drei Sternen kommen auf ein Zwanzigstel davon. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star5": {
+    "title": "Fünf Sterne aus der Zucht",
+    "short": "Chance auf ein Junges mit fünf Sternen, wenn beide Eltern fünf haben; jetzt {gc_tierarten_species_star5}.",
+    "body": "Zwei Eltern mit vier Sternen kommen auf ein Zwanzigstel davon. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_wild_stars": {
+    "title": "Drei bis fünf Sterne in der Welt",
+    "short": "Wer in der Welt mit zwei Sternen erscheint, hat mit {gc_tierarten_species_wild_stars} Chance drei.",
+    "body": "Gilt für alle Tiere und Gegner außer Bossen, beim Erscheinen in der Welt (nicht bei der Zucht). Von denen mit drei Sternen hat jeder zehnte vier, davon jeder zehnte fünf. Valheim rechnet mit den Sternen: Leben mal Sterne plus eins, Schaden plus 50 % je Stern, Beute mal Sterne plus eins; ein Gegner mit fünf Sternen hat also sechsfaches Leben, dreieinhalbfachen Schaden und sechsfache Beute. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star_skill": {
+    "title": "Tierpflege und Sterne",
+    "short": "Tierpflege 100 vervielfacht alle Stern-Chancen der Zucht {gc_tierarten_species_star_skill}-fach.",
+    "body": "Von 1-fach bei Tierpflege 0 bis zu diesem Faktor bei 100, erst langsam und gegen 100 steil (Stufe 50: 1,8-fach, 75: 4,3-fach, 90: 7,2-fach), für jede Stern-Chance der Zucht (0 → 1, 1 → 2 und drei bis fünf Sterne), höchstens 100 %. Es zählt der Züchter, also wessen Futter die Mutter zuletzt gefressen hat. Mehr: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.peace": {
+    "title": "Frieden mit der eigenen Art",
+    "short": "Zahme Tiere lassen wilde Tiere ihrer Art in Ruhe, bis die einen Spieler oder ein zahmes Tier angreifen oder du es befiehlst.",
+    "body": "Ein zahmes Tier greift wilde Tiere seiner eigenen Art nicht von selbst an, und die wilden lassen es ebenso in Ruhe. Das gilt für alle zahmen Tiere, auch Wolf und Bär; Jungtiere zählen zu ihrer Art.\n\nGreift ein wildes Tier einen Spieler oder ein zahmes Tier an, ist es 30 Sekunden lang ein Feind: Zahme Tiere seiner Art, die höchstens 20 m entfernt sind, gehen auf es los. Mit dem Befehl „Angreifen“ über die [[gc.tiere.leash|Leine]] oder die [[gc.tiere.whistle|Pfeife]] greifen sie jederzeit an. Wilde Tiere anderer Arten bleiben Feinde wie in Valheim.",
+    "see": ["gc.tierarten", "gc.tiere.commands"]
   }
 }

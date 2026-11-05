@@ -16,7 +16,7 @@
   "gc.outfit.wardrobe": {
     "title": "Wardrobe",
     "short": "Furniture where you change your outfit; built with the hammer at the workbench from 10 finewood and 10 bronze nails.",
-    "body": "You build it with the hammer under Furniture at the [[valheim.station.workbench|workbench]]. E on the wardrobe opens its doors and your inventory; where a chest would be, you see the 18 [[gc.outfit.slots|slots]] of your outfit in three tables: armor, one-handed weapons, two-handed and ranged. Drag and drop works as with a chest, Shift-click moves a piece into its slot or back into the inventory, and a piece already in that slot swaps with it. The eye next to a slot or a right-click on it [[gc.outfit.hide|hides it]].\n\nThe wardrobe itself holds nothing, it does not open inside the area of someone else's ward, and if you walk more than 4 m away, the window closes.",
+    "body": "You build it with the hammer under Furniture at the [[valheim.station.workbench|workbench]]. E on the wardrobe opens its doors and your inventory; where a chest would be, you see the 18 [[gc.outfit.slots|slots]] of your outfit in three tables: armor, one-handed weapons, two-handed and ranged. Drag and drop works as with a chest, Shift-click moves a piece into its slot or back into the inventory, and a piece already in that slot swaps with it. The eye next to a slot or a right-click on it [[gc.outfit.hide|hides it]].\n\nThe wardrobe itself holds nothing, it does not open inside the area of someone else's ward, and if you walk more than 4 m away, the window closes. You can drag the wardrobe panel by its edge and it stays there; a double click on the edge puts it back beside the inventory.",
     "aliases": ["Wardrobe"],
     "see": ["gc.outfit"]
   },
@@ -31,5 +31,19 @@
     "short": "The eye next to a slot at the wardrobe hides that piece: your character shows nothing there.",
     "body": "This works for every slot: for armor your character shows nothing there, for weapons a weapon of that kind is invisible in your hand and on your back. A right-click on the slot does the same. While a piece is hidden, the eye is crossed out and the row is grey; a second click shows the piece again. The stats of the worn piece stay, only its look disappears.",
     "see": ["gc.outfit.wardrobe"]
+  },
+  "gc.outfit.sets": {
+    "title": "Gear sets",
+    "short": "Four sets at the wardrobe: armour, hotbar, eight supplies and leash bar, swapped with one click. Currently {gc_outfit_sets}.",
+    "body": "At the [[gc.outfit.wardrobe|wardrobe]], the tabs at the top are **Style** (your [[gc.outfit|outfit]], looks only) and four **sets**. You wear one of them: its tab (green) shows live what you have on you, and whatever you put there goes straight to you, armour and weapons are put on at once. The others stay in the wardrobe. The first is called “Everyday” at first, the others “Set 2” to “Set 4”. Each set shows its **gear** in two tables (armour: head, chest, legs, cape; hands and accessories: right and left hand, belt, trinket), below them the **hotbar** for weapons, tools and supplies and the **supplies** (food, potions and meads, ammo; as many slots as your supply bar, eight per row). The hotbar is Valheim's first inventory row, the supplies are your [[gc.vorratsleiste|supply bar]]. Empty slots show a faint picture of what belongs there.\n\n**Wear** swaps: what lies in your hotbar and your supply bar and what you wear goes into your previous set, the chosen one comes to the same slots and is put on. Whatever lies further down stays with you, as does anything that may not go into the set at its place. With the [[gc.tiere.leashbar|leash bar]] every set has a third table with its five slots, for leashes and whistles only; Wear swaps them with the bar. A leash that is holding an animal never goes into a set and stays with you. If there is not enough room, nothing happens. **Rename** gives a set a name, such as “Melee” or “Mage”.\n\nSets belong to your character like the outfit: every wardrobe shows them, they weigh nothing and stay when you die. Materials, ore and trophies never go in, otherwise every wardrobe would be a weightless store available at every other wardrobe. If the [[gc.serverrules|server rule]] is off, you can only empty sets.",
+    "aliases": [
+      "set",
+      "sets",
+      "gear set"
+    ],
+    "see": [
+      "gc.outfit.wardrobe",
+      "gc.outfit"
+    ]
   }
 }

@@ -4,13 +4,13 @@
     <AssemblyName>GC_Outfit</AssemblyName>
     <RootNamespace>GC.Server.ModOutfit</RootNamespace>
     <Product>GC_Outfit</Product>
-    <Version>1.9.0</Version>
+    <Version>1.10.0</Version>
     <GcPaket>GC_Server</GcPaket>
     <GcId>outfit</GcId>
     <GcStufe>1</GcStufe>
     <GcSeite>Alle</GcSeite>
     <GcBraucht></GcBraucht>
-    <GcPartner></GcPartner>
+    <GcPartner>tiere;vorratsleiste</GcPartner>
     <GcFremd></GcFremd>
     <GcAlteConfig></GcAlteConfig>
     <GcAusgleich>0</GcAusgleich>
@@ -21,5 +21,9 @@
     <EmbeddedResource Include="Assets\*.gcm" />
     <EmbeddedResource Include="Assets\*.png" />
     <Reference Include="UnityEngine.ImageConversionModule" HintPath="$(Managed)\UnityEngine.ImageConversionModule.dll" Private="false" />
+    <!-- Partner: Reihe der Leinenleiste in den Sätzen (LeashLink.cs), zur Laufzeit im selben Paket-DLL -->
+    <ProjectReference Include="..\Tiere\GC_Tiere.csproj" Private="false" />
+    <!-- Partner: Vorräte der Sätze tauschen mit der Vorratsleiste (SupplyLink.cs) -->
+    <ProjectReference Include="..\Vorratsleiste\GC_Vorratsleiste.csproj" Private="false" />
   </ItemGroup>
 </Project>

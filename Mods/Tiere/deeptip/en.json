@@ -55,7 +55,7 @@
   "gc.tiere.leashbar": {
     "title": "Leash bar",
     "short": "Five extra slots right of the hotbar for leashes and whistles; Alt+1 to Alt+5 takes them in hand.",
-    "body": "The slots open with [[gc.tiere.care|Animal Care]] at levels 1, 25, 50, 75 and 90; if Animal Care is off, all are open. Leashes and whistles fit into every slot but only work in open ones: there a leash holds its animal, and Alt+number takes the leash or whistle in hand. Together with the one leash in the hotbar you can lead up to six animals.\n\n- A leash holding an animal can't be put into a locked slot. If your Animal Care drops, the leash stays in its slot, but its animal is free.\n- Leashes taken from a post only go into open slots.\n- When you die, the bar goes into your grave. When you loot the grave, every piece returns to its old slot; whatever lies there now moves to your inventory.\n\nDrag leashes in and out in the inventory screen; the workbench repairs them there too.",
+    "body": "The slots open with [[gc.tiere.care|Animal Care]] at levels 1, 25, 50, 75 and 90; if Animal Care is off, all are open. Leashes and whistles fit into every slot but only work in open ones: there a leash holds its animal, and Alt+number takes the leash or whistle in hand. Together with the one leash in the hotbar you can lead up to six animals.\n\n- A leash holding an animal can't be put into a locked slot. If your Animal Care drops, the leash stays in its slot, but its animal is free.\n- Leashes taken from a post only go into open slots.\n- When you die, the bar goes into your grave. When you loot the grave, every piece returns to its old slot; whatever lies there now moves to your inventory.\n\nDrag leashes in and out in the inventory screen; the workbench repairs them there too. In the inventory you can drag the bar by its edge, and the display in the game moves along; a double click on the edge puts it back.",
     "aliases": ["leash bar", "leash slot"]
   },
   "gc.tiere.whistle": {
@@ -143,5 +143,17 @@
     "short": "When you start walking, a leashed animal hesitates briefly before following: up to {gc_tiere_care_delay}, depending on the mixed level.",
     "body": "The delay is rolled anew each time; meanwhile the animal keeps roaming and the leash pulls as usual. It gets shorter with the mixed level = (animal level + 2 × half the holder's [[gc.tiere.care|Animal Care]]) ÷ 3; from mixed level {gc_tiere_care_delay_level} on, the animal follows at once. A new delay only comes after you have stood still for a moment. Without Animal Care no animal hesitates.",
     "aliases": ["mixed level"]
+  },
+  "gc.tiere.ride": {
+    "title": "Combat while riding",
+    "short": "Left, right and middle click make your mount attack, A/D turns it on the spot. Currently {gc_tiere_ride}.",
+    "body": "On lox, asksvin, bear and [[gc.tierarten.unbjorn|Vile]]: **left click** is a light attack, **right click** a heavy one, the **middle mouse button** a third one, at the enemy you look at, otherwise where you look. Bear and Vile bite, jump with a slam and swipe with their claws, the lox bites and stomps (it has no third attack), the asksvin bites, pounces and headbutts. Every attack has the animal's cooldown and costs mount stamina: light {gc_tiere_ride_stamina}, heavy {gc_tiere_ride_stamina_heavy} of 240. The saddle Hildisvíni (war mount) attacks without stamina and is ready again twice as fast.\n\n**A/D** turns the mount on the spot when standing and steers it while moving; W, S and running stay as in Valheim; dismount only with E, mouse buttons, jump and dodge no longer throw you off. Ridden, bear and Vile are {gc_tiere_ride_bear_speed} % faster and turn {gc_tiere_ride_bear_turn} times as fast; the lox stays sluggish.\n\nOff: as in Valheim, left click, middle mouse button, jump and dodge dismount and the right mouse button turns the animal.",
+    "aliases": [
+      "combat while riding",
+      "mounted combat"
+    ],
+    "see": [
+      "gc.tiere.saddle"
+    ]
   }
 }

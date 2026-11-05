@@ -1,0 +1,16 @@
+{
+  "$locale": "de",
+  "gc.palisaden": {
+    "title": "Große Palisaden",
+    "short": "Große Kernholz-Palisade und großes Kernholztor: doppelt so hoch und breit wie Valheims Vorlagen, viermal so haltbar.",
+    "body": "Die **große Kernholz-Palisade** ist Valheims Palisadenwall in doppelter Höhe und Breite: 4 m breit, knapp 7 m hoch, 4000 Haltbarkeit statt 1000, für 12 statt 4 Kernholz. Das **große Kernholztor** ist Valheims Holztor in doppelter Größe: ein Flügel knapp 3,4 m breit und 6 m hoch, 1600 Haltbarkeit statt 400, für 36 Kernholz. Wie bei Valheim ist das Tor schwächer als die Wand. Beide sehen aus wie die Vorlagen, nur dunkler, und die Pfähle sind doppelt so dick.\n\nDazu gibt es die **halbe Kernholz-Palisade** (halb so hoch und breit wie die große, also Valheims Größe, 2000 Haltbarkeit, 6 Kernholz) und das **Kernholztor** (so breit wie Valheims Holztor, so hoch wie die halbe Palisade, 800 Haltbarkeit, 18 Kernholz), beide gleich dunkel. Ein Kernholztor mit einer halben Palisade darüber ist so hoch wie die große Wand. Alle vier haben an jeder Kante Andockpunkte am Anfang, in der Mitte und am Ende, so schließen zwei halbe Teile genau an ein großes an.\n\nDu baust sie mit dem Hammer an der [[valheim.station.workbench|Werkbank]], in derselben Kategorie wie die Vorlagen. Die Mod gehört zu GC Server ([[gc.kern.stufe|Stufe]] 3 „Vanilla+“), Server und alle Spieler brauchen sie.",
+    "aliases": ["Große Palisade", "Kernholz-Palisade", "Kernholztor"],
+    "see": ["gc.palisaden.enabled"]
+  },
+  "gc.palisaden.enabled": {
+    "title": "Große Palisade und großes Tor",
+    "short": "Server-Regel: Große Palisade und großes Tor lassen sich bauen. Aus: nicht mehr baubar, Gebautes bleibt.",
+    "body": "Diese [[gc.serverrules|Server-Regel]] steht auf {gc_palisaden_enabled}. Ist sie aus, verschwinden beide [[gc.palisaden|großen Palisaden]] aus dem Hammer; was schon steht, bleibt stehen und lässt sich reparieren.",
+    "see": ["gc.palisaden"]
+  }
+}

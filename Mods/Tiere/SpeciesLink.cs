@@ -32,4 +32,9 @@ internal static class SpeciesLink
 	}
 
 	internal static GcTaming Taming(Character animal) => GcHooks.SpeciesTaming != null ? GcHooks.SpeciesTaming(animal) : GcTaming.Normal;
+
+	/// <summary>GC_Tierarten setzt es: Zähmbonus des zuletzt gefressenen Futters (Honig, Lox-Fleisch). Ohne GC_Tierarten 1.</summary>
+	internal static System.Func<Tameable, float>? FoodTamingOf;
+
+	internal static float FoodTaming(Tameable tame) => FoodTamingOf != null ? FoodTamingOf(tame) : 1f;
 }

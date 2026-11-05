@@ -38,6 +38,7 @@ internal static class Saddles
 	{
 		PrefabManager.OnVanillaPrefabsAvailable += AddVanilla;
 		SaddleUniqueEffects.Init(config); // Sondereffekte einzigartiger Sättel (Gorduan, 27.10.2026), SaddleUniqueEffects.cs
+		RideCombat.Init(config); // Reiten: Angriffe auf Links-/Rechtsklick, A/D dreht, Bär wendiger (Gorduan, 02.11.2026)
 	}
 
 	/// <summary>Weiterer Sattel (GC_Tierarten): Item-Name wie m_shared.m_name.</summary>

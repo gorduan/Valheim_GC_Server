@@ -24,6 +24,9 @@
   <Folder Name="/Mods/Outfit/">
     <Project Path="Mods/Outfit/GC_Outfit.csproj" />
   </Folder>
+  <Folder Name="/Mods/Palisaden/">
+    <Project Path="Mods/Palisaden/GC_Palisaden.csproj" />
+  </Folder>
   <Folder Name="/Mods/Parade/">
     <Project Path="Mods/Parade/GC_Parade.csproj" />
   </Folder>
@@ -38,6 +41,9 @@
   </Folder>
   <Folder Name="/Mods/Tiere/">
     <Project Path="Mods/Tiere/GC_Tiere.csproj" />
+  </Folder>
+  <Folder Name="/Mods/Vorratsleiste/">
+    <Project Path="Mods/Vorratsleiste/GC_Vorratsleiste.csproj" />
   </Folder>
   <Folder Name="/Mods/WalkuerenTransport/">
     <Project Path="Mods/WalkuerenTransport/GC_WalkuerenTransport.csproj" />

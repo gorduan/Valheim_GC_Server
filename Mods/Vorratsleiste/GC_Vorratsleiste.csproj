@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Vorratsleiste (Gorduan): acht Plätze nur für Vorräte im Inventar. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Vorratsleiste</AssemblyName>
+    <RootNamespace>GC.Server.ModVorratsleiste</RootNamespace>
+    <Product>GC_Vorratsleiste</Product>
+    <Version>1.10.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>vorratsleiste</GcId>
+    <GcStufe>1</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig></GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Vorratsleiste</GcTitel>
+    <GcBeschreibung>Acht Plätze unter dem Inventar nur für Vorräte: Essen, Tränke und Mets, Pfeile, Bolzen und Köder. Zählt zum Gewicht, kommt beim Tod mit ins Grab; Bogen und Armbrust nehmen Munition auch von dort. Der Kleiderschrank tauscht sie mit den Vorräten eines Satzes.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

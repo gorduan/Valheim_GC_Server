@@ -1,0 +1,16 @@
+{
+  "$locale": "en",
+  "gc.palisaden": {
+    "title": "Large palisades",
+    "short": "Large core wood stakewall and gate: twice as high and wide as Valheim's originals, four times as sturdy.",
+    "body": "The **large core wood stakewall** is Valheim's stakewall at twice the height and width: 4 m wide, almost 7 m high, 4000 durability instead of 1000, for 12 instead of 4 core wood. The **large core wood gate** is Valheim's wood gate at twice the size: one wing almost 3.4 m wide and 6 m high, 1600 durability instead of 400, for 36 core wood. As in Valheim, the gate is weaker than the wall. Both look like the originals, only darker, and the stakes are twice as thick.\n\nThere is also the **half core wood stakewall** (half as high and wide as the large one, i.e. Valheim's size, 2000 durability, 6 core wood) and the **core wood gate** (as wide as Valheim's wood gate, as high as the half stakewall, 800 durability, 18 core wood), both just as dark. A core wood gate with a half stakewall on top is as high as the large wall. All four have snap points at the start, middle and end of every edge, so two half pieces line up exactly with a large one.\n\nYou build them with the hammer at the [[valheim.station.workbench|workbench]], in the same category as the originals. The mod is part of GC Server ([[gc.kern.stufe|level]] 3 “Vanilla+”), and the server and all players need it.",
+    "aliases": ["large stakewall", "core wood stakewall", "core wood gate"],
+    "see": ["gc.palisaden.enabled"]
+  },
+  "gc.palisaden.enabled": {
+    "title": "Large stakewall and gate",
+    "short": "Server rule: the large stakewall and gate can be built. Off: no longer buildable, built pieces stay.",
+    "body": "This [[gc.serverrules|server rule]] is set to {gc_palisaden_enabled}. When it is off, both [[gc.palisaden|large palisades]] disappear from the hammer; what is already standing stays and can be repaired.",
+    "see": ["gc.palisaden"]
+  }
+}

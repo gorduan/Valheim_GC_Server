@@ -1,0 +1,12 @@
+# GC_Tiere - English. New texts since 02.11.2026 (combat while riding); the older ones are in the core (server.menu, server.features).
+gcsv_t_ride_name: "Combat while riding"
+gcsv_t_ride_desc: "On lox, asksvin, bear and vile: left click is a light, right click a heavy and the middle mouse button a third attack of the mount (bear bite, jump slam and claw swipes; lox bite and stomp; asksvin bite, pounce and headbutt), at the enemy you look at. A/D turns on the spot when standing and steers while moving. Dismount only with E. Bear and vile are faster and more agile when ridden. Off: as in Valheim (left click, middle mouse button, jump and dodge dismount, right mouse button turns)."
+gcsv_t_ride_stamina_name: "Stamina light attack"
+gcsv_t_ride_stamina_desc: "Mount stamina an attack with left click or the middle mouse button costs. A saddle has 240 stamina and regains 0.2 per second. With the saddle Hildisvíni (war mount), attacks cost nothing."
+gcsv_t_ride_stamina_heavy_name: "Stamina heavy attack"
+gcsv_t_ride_stamina_heavy_desc: "Mount stamina a right-click attack costs."
+gcsv_t_ride_bear_speed_name: "Ridden bear faster"
+gcsv_t_ride_bear_speed_desc: "Bear and vile run this many percent faster when ridden (Gorduan: 25 %)."
+gcsv_t_ride_bear_turn_name: "Ridden bear more agile"
+gcsv_t_ride_bear_turn_desc: "Bear and vile turn this many times faster when ridden (Gorduan: three times). The lox stays as it is."
+gcs_ride_tired: "Your mount is too exhausted."

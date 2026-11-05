@@ -54,7 +54,12 @@ public partial class Plugin : BaseUnityPlugin
 			.Sub("care_delay_level", Leash.Care.FollowDelayLevel, 5)
 			.Sub("care_xp", Leash.Care.AnimalXp)
 			.Sub("care_xp_factor", Leash.Care.AnimalXpFactor, 0.1, " ×")
-			.Sub("care_xp_kill", Leash.Care.AnimalKillXp, 1);
+			.Sub("care_xp_kill", Leash.Care.AnimalKillXp, 1)
+			.Main("ride", Leash.RideCombat.Enabled) // Gorduan, 02.11.2026: Angriffe beim Reiten, A/D dreht, Bär wendiger
+			.Sub("ride_stamina", Leash.RideCombat.LightStamina, 1)
+			.Sub("ride_stamina_heavy", Leash.RideCombat.HeavyStamina, 1)
+			.Sub("ride_bear_speed", Leash.RideCombat.AgileSpeed, 5, " %")
+			.Sub("ride_bear_turn", Leash.RideCombat.AgileTurn, 0.5, " ×");
 	}
 
 	private void Update()

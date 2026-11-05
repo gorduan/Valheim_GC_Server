@@ -55,7 +55,7 @@
   "gc.tiere.leashbar": {
     "title": "Leinenleiste",
     "short": "Fünf eigene Plätze rechts neben der Schnellleiste für Leinen und Pfeifen; Alt+1 bis Alt+5 nimmt sie in die Hand.",
-    "body": "Die Plätze öffnen sich mit der [[gc.tiere.care|Tierpflege]] ab Stufe 1, 25, 50, 75 und 90; ist die Tierpflege aus, sind alle offen. Leinen und Pfeifen passen in jeden Platz, wirken aber nur in offenen: Dort hält eine Leine ihr Tier, und Alt+Zahl nimmt Leine oder Pfeife in die Hand. Mit der einen Leine der Schnellleiste führst du so bis zu sechs Tiere.\n\n- Eine Leine mit Tier lässt sich nicht in einen gesperrten Platz legen. Sinkt deine Tierpflege, bleibt die Leine liegen, ihr Tier ist aber frei.\n- Leinen vom Pfosten kommen nur in offene Plätze.\n- Beim Tod kommt die Leiste mit ins Grab. Beim Einsammeln kehrt jedes Stück in seinen alten Platz zurück; was dort inzwischen liegt, wandert ins Inventar.\n\nIm Inventar ziehst du Leinen hinein und heraus; an der Werkbank werden sie mit repariert.",
+    "body": "Die Plätze öffnen sich mit der [[gc.tiere.care|Tierpflege]] ab Stufe 1, 25, 50, 75 und 90; ist die Tierpflege aus, sind alle offen. Leinen und Pfeifen passen in jeden Platz, wirken aber nur in offenen: Dort hält eine Leine ihr Tier, und Alt+Zahl nimmt Leine oder Pfeife in die Hand. Mit der einen Leine der Schnellleiste führst du so bis zu sechs Tiere.\n\n- Eine Leine mit Tier lässt sich nicht in einen gesperrten Platz legen. Sinkt deine Tierpflege, bleibt die Leine liegen, ihr Tier ist aber frei.\n- Leinen vom Pfosten kommen nur in offene Plätze.\n- Beim Tod kommt die Leiste mit ins Grab. Beim Einsammeln kehrt jedes Stück in seinen alten Platz zurück; was dort inzwischen liegt, wandert ins Inventar.\n\nIm Inventar ziehst du Leinen hinein und heraus; an der Werkbank werden sie mit repariert. Im Inventar lässt sich die Leiste am Rand ziehen, auch die Anzeige im Spiel wandert mit; ein Doppelklick auf den Rand legt sie zurück.",
     "aliases": ["Leinenleiste", "Leinenplatz"]
   },
   "gc.tiere.whistle": {
@@ -143,5 +143,17 @@
     "short": "Läufst du los, zögert ein Tier an der Leine kurz, bevor es folgt: bis zu {gc_tiere_care_delay}, je nach Mischstufe.",
     "body": "Die Bedenkzeit wird jedes Mal neu gewürfelt; so lange streift das Tier weiter herum, und die Leine zieht wie immer. Sie wird kürzer mit der Mischstufe = (Tier-Stufe + 2 × halbe [[gc.tiere.care|Tierpflege]] des Halters) ÷ 3; ab Mischstufe {gc_tiere_care_delay_level} folgt das Tier sofort. Eine neue Bedenkzeit gibt es erst, wenn du kurz gestanden hast. Ohne Tierpflege zögert kein Tier.",
     "aliases": ["Mischstufe"]
+  },
+  "gc.tiere.ride": {
+    "title": "Kampf beim Reiten",
+    "short": "Linksklick, Rechtsklick und mittlere Maustaste lassen dein Reittier angreifen, A/D dreht es auf der Stelle. Jetzt {gc_tiere_ride}.",
+    "body": "Auf Lox, Asksvin, Bär und [[gc.tierarten.unbjorn|Aasbär]]: **Linksklick** ist ein leichter Angriff, **Rechtsklick** ein schwerer, die **mittlere Maustaste** ein dritter, auf den Gegner, den du anschaust, sonst in deine Blickrichtung. Bär und Aasbär beißen, springen mit Aufschlag und schlagen mit den Pranken, der Lox beißt und stampft (einen dritten Angriff hat er nicht), der Asksvin beißt, springt an und stößt mit dem Kopf. Jeder Angriff hat die Abklingzeit des Tiers und kostet Ausdauer des Reittiers: leicht {gc_tiere_ride_stamina}, schwer {gc_tiere_ride_stamina_heavy} von 240. Der Sattel Hildisvíni (Kriegsreittier) greift ohne Ausdauer an und ist doppelt so schnell wieder bereit.\n\n**A/D** dreht das Reittier im Stand auf der Stelle und lenkt es in der Fahrt; W, S und Rennen bleiben wie in Valheim; absteigen nur mit E, Maustasten, Sprung und Ausweichen werfen dich nicht mehr ab. Bär und Aasbär sind geritten {gc_tiere_ride_bear_speed} % schneller und wenden {gc_tiere_ride_bear_turn}-mal so schnell; der Lox bleibt schwerfällig.\n\nAus: wie in Valheim, Linksklick, mittlere Maustaste, Sprung und Ausweichen steigen ab und die rechte Maustaste wendet das Tier.",
+    "aliases": [
+      "Kampf beim Reiten",
+      "Reitkampf"
+    ],
+    "see": [
+      "gc.tiere.saddle"
+    ]
   }
 }

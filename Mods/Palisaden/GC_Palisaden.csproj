@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- GC_Palisaden (Gorduan): große Palisade und großes Tor aus Kernholz. Steckbrief (Gc*) siehe ..\..\Directory.Build.targets -->
+  <PropertyGroup>
+    <AssemblyName>GC_Palisaden</AssemblyName>
+    <RootNamespace>GC.Server.ModPalisaden</RootNamespace>
+    <Product>GC_Palisaden</Product>
+    <Version>1.10.0</Version>
+    <GcPaket>GC_Server</GcPaket>
+    <GcId>palisaden</GcId>
+    <GcStufe>3</GcStufe>
+    <GcSeite>Alle</GcSeite>
+    <GcBraucht></GcBraucht>
+    <GcPartner></GcPartner>
+    <GcFremd></GcFremd>
+    <GcAlteConfig></GcAlteConfig>
+    <GcAusgleich>0</GcAusgleich>
+    <GcTitel>Große Palisaden</GcTitel>
+    <GcBeschreibung>Große Palisade und großes Tor aus Kernholz: doppelt so hoch und breit wie Valheims Palisadenwall und Holztor, dreimal so teuer, viermal so haltbar.</GcBeschreibung>
+  </PropertyGroup>
+</Project>

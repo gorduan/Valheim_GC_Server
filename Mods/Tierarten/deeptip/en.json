@@ -3,7 +3,7 @@
   "gc.tierarten": {
     "title": "Animal species and saddles",
     "short": "GC mod: max level per species, stars at birth, more loot, more tameable animals, bear cubs, Vile and bear saddles.",
-    "body": "The mod extends [[gc.tiere|GC_Tiere]] and needs it. Every species gets its own [[gc.tierarten.maxlevel|maximum level]], young animals have a small chance of [[gc.tierarten.stars|one more star]], and animals with a level drop [[gc.tierarten.loot|more loot]]. Optionally you can tame the [[gc.tierarten.species_tame_bjorn|bear]], [[gc.tierarten.species_tame_neck|neck]], [[gc.tierarten.species_tame_deer|deer]], [[gc.tierarten.species_tame_hare|hare]] and [[gc.tierarten.species_tame_seal|seal]], each with its own young ([[gc.tierarten.bearcub|bear cub]] and [[gc.tierarten.young|more]]); bears add the [[gc.tierarten.unbjorn|Vile]] and [[gc.tierarten.bearsaddle|saddles]]. [[gc.tierarten.species_young_fight|Young animals]] can also fight.\n\nAll values are [[gc.serverrules|server rules]]. [[gc.kern.stufe|Level]] 5 “GC”; while leashes or Animal Care are on, the mod adds 5 % per boss to the [[gc.kern.bossscale|boss progression]].",
+    "body": "The mod extends [[gc.tiere|GC_Tiere]] and needs it. Every species gets its own [[gc.tierarten.maxlevel|maximum level]], young animals have a small chance of [[gc.tierarten.stars|one more star]], and animals with a level drop [[gc.tierarten.loot|more loot]]. Optionally you can tame the [[gc.tierarten.species_tame_bjorn|bear]], [[gc.tierarten.species_tame_neck|neck]], [[gc.tierarten.species_tame_deer|deer]], [[gc.tierarten.species_tame_hare|hare]] and [[gc.tierarten.species_tame_seal|seal]], each with its own young ([[gc.tierarten.bearcub|bear cub]] and [[gc.tierarten.young|more]]); bears add the [[gc.tierarten.unbjorn|Vile]] and [[gc.tierarten.bearsaddle|saddles]]. [[gc.tierarten.species_young_fight|Young animals]] can also fight, and tamed animals keep [[gc.tierarten.peace|peace with their own kind]].\n\nAll values are [[gc.serverrules|server rules]]. [[gc.kern.stufe|Level]] 5 “GC”; while leashes or Animal Care are on, the mod adds 5 % per boss to the [[gc.kern.bossscale|boss progression]].",
     "aliases": ["GC_Tierarten"],
     "see": ["gc.about", "gc.modswitch"]
   },
@@ -20,8 +20,8 @@
   },
   "gc.tierarten.species_star1": {
     "title": "Star chance 0 → 1",
-    "short": "Chance that a young animal or egg without a star gets one after all; currently {gc_tierarten_species_star1}.",
-    "body": "Rolled at every birth and when an egg is laid; there is never more than one extra star. The breeder gets a message. More: [[gc.tierarten.stars]]."
+    "short": "Chance that a young or egg without a star gets one after all; currently {gc_tierarten_species_star1}.",
+    "body": "Rolled at every birth and when an egg is laid. The breeder learns of it by message. More: [[gc.tierarten.stars]]."
   },
   "gc.tierarten.species_star2": {
     "title": "Star chance 1 → 2",
@@ -30,8 +30,8 @@
   },
   "gc.tierarten.stars": {
     "title": "Stars at birth",
-    "short": "A young animal can be born with one star more than its mother, never with more than one extra.",
-    "body": "Valheim gives the young its mother's stars. If she has none, the young gets one with a {gc_tierarten_species_star1} chance; if she has one, it gets two with a {gc_tierarten_species_star2} chance. For eggs the roll happens when they are laid. The breeder gets a message, otherwise the nearest player within 30 m. What stars do: [[valheim.tame.breeding]]."
+    "short": "Young inherit up to two of the mother's stars; three to five stars take a lot of luck and strong parents.",
+    "body": "Valheim gives the young its mother's stars, but at most two are inherited for sure. If she has none, the young gets one with a {gc_tierarten_species_star1} chance; if she has one, it gets two with a {gc_tierarten_species_star2} chance.\n\n**Three to five stars** are very rare, and both parents count: the mother and the partner with the most stars that was close by when she got pregnant. If both have three stars, a young is born with three at a {gc_tierarten_species_star3} chance; otherwise with two. Each parent with one star less multiplies the chance by 0.22, with two less by 0.02: two parents with two stars have 0.25 %, three and two stars 1.1 %, three and one star only 0.1 %. Four stars come from two parents with four at a {gc_tierarten_species_star4} chance, from two with three only at 0.05 %; five stars from two parents with five at {gc_tierarten_species_star5}, from two with four at 0.01 %.\n\nThe breeder's [[gc.tiere.care|animal care]] multiplies all these chances (the breeder is whoever's food the mother ate last): up to {gc_tierarten_species_star_skill} times at level 100, slowly at first and steep towards 100 (level 50: 1.8 times, 75: 4.3 times, 90: 7.2 times). The young's GC level at birth counts too ([[gc.tiere.breedlevel|breeding level]]): Lvl 50 1.33 times, 100 twice, 150 three times, 200 4.33 times, 300 eight times (1 + Lvl/300 + Lvl²/15000). Both are multiplied, no chance goes above 100 %. For eggs the roll happens when they are laid. If a young has more stars than expected, the breeder gets a message, otherwise the nearest player within 30 m. Three to five stars can appear in the world too: [[gc.tierarten.species_wild_stars]]. What stars do: [[valheim.tame.breeding]].\n\nStars make an animal of these species bigger, measured against its own size, wild or tamed and as a young animal too: one star 5 %, two 15 %, three 30 %, four 50 %, five 75 %; its colour changes along. The colour follows a fixed path with the stars: every star makes the coat richer, from two stars on it turns redder and redder, with five it is fully red and menacing. On all other creatures one and two stars stay as in Valheim, from three on the same path to red applies. By command there are up to 15 stars: from six a large bar at the top shows the health like a boss's, the colour runs from yellow through green, turquoise and blue to pink, and with 15 the animal is twice as large as with five. Health and damage keep rising with every level. All stars show above the health bar."
   },
   "gc.tierarten.loot": {
     "title": "More loot by level",
@@ -87,12 +87,12 @@
   "gc.tierarten.species_tame_bjorn": {
     "title": "Bears tameable",
     "short": "Bears can be tamed, leashed and ridden, have cubs and can turn into a Vile. Currently {gc_tierarten_species_tame_bjorn}.",
-    "body": "Bears eat Honey, Raspberries, Blueberries and Cloudberries; as with [[valheim.tame.taming|taming]] in Valheim they need 30 minutes fed and unafraid, less with [[gc.tiere.care|Animal Care]]. Tamed bears don't attack wild bears on their own, but they do on command. Max level {gc_tierarten_species_max_bjorn}.\n\n- [[gc.tierarten.bearcub|Bear cubs]] from breeding\n- Rotten Meat turns a bear into a [[gc.tierarten.unbjorn|Vile]]\n- [[gc.tierarten.bearsaddle|Bear and Vile saddles]] at the forge\n\nOff (default): bears behave as in Valheim, and the saddles can't be crafted."
+    "body": "Bears eat Honey and every kind of raw meat, no berries. As with [[valheim.tame.taming|taming]] in Valheim they need 30 minutes fed and unafraid, less with [[gc.tiere.care|Animal Care]]. The food they ate last counts too: Honey tames twice as fast (15 minutes), Lox Meat one and a half times as fast (20 minutes); Lox Meat helps every meat eater that way, the wolf too. Tamed bears keep the [[gc.tierarten.peace|peace]] with wild bears until those attack or you order it. Max level {gc_tierarten_species_max_bjorn}.\n\n- [[gc.tierarten.bearcub|Bear cubs]] from breeding\n- Rotten Meat turns a bear into a [[gc.tierarten.unbjorn|Vile]]\n- [[gc.tierarten.bearsaddle|Bear and Vile saddles]] at the forge\n\nOff (default): bears behave as in Valheim, and the saddles can't be crafted."
   },
   "gc.tierarten.species_tame_neck": {
     "title": "Necks tameable",
     "short": "Necks eat Raw Fish and can be tamed in 30 minutes, leashed and bred. Currently {gc_tierarten_species_tame_neck}.",
-    "body": "Throw Raw Fish near a neck; fed and unafraid, it becomes tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]. Tamed necks have [[gc.tierarten.young|young]] (young necks) and can be leashed like any tamed animal. Max level {gc_tierarten_species_max_neck}. Off (default): as in Valheim."
+    "body": "Throw Raw Fish near a neck (within 10 m): while it is hungry and fish lies there, it does not flee from you and is not afraid of fire, it goes to eat. Afterwards it is shy again, but taming goes on while it flees. Don't come closer than 6 m, or it attacks and taming pauses. Fed, it becomes tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]; once tame it never flees again. Tamed necks have [[gc.tierarten.young|young]] (young necks) and can be leashed like any tamed animal. Max level {gc_tierarten_species_max_neck}. Off (default): as in Valheim."
   },
   "gc.tierarten.species_tame_deer": {
     "title": "Deer tameable",
@@ -101,8 +101,8 @@
   },
   "gc.tierarten.species_tame_hare": {
     "title": "Hares tameable",
-    "short": "Hares of the Mistlands eat mushrooms from the ground and can be tamed, leashed and bred. Currently {gc_tierarten_species_tame_hare}.",
-    "body": "Food: Mushroom, Yellow Mushroom and Jotun Puffs. Hares live in the [[valheim.biome.mistlands|Mistlands]] and flee from you: put the food down and keep your distance, then they eat it within 10 m and become tame in 30 minutes, faster with [[gc.tiere.care|Animal Care]]. Tamed, they no longer flee and have [[gc.tierarten.young|leverets]]; they can't attack. Max level {gc_tierarten_species_max_hare}. Off (default): as in Valheim."
+    "short": "Hares eat Jotun Puffs and carrots from the ground and can be tamed, leashed and bred. Currently {gc_tierarten_species_tame_hare}.",
+    "body": "Food: Jotun Puffs and carrots, for taming and breeding alike. Hares live in the [[valheim.biome.mistlands|Mistlands]] and flee from you: put the food down and keep your distance, then they eat it within 10 m and become tame, in 30 minutes with Jotun Puffs, half as fast in 60 with carrots, faster with [[gc.tiere.care|Animal Care]]. Tamed, they no longer flee and have [[gc.tierarten.young|leverets]]; they can't attack. Max level {gc_tierarten_species_max_hare}. Off (default): as in Valheim."
   },
   "gc.tierarten.species_tame_seal": {
     "title": "Seals tameable",
@@ -117,8 +117,8 @@
   },
   "gc.tierarten.unbjorn": {
     "title": "Vile (Unbjørn)",
-    "short": "If a bear eats Rotten Meat, it turns into a Vile 30 minutes later, tamed or wild.",
-    "body": "This only happens while [[gc.tierarten.species_tame_bjorn|bears are tameable]]. Level, stars, name, leash, post and tamed state stay; a bear saddle drops off, and players within 40 m get a message. If no one is nearby, the bear changes as soon as its area is loaded again. A tamed Vile attacks everything wild on its own, but never players or tamed animals. Viles can't be tamed and have no young; their max level is {gc_tierarten_species_max_unbjorn}, and you ride them with the [[gc.tierarten.bearsaddle|Vile saddle]].",
+    "short": "If a bear eats Rotten Meat, it usually dies of it 30 minutes later; only otherwise it turns into a Vile, tamed or wild.",
+    "body": "This only happens while [[gc.tierarten.species_tame_bjorn|bears are tameable]]. At a {gc_tierarten_species_unbjorn_death} chance the bear does not survive the meat: it dies as in a fight and drops its loot. Otherwise it changes: level, stars, name, leash, post and tamed state stay; a bear saddle drops off, and players within 40 m get a message. If no one is nearby, the bear changes as soon as its area is loaded again. A tamed Vile attacks everything wild on its own, but never players or tamed animals. Viles eat Honey and meat like bears, can't be tamed and have no young; their max level is {gc_tierarten_species_max_unbjorn}, and you ride them with the [[gc.tierarten.bearsaddle|Vile saddle]].",
     "aliases": ["Unbjørn", "Unbjorn"]
   },
   "gc.tierarten.bearsaddle": {
@@ -132,5 +132,36 @@
     "short": "Tamed deer, hares, seals and necks have young: fawn, leveret, seal pup and young neck.",
     "body": "The young are half the size with half the health and grow into the animal in 50 minutes, the leveret in 25; they are tame like their parents. They are only bred while the species is tameable, and they inherit the [[gc.tiere.breedlevel|breeding level]] like any animal. They can be leashed like all [[gc.tiere.young|young animals]].",
     "aliases": ["Fawn", "Leveret", "Seal pup", "Young neck"]
+  },
+  "gc.tierarten.species_star3": {
+    "title": "Three stars from breeding",
+    "short": "Chance of a young with three stars when both parents have three; currently {gc_tierarten_species_star3}.",
+    "body": "Each parent with one star less multiplies by 0.22, with two less by 0.02. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star4": {
+    "title": "Four stars from breeding",
+    "short": "Chance of a young with four stars when both parents have four; currently {gc_tierarten_species_star4}.",
+    "body": "Two parents with three stars get a twentieth of it. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star5": {
+    "title": "Five stars from breeding",
+    "short": "Chance of a young with five stars when both parents have five; currently {gc_tierarten_species_star5}.",
+    "body": "Two parents with four stars get a twentieth of it. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_wild_stars": {
+    "title": "Three to five stars in the world",
+    "short": "Whoever appears in the world with two stars has three at a {gc_tierarten_species_wild_stars} chance.",
+    "body": "Applies to all animals and enemies except bosses, when they appear in the world (not when bred). One in ten of those with three stars has four, one in ten of those five. Valheim scales with the stars: health times stars plus one, damage plus 50 % per star, loot times stars plus one; an enemy with five stars has six times the health, three and a half times the damage and six times the loot. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.species_star_skill": {
+    "title": "Animal care and stars",
+    "short": "Animal care 100 multiplies all star chances from breeding by {gc_tierarten_species_star_skill}.",
+    "body": "From 1 times at animal care 0 up to this factor at 100, slowly at first and steep towards 100 (level 50: 1.8 times, 75: 4.3 times, 90: 7.2 times), for every star chance from breeding (0 → 1, 1 → 2 and three to five stars), at most 100 %. The breeder counts, i.e. whoever's food the mother ate last. More: [[gc.tierarten.stars]]."
+  },
+  "gc.tierarten.peace": {
+    "title": "Peace with their own kind",
+    "short": "Tamed animals leave wild ones of their kind alone until those attack a player or a tamed animal, or you order an attack.",
+    "body": "A tamed animal does not attack wild animals of its own kind on its own, and the wild ones leave it alone too. This applies to every tamed animal, wolves and bears included; young count as their kind.\n\nIf a wild animal attacks a player or a tamed animal, it is an enemy for 30 seconds: tamed animals of its kind within 20 m go after it. With the order “attack” through the [[gc.tiere.leash|leash]] or the [[gc.tiere.whistle|whistle]] they attack at any time. Wild animals of other kinds stay enemies as in Valheim.",
+    "see": ["gc.tierarten", "gc.tiere.commands"]
   }
 }

@@ -42,12 +42,19 @@ public partial class Plugin : BaseUnityPlugin
 			}
 			return kind.Optional ? GcTaming.SimpleAI : GcTaming.Normal;
 		};
+		Leash.SpeciesLink.FoodTamingOf = Leash.Species.FoodTaming; // Zähm-Countdown mit dem Zähmbonus des Futters
 		GcMod.PatchAll(harmony); // nur die Patches dieser Mod (alle Mods des Pakets in einer DLL)
 
 		GcMenuGroup species = Module.MenuGroup(key => GcLoc.Get("gcsv_" + key))
 			.Main("species_cap", Leash.Species.EffectCap, step: 10)
 			.Main("species_star1", Leash.Species.StarChance1, step: 0.1, unit: " %")
 			.Main("species_star2", Leash.Species.StarChance2, step: 0.1, unit: " %")
+			.Main("species_star3", Leash.Species.StarChance3, step: 0.5, unit: " %") // Gorduan, 03.11.2026: bis fünf Sterne
+			.Main("species_star4", Leash.Species.StarChance4, step: 0.1, unit: " %")
+			.Main("species_star5", Leash.Species.StarChance5, step: 0.05, unit: " %")
+			.Main("species_star_skill", Leash.Species.SkillFactor, step: 0.5, unit: " ×") // Gorduan, 03.11.2026: Tierpflege 100 = 10-fach
+			.Main("species_wild_stars", Leash.Species.WildChance, step: 0.1, unit: " %")
+			.Main("species_unbjorn_death", Leash.Species.TransformDeath, step: 5, unit: " %") // Gorduan, 03.11.2026: Bär stirbt am Fleisch
 			.Main("species_young_fight", Leash.YoungFighters.Enabled) // Gorduan, 27.10.2026: Jungtiere kämpfen mit
 			.Sub("species_young_damage", Leash.YoungFighters.DamagePercent, 5, " %");
 		foreach (Leash.Species.Kind kind in Leash.Species.All)
